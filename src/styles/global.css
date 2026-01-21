@@ -180,6 +180,13 @@ button:disabled {
 .mb-md { margin-bottom: var(--spacing-md); }
 .mb-lg { margin-bottom: var(--spacing-lg); }
 
+/* Desktop layout - side-by-side charts */
+@media (min-width: 1200px) {
+  .charts-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
 /* Responsive breakpoints */
 @media (max-width: 768px) {
   :root {

@@ -145,28 +145,36 @@ function ForecastView({ location, onLocationChange }: ForecastViewProps) {
             flexDirection: 'column',
             gap: '1.5rem'
           }}>
-            {/* Wind Chart */}
-            {forecastData.wind.length > 0 && (
-              <WindChart
-                data={forecastData.wind}
-                selectedDay={selectedDay}
-              />
-            )}
+            {/* Wind and Tide Charts - Side by side on desktop */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr',
+              gap: '1.5rem'
+            }}
+            className="charts-grid">
+              {/* Wind Chart */}
+              {forecastData.wind.length > 0 && (
+                <WindChart
+                  data={forecastData.wind}
+                  selectedDay={selectedDay}
+                />
+              )}
 
-            {/* Temperature Chart */}
+              {/* Tide Chart */}
+              <TideChart
+                data={forecastData.tides}
+                selectedDay={selectedDay}
+                stationName={forecastData.tideStation?.name}
+              />
+            </div>
+
+            {/* Temperature Chart - Full width below */}
             {forecastData.temperature.length > 0 && (
               <TemperatureChart
                 data={forecastData.temperature}
                 selectedDay={selectedDay}
               />
             )}
-
-            {/* Tide Chart */}
-            <TideChart
-              data={forecastData.tides}
-              selectedDay={selectedDay}
-              stationName={forecastData.tideStation?.name}
-            />
 
             {/* Station info */}
             {forecastData.tideStation && (

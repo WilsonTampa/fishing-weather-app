@@ -155,7 +155,7 @@ function WindChart({ data, selectedDay }: WindChartProps) {
       </div>
 
       {/* Chart */}
-      <ResponsiveContainer width="100%" height={250}>
+      <ResponsiveContainer width="100%" height={200} className="wind-chart">
         <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
           <XAxis
