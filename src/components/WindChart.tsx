@@ -113,8 +113,7 @@ function WindChart({ data, selectedDay }: WindChartProps) {
     <div style={{
       backgroundColor: 'var(--color-surface)',
       borderRadius: 'var(--radius-lg)',
-      padding: '1.5rem',
-      marginBottom: '1.5rem'
+      padding: '1rem'
     }}>
       {/* Header */}
       <div style={{
@@ -155,7 +154,7 @@ function WindChart({ data, selectedDay }: WindChartProps) {
       </div>
 
       {/* Chart */}
-      <ResponsiveContainer width="100%" height={200} className="wind-chart">
+      <ResponsiveContainer width="100%" height={140} className="wind-chart">
         <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
           <XAxis
@@ -196,10 +195,10 @@ function WindChart({ data, selectedDay }: WindChartProps) {
         display: 'flex',
         justifyContent: 'center',
         gap: '2rem',
-        marginTop: '1rem',
-        paddingTop: '1rem',
+        marginTop: '0.5rem',
+        paddingTop: '0.5rem',
         borderTop: '1px solid var(--color-border)',
-        fontSize: '0.875rem'
+        fontSize: '0.75rem'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <svg width="30" height="3" viewBox="0 0 30 3">

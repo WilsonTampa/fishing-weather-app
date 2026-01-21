@@ -70,8 +70,7 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
     <div style={{
       backgroundColor: 'var(--color-surface)',
       borderRadius: 'var(--radius-lg)',
-      padding: '1.5rem',
-      marginBottom: '1.5rem'
+      padding: '1rem'
     }}>
       {/* Header */}
       <div style={{
@@ -102,7 +101,7 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
       </div>
 
       {/* Chart */}
-      <ResponsiveContainer width="100%" height={180} className="weather-chart">
+      <ResponsiveContainer width="100%" height={140} className="weather-chart">
         <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
           <XAxis

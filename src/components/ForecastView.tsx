@@ -53,15 +53,15 @@ function ForecastView({ location, onLocationChange }: ForecastViewProps) {
   }, [location]);
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
       {/* Header */}
       <header style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '2rem',
+        marginBottom: '1rem',
         borderBottom: '1px solid var(--color-border)',
-        paddingBottom: '1rem',
+        paddingBottom: '0.75rem',
         flexWrap: 'wrap',
         gap: '1rem'
       }}>
@@ -145,7 +145,7 @@ function ForecastView({ location, onLocationChange }: ForecastViewProps) {
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr',
-            gap: '1.5rem'
+            gap: '1rem'
           }}
           className="charts-grid">
             {/* Wind Chart */}

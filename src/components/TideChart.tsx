@@ -191,8 +191,7 @@ function TideChart({ data, selectedDay, stationName }: TideChartProps) {
     <div style={{
       backgroundColor: 'var(--color-surface)',
       borderRadius: 'var(--radius-lg)',
-      padding: '1.5rem',
-      marginBottom: '1.5rem'
+      padding: '1rem'
     }}>
       {/* Header */}
       <div style={{
@@ -240,7 +239,7 @@ function TideChart({ data, selectedDay, stationName }: TideChartProps) {
       )}
 
       {/* Chart */}
-      <ResponsiveContainer width="100%" height={200} className="tide-chart">
+      <ResponsiveContainer width="100%" height={140} className="tide-chart">
         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="tideGradient" x1="0" y1="0" x2="0" y2="1">
