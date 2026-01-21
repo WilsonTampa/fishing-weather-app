@@ -4,6 +4,7 @@ import { getLocationForecast } from '../services/noaaApi';
 import WindChart from './WindChart';
 import TemperatureChart from './TemperatureChart';
 import TideChart from './TideChart';
+import WeatherConditionsChart from './WeatherConditionsChart';
 import DaySelector from './DaySelector';
 import LocationThumbnail from './LocationThumbnail';
 
@@ -15,6 +16,7 @@ interface ForecastViewProps {
 interface ForecastData {
   wind: any[];
   temperature: any[];
+  weather: any[];
   tides: any[];
   tideStation?: {
     id: string;
@@ -141,56 +143,59 @@ function ForecastView({ location, onLocationChange }: ForecastViewProps) {
 
           {/* Charts */}
           <div style={{
-            display: 'flex',
-            flexDirection: 'column',
+            display: 'grid',
+            gridTemplateColumns: '1fr',
             gap: '1.5rem'
-          }}>
-            {/* Wind and Tide Charts - Side by side on desktop */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '1.5rem'
-            }}
-            className="charts-grid">
-              {/* Wind Chart */}
-              {forecastData.wind.length > 0 && (
-                <WindChart
-                  data={forecastData.wind}
-                  selectedDay={selectedDay}
-                />
-              )}
-
-              {/* Tide Chart */}
-              <TideChart
-                data={forecastData.tides}
+          }}
+          className="charts-grid">
+            {/* Wind Chart */}
+            {forecastData.wind.length > 0 && (
+              <WindChart
+                data={forecastData.wind}
                 selectedDay={selectedDay}
-                stationName={forecastData.tideStation?.name}
               />
-            </div>
+            )}
 
-            {/* Temperature Chart - Full width below */}
+            {/* Tide Chart */}
+            <TideChart
+              data={forecastData.tides}
+              selectedDay={selectedDay}
+              stationName={forecastData.tideStation?.name}
+            />
+
+            {/* Temperature Chart */}
             {forecastData.temperature.length > 0 && (
               <TemperatureChart
                 data={forecastData.temperature}
+                weatherData={forecastData.weather}
                 selectedDay={selectedDay}
               />
             )}
 
-            {/* Station info */}
-            {forecastData.tideStation && (
-              <div style={{
-                backgroundColor: 'var(--color-surface)',
-                borderRadius: 'var(--radius-md)',
-                padding: '1rem',
-                fontSize: '0.75rem',
-                color: 'var(--color-text-secondary)',
-                textAlign: 'center'
-              }}>
-                Tide data from {forecastData.tideStation.name}
-                ({forecastData.tideStation.distance.toFixed(1)} km away)
-              </div>
+            {/* Weather Conditions Chart */}
+            {forecastData.weather.length > 0 && (
+              <WeatherConditionsChart
+                data={forecastData.weather}
+                selectedDay={selectedDay}
+              />
             )}
           </div>
+
+          {/* Station info */}
+          {forecastData.tideStation && (
+            <div style={{
+              backgroundColor: 'var(--color-surface)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1rem',
+              fontSize: '0.75rem',
+              color: 'var(--color-text-secondary)',
+              textAlign: 'center',
+              marginTop: '1.5rem'
+            }}>
+              Tide data from {forecastData.tideStation.name}
+              ({forecastData.tideStation.distance.toFixed(1)} km away)
+            </div>
+          )}
         </>
       )}
     </div>

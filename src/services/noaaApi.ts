@@ -1,4 +1,4 @@
-import { WindData, TemperatureData, TideData, Location } from '../types';
+import { WindData, TemperatureData, TideData, WeatherData, Location } from '../types';
 
 // NOAA CO-OPS API base URL for tide data
 const NOAA_COOPS_BASE = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
@@ -132,11 +132,11 @@ export async function fetchTideData(
 export async function fetchWeatherData(
   lat: number,
   lng: number
-): Promise<{ wind: WindData[], temperature: TemperatureData[] }> {
+): Promise<{ wind: WindData[], temperature: TemperatureData[], weather: WeatherData[] }> {
   const params = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lng.toString(),
-    hourly: 'temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
+    hourly: 'temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation_probability,cloud_cover',
     temperature_unit: 'fahrenheit',
     wind_speed_unit: 'mph',
     timezone: 'America/New_York',
@@ -153,6 +153,7 @@ export async function fetchWeatherData(
 
     const windData: WindData[] = [];
     const temperatureData: TemperatureData[] = [];
+    const weatherData: WeatherData[] = [];
 
     for (let i = 0; i < data.hourly.time.length; i++) {
       const timestamp = data.hourly.time[i];
@@ -170,9 +171,15 @@ export async function fetchWeatherData(
         temperature: data.hourly.temperature_2m[i] || 0,
         feelsLike: data.hourly.apparent_temperature[i] || 0
       });
+
+      weatherData.push({
+        timestamp,
+        precipitationProbability: data.hourly.precipitation_probability[i] || 0,
+        cloudCover: data.hourly.cloud_cover[i] || 0
+      });
     }
 
-    return { wind: windData, temperature: temperatureData };
+    return { wind: windData, temperature: temperatureData, weather: weatherData };
   } catch (error) {
     console.error('Error fetching weather data:', error);
     throw error;
@@ -217,6 +224,7 @@ export async function getLocationForecast(location: Location) {
     return {
       wind: weather.wind,
       temperature: weather.temperature,
+      weather: weather.weather,
       tides,
       tideStation: tideStation || undefined
     };

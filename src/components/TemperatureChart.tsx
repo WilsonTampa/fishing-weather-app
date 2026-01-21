@@ -1,12 +1,13 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TemperatureData } from '../types';
+import { TemperatureData, WeatherData } from '../types';
 
 interface TemperatureChartProps {
   data: TemperatureData[];
+  weatherData: WeatherData[];
   selectedDay: Date;
 }
 
-function TemperatureChart({ data, selectedDay }: TemperatureChartProps) {
+function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartProps) {
   // Filter data for selected day
   const startOfDay = new Date(selectedDay);
   startOfDay.setHours(0, 0, 0, 0);
@@ -18,14 +19,21 @@ function TemperatureChart({ data, selectedDay }: TemperatureChartProps) {
     return timestamp >= startOfDay && timestamp <= endOfDay;
   });
 
+  const dayWeatherData = weatherData.filter(item => {
+    const timestamp = new Date(item.timestamp);
+    return timestamp >= startOfDay && timestamp <= endOfDay;
+  });
+
   // Format data for chart
-  const chartData = dayData.map(item => {
+  const chartData = dayData.map((item, index) => {
     const time = new Date(item.timestamp);
+    const weather = dayWeatherData[index];
     return {
       time: time.getHours(),
       timeLabel: time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
       temperature: Math.round(item.temperature),
       feelsLike: item.feelsLike ? Math.round(item.feelsLike) : undefined,
+      cloudCover: weather ? weather.cloudCover : 0,
       fullTimestamp: item.timestamp
     };
   });
@@ -72,6 +80,14 @@ function TemperatureChart({ data, selectedDay }: TemperatureChartProps) {
     if (temp >= 60) return '#4ADE80'; // Mild - green
     if (temp >= 50) return '#38BDF8'; // Cool - sky blue
     return '#60A5FA'; // Cold - blue
+  };
+
+  // Get weather icon based on cloud cover
+  const getWeatherIcon = (cloudCover: number): string => {
+    if (cloudCover >= 75) return '☁️'; // Cloudy
+    if (cloudCover >= 50) return '⛅'; // Partly cloudy
+    if (cloudCover >= 25) return '🌤️'; // Mostly sunny
+    return '☀️'; // Sunny
   };
 
   if (chartData.length === 0) {
@@ -130,7 +146,7 @@ function TemperatureChart({ data, selectedDay }: TemperatureChartProps) {
 
       {/* Chart */}
       <ResponsiveContainer width="100%" height={180} className="temperature-chart">
-        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
           <defs>
             <linearGradient id="temperatureGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={gradientColor} stopOpacity={0.8}/>
@@ -161,6 +177,27 @@ function TemperatureChart({ data, selectedDay }: TemperatureChartProps) {
           />
         </AreaChart>
       </ResponsiveContainer>
+
+      {/* Weather Icons */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-around',
+        marginTop: '0.5rem',
+        fontSize: '1.5rem'
+      }}>
+        {chartData.filter((_, index) => index % Math.ceil(chartData.length / 8) === 0).slice(0, 8).map((item, index) => (
+          <div key={index} style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
+            <span>{getWeatherIcon(item.cloudCover)}</span>
+            <span style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
+              {item.timeLabel}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

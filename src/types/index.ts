@@ -25,6 +25,13 @@ export interface TemperatureData {
   low?: number; // daily low
 }
 
+// Weather conditions data
+export interface WeatherData {
+  timestamp: string; // ISO 8601
+  precipitationProbability: number; // percentage (0-100)
+  cloudCover: number; // percentage (0-100)
+}
+
 // Tide data
 export interface TideData {
   timestamp: string;
