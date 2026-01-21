@@ -1,0 +1,168 @@
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { TemperatureData } from '../types';
+
+interface TemperatureChartProps {
+  data: TemperatureData[];
+  selectedDay: Date;
+}
+
+function TemperatureChart({ data, selectedDay }: TemperatureChartProps) {
+  // Filter data for selected day
+  const startOfDay = new Date(selectedDay);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(selectedDay);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const dayData = data.filter(item => {
+    const timestamp = new Date(item.timestamp);
+    return timestamp >= startOfDay && timestamp <= endOfDay;
+  });
+
+  // Format data for chart
+  const chartData = dayData.map(item => {
+    const time = new Date(item.timestamp);
+    return {
+      time: time.getHours(),
+      timeLabel: time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
+      temperature: Math.round(item.temperature),
+      feelsLike: item.feelsLike ? Math.round(item.feelsLike) : undefined,
+      fullTimestamp: item.timestamp
+    };
+  });
+
+  // Get current temperature (first data point of selected day)
+  const currentTemp = dayData[0] || null;
+
+  // Calculate high and low for the day
+  const temperatures = chartData.map(d => d.temperature);
+  const high = temperatures.length > 0 ? Math.max(...temperatures) : null;
+  const low = temperatures.length > 0 ? Math.min(...temperatures) : null;
+
+  // Custom tooltip
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div style={{
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          padding: '0.75rem',
+          fontSize: '0.875rem'
+        }}>
+          <p style={{ marginBottom: '0.5rem', fontWeight: 600 }}>{data.timeLabel}</p>
+          <p style={{ color: 'var(--color-temperature-warm)' }}>
+            Temperature: {data.temperature}°F
+          </p>
+          {data.feelsLike !== undefined && (
+            <p style={{ color: 'var(--color-text-secondary)' }}>
+              Feels like: {data.feelsLike}°F
+            </p>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Get gradient color based on temperature
+  const getTemperatureColor = (temp: number): string => {
+    if (temp >= 80) return '#F97316'; // Hot - orange
+    if (temp >= 70) return '#FBBF24'; // Warm - amber
+    if (temp >= 60) return '#4ADE80'; // Mild - green
+    if (temp >= 50) return '#38BDF8'; // Cool - sky blue
+    return '#60A5FA'; // Cold - blue
+  };
+
+  if (chartData.length === 0) {
+    return (
+      <div style={{
+        padding: '2rem',
+        textAlign: 'center',
+        color: 'var(--color-text-secondary)'
+      }}>
+        No temperature data available for this day
+      </div>
+    );
+  }
+
+  const gradientColor = currentTemp ? getTemperatureColor(currentTemp.temperature) : '#4ADE80';
+
+  return (
+    <div style={{
+      backgroundColor: 'var(--color-surface)',
+      borderRadius: 'var(--radius-lg)',
+      padding: '1.5rem',
+      marginBottom: '1.5rem'
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '1rem',
+        borderBottom: '1px solid var(--color-border)',
+        paddingBottom: '0.75rem'
+      }}>
+        <h2 style={{
+          fontSize: '1.25rem',
+          margin: 0,
+          color: gradientColor
+        }}>
+          🌡️ TEMPERATURE
+        </h2>
+        {currentTemp && (
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: gradientColor }}>
+              {Math.round(currentTemp.temperature)}°F
+            </div>
+            <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+              {currentTemp.feelsLike && `Feels like: ${Math.round(currentTemp.feelsLike)}°F`}
+            </div>
+            {high !== null && low !== null && (
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
+                H: {high}° L: {low}°
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Chart */}
+      <ResponsiveContainer width="100%" height={250}>
+        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <defs>
+            <linearGradient id="temperatureGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={gradientColor} stopOpacity={0.8}/>
+              <stop offset="95%" stopColor={gradientColor} stopOpacity={0.1}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+          <XAxis
+            dataKey="timeLabel"
+            stroke="var(--color-text-secondary)"
+            style={{ fontSize: '0.75rem' }}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            stroke="var(--color-text-secondary)"
+            style={{ fontSize: '0.75rem' }}
+            label={{ value: '°F', angle: -90, position: 'insideLeft', style: { fill: 'var(--color-text-secondary)' } }}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="temperature"
+            stroke={gradientColor}
+            strokeWidth={2}
+            fill="url(#temperatureGradient)"
+            dot={{ fill: gradientColor, r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export default TemperatureChart;
