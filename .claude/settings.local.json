@@ -7,7 +7,9 @@
       "Bash(timeout 5 npm run dev)",
       "Bash(cd:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(open:*)",
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/fishingAppClaudeCode && npx tsc:*)"
     ]
   }
 }

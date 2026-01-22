@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Location } from '../types';
+import TideStationSelector from './TideStationSelector';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default marker icons in React-Leaflet
@@ -21,7 +22,7 @@ interface MapViewProps {
   onLocationSelect: (location: Location) => void;
 }
 
-function LocationMarker({ onLocationSelect }: { onLocationSelect: (location: Location) => void }) {
+function LocationMarker({ onLocationClick }: { onLocationClick: (location: Location) => void }) {
   const [position, setPosition] = useState<[number, number] | null>(null);
 
   const map = useMapEvents({
@@ -30,7 +31,7 @@ function LocationMarker({ onLocationSelect }: { onLocationSelect: (location: Loc
       setPosition([lat, lng]);
 
       // Select location
-      onLocationSelect({
+      onLocationClick({
         latitude: lat,
         longitude: lng,
         name: `${lat.toFixed(4)}, ${lng.toFixed(4)}`
@@ -57,6 +58,22 @@ function LocationMarker({ onLocationSelect }: { onLocationSelect: (location: Loc
 
 function MapView({ onLocationSelect }: MapViewProps) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
+  const [showStationSelector, setShowStationSelector] = useState(false);
+
+  const handleLocationClick = (location: Location) => {
+    setPendingLocation(location);
+    setShowStationSelector(true);
+  };
+
+  const handleStationSelect = (stationId: string) => {
+    if (pendingLocation) {
+      onLocationSelect({
+        ...pendingLocation,
+        tideStationId: stationId
+      });
+    }
+  };
 
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
@@ -65,7 +82,7 @@ function MapView({ onLocationSelect }: MapViewProps) {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
           setUserLocation([lat, lng]);
-          onLocationSelect({
+          handleLocationClick({
             latitude: lat,
             longitude: lng,
             name: 'Current Location'
@@ -142,9 +159,22 @@ function MapView({ onLocationSelect }: MapViewProps) {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <LocationMarker onLocationSelect={onLocationSelect} />
+          <LocationMarker onLocationClick={handleLocationClick} />
         </MapContainer>
       </div>
+
+      {/* Tide Station Selector Modal */}
+      {showStationSelector && pendingLocation && (
+        <TideStationSelector
+          userLat={pendingLocation.latitude}
+          userLng={pendingLocation.longitude}
+          onSelect={handleStationSelect}
+          onClose={() => {
+            setShowStationSelector(false);
+            setPendingLocation(null);
+          }}
+        />
+      )}
     </div>
   );
 }

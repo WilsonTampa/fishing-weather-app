@@ -6,11 +6,12 @@ import TemperatureChart from './TemperatureChart';
 import TideChart from './TideChart';
 import WeatherConditionsChart from './WeatherConditionsChart';
 import DaySelector from './DaySelector';
-import LocationThumbnail from './LocationThumbnail';
+import TideStationSelector from './TideStationSelector';
 
 interface ForecastViewProps {
   location: Location;
   onLocationChange: () => void;
+  onLocationUpdate?: () => void;
 }
 
 interface ForecastData {
@@ -27,11 +28,13 @@ interface ForecastData {
   };
 }
 
-function ForecastView({ location, onLocationChange }: ForecastViewProps) {
+function ForecastView({ location, onLocationChange, onLocationUpdate }: ForecastViewProps) {
   const [selectedDay, setSelectedDay] = useState<Date>(new Date());
   const [forecastData, setForecastData] = useState<ForecastData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showStationSelector, setShowStationSelector] = useState(false);
+  const [selectedStationId, setSelectedStationId] = useState<string | undefined>(location.tideStationId);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,7 +42,7 @@ function ForecastView({ location, onLocationChange }: ForecastViewProps) {
       setError(null);
 
       try {
-        const data = await getLocationForecast(location);
+        const data = await getLocationForecast(location, selectedStationId);
         setForecastData(data);
       } catch (err) {
         console.error('Error fetching forecast data:', err);
@@ -50,7 +53,23 @@ function ForecastView({ location, onLocationChange }: ForecastViewProps) {
     };
 
     fetchData();
-  }, [location]);
+  }, [location, selectedStationId]);
+
+  const handleStationSelect = (stationId: string) => {
+    setSelectedStationId(stationId);
+
+    // Update location in localStorage with new tide station
+    const updatedLocation = {
+      ...location,
+      tideStationId: stationId
+    };
+    localStorage.setItem('savedLocation', JSON.stringify(updatedLocation));
+
+    // Notify parent to reload location
+    if (onLocationUpdate) {
+      onLocationUpdate();
+    }
+  };
 
   return (
     <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -58,7 +77,7 @@ function ForecastView({ location, onLocationChange }: ForecastViewProps) {
       <header style={{
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         marginBottom: '1rem',
         borderBottom: '1px solid var(--color-border)',
         paddingBottom: '0.75rem',
@@ -66,12 +85,74 @@ function ForecastView({ location, onLocationChange }: ForecastViewProps) {
         gap: '1rem'
       }}>
         <h1>Tides & Weather</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <LocationThumbnail
-            latitude={location.latitude}
-            longitude={location.longitude}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '0.5rem', minWidth: '200px' }}>
+          <button
             onClick={onLocationChange}
-          />
+            style={{
+              padding: '0.625rem 1.25rem',
+              backgroundColor: 'var(--color-surface)',
+              color: 'var(--color-text-primary)',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-md)',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)';
+              e.currentTarget.style.borderColor = 'var(--color-accent)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-surface)';
+              e.currentTarget.style.borderColor = 'var(--color-border)';
+            }}
+          >
+            Change Location
+          </button>
+          {forecastData?.tideStation && (
+            <>
+              <button
+                onClick={() => setShowStationSelector(true)}
+                style={{
+                  padding: '0.625rem 1.25rem',
+                  backgroundColor: 'var(--color-surface)',
+                  color: 'var(--color-text-primary)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)';
+                  e.currentTarget.style.borderColor = 'var(--color-accent)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-surface)';
+                  e.currentTarget.style.borderColor = 'var(--color-border)';
+                }}
+              >
+                Change Tide Station
+              </button>
+              <div style={{
+                fontSize: '0.75rem',
+                color: 'var(--color-text-secondary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                paddingTop: '0.25rem'
+              }}>
+                <span style={{ fontSize: '0.8rem' }}>📍</span>
+                <span>{forecastData.tideStation.name}</span>
+                <span style={{ color: 'var(--color-text-muted)' }}>
+                  ({(forecastData.tideStation.distance * 0.621371).toFixed(1)} miles)
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </header>
 
@@ -180,23 +261,18 @@ function ForecastView({ location, onLocationChange }: ForecastViewProps) {
               />
             )}
           </div>
-
-          {/* Station info */}
-          {forecastData.tideStation && (
-            <div style={{
-              backgroundColor: 'var(--color-surface)',
-              borderRadius: 'var(--radius-md)',
-              padding: '1rem',
-              fontSize: '0.75rem',
-              color: 'var(--color-text-secondary)',
-              textAlign: 'center',
-              marginTop: '1.5rem'
-            }}>
-              Tide data from {forecastData.tideStation.name}
-              ({forecastData.tideStation.distance.toFixed(1)} km away)
-            </div>
-          )}
         </>
+      )}
+
+      {/* Tide Station Selector Modal */}
+      {showStationSelector && (
+        <TideStationSelector
+          userLat={location.latitude}
+          userLng={location.longitude}
+          currentStationId={selectedStationId}
+          onSelect={handleStationSelect}
+          onClose={() => setShowStationSelector(false)}
+        />
       )}
     </div>
   );

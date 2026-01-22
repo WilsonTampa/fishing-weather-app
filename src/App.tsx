@@ -39,6 +39,19 @@ function App() {
     setSavedLocation(null);
   };
 
+  const handleLocationUpdate = () => {
+    // Reload the saved location from localStorage
+    try {
+      const saved = localStorage.getItem('savedLocation');
+      if (saved) {
+        const location: Location = JSON.parse(saved);
+        setSavedLocation(location);
+      }
+    } catch (error) {
+      console.error('Error reloading saved location:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div style={{
@@ -72,6 +85,7 @@ function App() {
               <ForecastView
                 location={savedLocation}
                 onLocationChange={handleLocationChange}
+                onLocationUpdate={handleLocationUpdate}
               />
             ) : (
               <Navigate to="/" replace />

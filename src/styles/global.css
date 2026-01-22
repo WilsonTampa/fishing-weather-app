@@ -12,10 +12,13 @@
   --color-background: #0D1117;
   --color-surface: #161B22;
   --color-surface-hover: #1F2428;
+  --color-hover: #1F2428;
   --color-primary: #0A4B7D;
   --color-secondary: #4A90E2;
   --color-accent: #58A6FF;
+  --color-text: #FFFFFF;
   --color-text-primary: #FFFFFF;
+  --color-text-muted: #8B949E;
   --color-text-secondary: #8B949E;
   --color-border: #30363D;
 

@@ -34,26 +34,68 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
  * This is a subset - in production, you'd query the full station list
  */
 const TIDE_STATIONS = [
+  // Florida Gulf Coast (Tampa Bay Area)
   { id: '8726520', name: 'St. Petersburg, Tampa Bay', lat: 27.7606, lng: -82.6269 },
-  { id: '8729108', name: 'Panama City, FL', lat: 30.1517, lng: -85.6669 },
   { id: '8726607', name: 'Old Port Tampa', lat: 27.8569, lng: -82.5544 },
+  { id: '8726384', name: 'Clearwater Beach', lat: 27.9783, lng: -82.8317 },
+  { id: '8726724', name: 'McKay Bay Entrance', lat: 27.9100, lng: -82.4317 },
+  { id: '8726667', name: 'Port Manatee', lat: 27.6383, lng: -82.5633 },
+  { id: '8726679', name: 'Middle Tampa Bay', lat: 27.6500, lng: -82.5817 },
+  { id: '8726694', name: 'Egmont Channel', lat: 27.6000, lng: -82.7633 },
+
+  // Florida Gulf Coast (South)
   { id: '8725110', name: 'Naples, Gulf of Mexico', lat: 26.1317, lng: -81.8075 },
+  { id: '8725520', name: 'Fort Myers', lat: 26.6483, lng: -81.8700 },
+  { id: '8725354', name: 'Redfish Pass', lat: 26.5333, lng: -82.2167 },
+  { id: '8726412', name: 'Venice', lat: 27.0683, lng: -82.4483 },
+
+  // Florida Gulf Coast (North)
+  { id: '8728690', name: 'Apalachicola', lat: 29.7267, lng: -84.9817 },
+  { id: '8729108', name: 'Panama City', lat: 30.1517, lng: -85.6669 },
+  { id: '8729210', name: 'Panama City Beach', lat: 30.2133, lng: -85.8783 },
+  { id: '8729840', name: 'Pensacola', lat: 30.4050, lng: -87.2117 },
+  { id: '8727520', name: 'Cedar Key', lat: 29.1350, lng: -83.0317 },
+
+  // Florida Keys
   { id: '8724580', name: 'Key West', lat: 24.5511, lng: -81.8081 },
+  { id: '8723970', name: 'Vaca Key', lat: 24.7117, lng: -81.1050 },
   { id: '8723214', name: 'Virginia Key, Biscayne Bay', lat: 25.7311, lng: -80.1606 },
+
+  // Florida East Coast
   { id: '8721164', name: 'Trident Pier, Port Canaveral', lat: 28.4156, lng: -80.5939 },
+  { id: '8720218', name: 'Mayport', lat: 30.3967, lng: -81.4300 },
+  { id: '8720030', name: 'Fernandina Beach', lat: 30.6717, lng: -81.4650 },
+  { id: '8722670', name: 'Lake Worth Pier', lat: 26.6133, lng: -80.0350 },
+  { id: '8722548', name: 'Boynton Beach Inlet', lat: 26.5433, lng: -80.0483 },
+
+  // Southeast Atlantic
   { id: '8670870', name: 'Fort Pulaski, GA', lat: 32.0333, lng: -80.9017 },
   { id: '8665530', name: 'Charleston, Cooper River', lat: 32.7814, lng: -79.9247 },
+  { id: '8661070', name: 'Springmaid Pier, SC', lat: 33.6550, lng: -78.9183 },
   { id: '8658120', name: 'Wilmington, NC', lat: 34.2272, lng: -77.9533 },
+  { id: '8656483', name: 'Beaufort, NC', lat: 34.7200, lng: -76.6700 },
+  { id: '8654467', name: 'Wrightsville Beach, NC', lat: 34.2133, lng: -77.7867 },
   { id: '8651370', name: 'Duck, NC', lat: 36.1833, lng: -75.7467 },
+
+  // Mid-Atlantic
   { id: '8638610', name: 'Sewells Point, Norfolk', lat: 36.9467, lng: -76.3300 },
+  { id: '8632200', name: 'Kiptopeke, VA', lat: 37.1667, lng: -75.9883 },
+  { id: '8574680', name: 'Lewes, DE', lat: 38.7817, lng: -75.1200 },
+
+  // Northeast
   { id: '8518750', name: 'The Battery, New York', lat: 40.7006, lng: -74.0142 },
+  { id: '8516945', name: 'Kings Point, NY', lat: 40.8100, lng: -73.7650 },
   { id: '8454000', name: 'Providence, RI', lat: 41.8067, lng: -71.4006 },
   { id: '8443970', name: 'Boston, MA', lat: 42.3539, lng: -71.0533 },
   { id: '8418150', name: 'Portland, ME', lat: 43.6567, lng: -70.2467 },
+
+  // West Coast
   { id: '9414290', name: 'San Francisco', lat: 37.8067, lng: -122.4650 },
   { id: '9410170', name: 'San Diego', lat: 32.7142, lng: -117.1733 },
   { id: '9447130', name: 'Seattle', lat: 47.6031, lng: -122.3389 },
   { id: '9435380', name: 'Astoria, OR', lat: 46.2072, lng: -123.7686 },
+  { id: '9413450', name: 'Monterey, CA', lat: 36.6050, lng: -121.8883 },
+  { id: '9411340', name: 'Santa Monica, CA', lat: 34.0083, lng: -118.5000 },
 ];
 
 /**
@@ -77,6 +119,27 @@ export function findNearestTideStation(lat: number, lng: number): TideStation | 
     ...nearest,
     distance: minDistance
   };
+}
+
+/**
+ * Find nearby tide stations within a given radius (in km)
+ * Returns stations sorted by distance
+ */
+export function findNearbyTideStations(lat: number, lng: number, maxDistanceKm: number = 300): TideStation[] {
+  const nearby: TideStation[] = [];
+
+  for (const station of TIDE_STATIONS) {
+    const distance = calculateDistance(lat, lng, station.lat, station.lng);
+    if (distance <= maxDistanceKm) {
+      nearby.push({
+        ...station,
+        distance
+      });
+    }
+  }
+
+  // Sort by distance, nearest first
+  return nearby.sort((a, b) => a.distance - b.distance);
 }
 
 /**
@@ -199,10 +262,25 @@ function degreesToCardinal(degrees: number): string {
 /**
  * Get complete forecast data for a location
  */
-export async function getLocationForecast(location: Location) {
+export async function getLocationForecast(location: Location, tideStationId?: string) {
   try {
-    // Find nearest tide station
-    const tideStation = findNearestTideStation(location.latitude, location.longitude);
+    // Use provided tide station ID or find nearest
+    let tideStation: TideStation | null | undefined;
+
+    if (tideStationId) {
+      // Find the specific station by ID
+      const station = TIDE_STATIONS.find(s => s.id === tideStationId);
+      if (station) {
+        const distance = calculateDistance(location.latitude, location.longitude, station.lat, station.lng);
+        tideStation = { ...station, distance };
+      } else {
+        // Fallback to nearest if specified ID not found
+        tideStation = findNearestTideStation(location.latitude, location.longitude);
+      }
+    } else {
+      // Find nearest tide station
+      tideStation = findNearestTideStation(location.latitude, location.longitude);
+    }
 
     // Fetch weather data
     const weatherPromise = fetchWeatherData(location.latitude, location.longitude);
