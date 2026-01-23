@@ -46,10 +46,20 @@ const TIDE_STATIONS = [
   { id: '8726679', name: 'Middle Tampa Bay', lat: 27.6500, lng: -82.5817 },
   { id: '8726694', name: 'Egmont Channel', lat: 27.6000, lng: -82.7633 },
 
-  // Florida Gulf Coast (South)
+  // Florida Gulf Coast (Southwest - Fort Myers/Captiva Area)
   { id: '8725110', name: 'Naples, Gulf of Mexico', lat: 26.1317, lng: -81.8075 },
   { id: '8725520', name: 'Fort Myers', lat: 26.6483, lng: -81.8700 },
+  { id: '8725384', name: 'Captiva Island', lat: 26.5317, lng: -82.1867 },
+  { id: '8725392', name: 'North Captiva Island', lat: 26.6467, lng: -82.2183 },
   { id: '8725354', name: 'Redfish Pass', lat: 26.5333, lng: -82.2167 },
+  { id: '8725405', name: 'Galt Island', lat: 26.7217, lng: -82.1817 },
+  { id: '8725412', name: 'Saint James City', lat: 26.5017, lng: -82.0833 },
+  { id: '8725435', name: 'Pine Island Center', lat: 26.6067, lng: -82.1100 },
+  { id: '8725437', name: 'Pineland', lat: 26.6783, lng: -82.1483 },
+  { id: '8725440', name: 'Tarpon Bay', lat: 26.4583, lng: -82.0867 },
+  { id: '8725447', name: 'Punta Rassa', lat: 26.4833, lng: -82.0050 },
+  { id: '8725480', name: 'Bokeelia', lat: 26.6900, lng: -82.1467 },
+  { id: '8725500', name: 'Matlacha', lat: 26.6317, lng: -82.0733 },
   { id: '8726412', name: 'Venice', lat: 27.0683, lng: -82.4483 },
 
   // Florida Gulf Coast (North)
@@ -102,73 +112,16 @@ const TIDE_STATIONS = [
 ];
 
 /**
- * Fetch tide stations from NOAA API within a bounding box around a location
+ * Fetch nearby tide stations (synchronous, using hardcoded list)
+ * Note: NOAA metadata API doesn't support CORS for browser requests
  */
 export async function fetchNearbyTideStations(lat: number, lng: number, radiusKm: number = 80.47): Promise<TideStation[]> {
-  // Calculate bounding box (approximate degrees)
-  const kmPerDegreeLat = 111; // roughly constant
-  const kmPerDegreeLng = 111 * Math.cos(lat * Math.PI / 180);
-
-  const latDelta = radiusKm / kmPerDegreeLat;
-  const lngDelta = radiusKm / kmPerDegreeLng;
-
-  const minLat = lat - latDelta;
-  const maxLat = lat + latDelta;
-  const minLng = lng - lngDelta;
-  const maxLng = lng + lngDelta;
-
-  try {
-    const response = await fetch(`${NOAA_METADATA_BASE}?type=tidepredictions`);
-
-    if (!response.ok) {
-      console.error('NOAA metadata API error:', response.status);
-      // Fallback to hardcoded stations
-      return findNearbyTideStationsFromList(lat, lng, radiusKm);
-    }
-
-    const data = await response.json();
-
-    if (!data.stations || !Array.isArray(data.stations)) {
-      console.error('Invalid response from NOAA metadata API');
-      return findNearbyTideStationsFromList(lat, lng, radiusKm);
-    }
-
-    // Filter stations within bounding box and calculate distances
-    const nearby: TideStation[] = [];
-
-    for (const station of data.stations) {
-      const stationLat = parseFloat(station.lat);
-      const stationLng = parseFloat(station.lng);
-
-      // Check if within bounding box
-      if (stationLat >= minLat && stationLat <= maxLat &&
-          stationLng >= minLng && stationLng <= maxLng) {
-        const distance = calculateDistance(lat, lng, stationLat, stationLng);
-
-        // Double-check distance is within radius (bounding box is approximate)
-        if (distance <= radiusKm) {
-          nearby.push({
-            id: station.id,
-            name: station.name,
-            lat: stationLat,
-            lng: stationLng,
-            distance
-          });
-        }
-      }
-    }
-
-    // Sort by distance, nearest first
-    return nearby.sort((a, b) => a.distance - b.distance);
-  } catch (error) {
-    console.error('Error fetching tide stations from API:', error);
-    // Fallback to hardcoded stations
-    return findNearbyTideStationsFromList(lat, lng, radiusKm);
-  }
+  // Use hardcoded station list (NOAA API doesn't support CORS)
+  return Promise.resolve(findNearbyTideStationsFromList(lat, lng, radiusKm));
 }
 
 /**
- * Find nearby tide stations from hardcoded list (fallback)
+ * Find nearby tide stations from hardcoded list
  */
 function findNearbyTideStationsFromList(lat: number, lng: number, maxDistanceKm: number = 80.47): TideStation[] {
   const nearby: TideStation[] = [];
