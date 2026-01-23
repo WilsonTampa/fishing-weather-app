@@ -159,7 +159,9 @@ export async function fetchTideData(
   try {
     const response = await fetch(`${NOAA_COOPS_BASE}?${params}`);
     if (!response.ok) {
-      throw new Error(`NOAA CO-OPS API error: ${response.status}`);
+      // Log the invalid station ID for debugging
+      console.warn(`Invalid or unavailable tide station: ${stationId}`);
+      throw new Error(`NOAA CO-OPS API error: ${response.status} for station ${stationId}`);
     }
 
     const data = await response.json();
@@ -266,6 +268,7 @@ export async function getLocationForecast(location: Location, tideStationId?: st
         tideStation = { ...station, distance };
       } else {
         // Fallback to nearest if specified ID not found
+        console.warn(`Station ${tideStationId} not found in station list, using nearest station`);
         tideStation = await findNearestTideStation(location.latitude, location.longitude);
       }
     } else {
@@ -284,9 +287,23 @@ export async function getLocationForecast(location: Location, tideStationId?: st
     endDate.setDate(endDate.getDate() + 7);
     endDate.setHours(23, 59, 59, 999);
 
-    const tidePromise = tideStation
-      ? fetchTideData(tideStation.id, startDate, endDate)
-      : Promise.resolve([]);
+    // Fetch tide data with fallback handling for invalid stations
+    let tidePromise: Promise<TideData[]>;
+    if (tideStation) {
+      tidePromise = fetchTideData(tideStation.id, startDate, endDate).catch(async (error) => {
+        // If tide fetch fails (invalid station), try to find nearest valid station
+        console.warn(`Failed to fetch tides for station ${tideStation.id}, finding nearest valid station`);
+        const nearestStation = await findNearestTideStation(location.latitude, location.longitude);
+        if (nearestStation && nearestStation.id !== tideStation.id) {
+          console.log(`Retrying with nearest station: ${nearestStation.id}`);
+          tideStation = nearestStation;
+          return fetchTideData(nearestStation.id, startDate, endDate);
+        }
+        return [];
+      });
+    } else {
+      tidePromise = Promise.resolve([]);
+    }
 
     const [weather, tides] = await Promise.all([weatherPromise, tidePromise]);
 

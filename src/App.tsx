@@ -16,6 +16,19 @@ function App() {
         const saved = localStorage.getItem('savedLocation');
         if (saved) {
           const location: Location = JSON.parse(saved);
+
+          // Clean up invalid station IDs from old deployments
+          // Station 8725354 was incorrectly added and should be 8725441
+          const invalidStationIds = ['8725354', '8725384', '8725392', '8725405', '8725412',
+                                     '8725435', '8725437', '8725440', '8725447', '8725480', '8725500'];
+
+          if (location.tideStationId && invalidStationIds.includes(location.tideStationId)) {
+            console.warn(`Removing invalid tide station ${location.tideStationId} from saved location`);
+            // Remove the invalid station ID, will auto-select nearest on next load
+            delete location.tideStationId;
+            localStorage.setItem('savedLocation', JSON.stringify(location));
+          }
+
           setSavedLocation(location);
         }
       } catch (error) {
