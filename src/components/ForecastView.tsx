@@ -84,7 +84,7 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
         flexWrap: 'wrap',
         gap: '1rem'
       }}>
-        <h1>Tides & Weather</h1>
+        <h1>My Marine Forecast</h1>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '0.5rem', minWidth: '200px' }}>
           <button
             onClick={onLocationChange}
@@ -168,7 +168,7 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
         }}>
           <div className="spinner" />
           <p style={{ color: 'var(--color-text-secondary)' }}>
-            Loading forecast data...
+            Loading marine forecast and tide predictions...
           </p>
         </div>
       )}
@@ -260,6 +260,25 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
                 selectedDay={selectedDay}
               />
             )}
+          </div>
+
+          {/* Marine Forecast Info */}
+          <div style={{
+            backgroundColor: 'var(--color-surface)',
+            borderRadius: 'var(--radius-md)',
+            padding: '1rem',
+            marginTop: '1rem',
+            border: '1px solid var(--color-border)',
+            textAlign: 'center'
+          }}>
+            <p style={{
+              fontSize: '0.875rem',
+              color: 'var(--color-text-secondary)',
+              lineHeight: '1.6',
+              margin: 0
+            }}>
+              Just the marine forecast data you need to plan a great day on the water.
+            </p>
           </div>
         </>
       )}

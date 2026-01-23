@@ -116,7 +116,7 @@ function MapView({ onLocationSelect }: MapViewProps) {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <h1 style={{ fontSize: '1.5rem' }}>Tides & Weather</h1>
+        <h1 style={{ fontSize: '1.5rem' }}>My Marine Forecast</h1>
         <button
           onClick={handleGetCurrentLocation}
           style={{
@@ -143,7 +143,7 @@ function MapView({ onLocationSelect }: MapViewProps) {
         textAlign: 'center'
       }}>
         <p style={{ color: 'var(--color-text-secondary)' }}>
-          Click anywhere on the map to select a location for weather and tide forecasts
+          Click anywhere on the map to get marine conditions, tide predictions, and offshore weather forecasts
         </p>
       </div>
 

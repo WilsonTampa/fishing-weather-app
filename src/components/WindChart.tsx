@@ -129,7 +129,7 @@ function WindChart({ data, selectedDay }: WindChartProps) {
           margin: 0,
           color: 'var(--color-wind)'
         }}>
-          💨 WIND
+          💨 MARINE WIND CONDITIONS
         </h2>
         {currentWind && (
           <div style={{
