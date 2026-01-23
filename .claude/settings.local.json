@@ -15,7 +15,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(gh pr list:*)"
+      "Bash(gh pr list:*)",
+      "Bash(npm install suncalc)",
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/fishingAppClaudeCode && npm install --save-dev @types/suncalc:*)"
     ]
   }
 }

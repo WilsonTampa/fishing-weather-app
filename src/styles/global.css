@@ -29,6 +29,19 @@
   --color-temperature-cool: #3B82F6;
   --color-tide: #4A90E2;
 
+  /* Solunar colors */
+  --color-solunar-major: #FFA500;
+  --color-solunar-minor: #FFD700;
+  --color-solunar-timeline: #30363D;
+  --color-sun: #FFD700;
+  --color-moon: #A8B2D1;
+
+  /* Activity score colors */
+  --color-activity-excellent: #10B981;
+  --color-activity-good: #F59E0B;
+  --color-activity-fair: #EAB308;
+  --color-activity-poor: #6B7280;
+
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;

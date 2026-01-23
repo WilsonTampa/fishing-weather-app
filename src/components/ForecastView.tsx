@@ -5,8 +5,10 @@ import WindChart from './WindChart';
 import TemperatureChart from './TemperatureChart';
 import TideChart from './TideChart';
 import WeatherConditionsChart from './WeatherConditionsChart';
+import SolunarChart from './SolunarChart';
 import DaySelector from './DaySelector';
 import TideStationSelector from './TideStationSelector';
+import { getSolunarData } from '../utils/solunarData';
 
 interface ForecastViewProps {
   location: Location;
@@ -260,6 +262,12 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
                 selectedDay={selectedDay}
               />
             )}
+
+            {/* Solunar Chart */}
+            <SolunarChart
+              data={getSolunarData(selectedDay, location.latitude, location.longitude)}
+              selectedDay={selectedDay}
+            />
           </div>
 
           {/* Marine Forecast Info */}
