@@ -37,15 +37,15 @@ function SunMoonTimes({ data }: SunMoonTimesProps) {
             color: 'var(--color-sun)'
           }}
         >
-          ☀️🌙 SUN & MOON TIMES
+           SUN & MOON TIMES
         </h2>
       </div>
 
       {/* Sun and Moon Info */}
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '1rem'
         }}
       >
@@ -61,17 +61,13 @@ function SunMoonTimes({ data }: SunMoonTimesProps) {
               letterSpacing: '0.5px'
             }}
           >
-            ☀️ Sun
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--color-text-secondary)' }}>Sunrise</span>
               <span style={{ fontWeight: 600 }}>{formatTime(data.sunrise)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-secondary)' }}>Solar Noon</span>
-              <span style={{ fontWeight: 600 }}>{formatTime(data.solarNoon)}</span>
-            </div>
+            
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--color-text-secondary)' }}>Sunset</span>
               <span style={{ fontWeight: 600 }}>{formatTime(data.sunset)}</span>
@@ -95,28 +91,65 @@ function SunMoonTimes({ data }: SunMoonTimesProps) {
               letterSpacing: '0.5px'
             }}
           >
-            🌙 Moon
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-secondary)' }}>Moonrise</span>
-              <span style={{ fontWeight: 600 }}>
-                {data.moonrise ? formatTime(data.moonrise) : 'No rise'}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1fr) auto',
+              gap: '0.75rem',
+              alignItems: 'start'
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-text-secondary)' }}>Moonrise</span>
+                <span style={{ fontWeight: 600 }}>
+                  {data.moonrise ? formatTime(data.moonrise) : 'No rise'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-text-secondary)' }}>Moonset</span>
+                <span style={{ fontWeight: 600 }}>
+                  {data.moonset ? formatTime(data.moonset) : 'No set'}
+                </span>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-text-secondary)' }}>Illumination</span>
+                <span style={{ fontWeight: 600 }}>{data.moonIllumination}%</span>
+              </div>
+            </div>
+            <div
+              aria-label={`Moon phase: ${data.moonPhase}`}
+              role="img"
+              title={data.moonPhase}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.35rem',
+                alignSelf: 'start'
+              }}
+            >
+              <div
+                style={{
+                  width: '72px',
+                  height: '72px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--color-background)',
+                  border: '1px solid var(--color-border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '2.5rem',
+                  lineHeight: 1
+                }}
+              >
+                {data.moonPhaseEmoji}
+              </div>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                {data.moonPhase}
               </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-secondary)' }}>Moonset</span>
-              <span style={{ fontWeight: 600 }}>
-                {data.moonset ? formatTime(data.moonset) : 'No set'}
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-secondary)' }}>Phase</span>
-              <span style={{ fontWeight: 600 }}>{data.moonPhase}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-secondary)' }}>Illumination</span>
-              <span style={{ fontWeight: 600 }}>{data.moonIllumination}%</span>
             </div>
           </div>
         </div>

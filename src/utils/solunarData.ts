@@ -13,6 +13,7 @@ export interface SolunarData {
   moonrise: Date | null;
   moonset: Date | null;
   moonPhase: string;
+  moonPhaseEmoji: string;
   moonIllumination: number;
   majorPeriods: SolunarPeriod[];
   minorPeriods: SolunarPeriod[];
@@ -71,6 +72,7 @@ export function getSolunarData(date: Date, lat: number, lng: number): SolunarDat
     moonrise,
     moonset,
     moonPhase: moonPhaseData.phaseName,
+    moonPhaseEmoji: moonPhaseData.emoji,
     moonIllumination: Math.round(moonIllum.fraction * 100),
     majorPeriods,
     minorPeriods,

@@ -37,7 +37,7 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
             color: 'var(--color-solunar-major)'
           }}
         >
-          🌓 FEEDING PERIODS
+          MAJOR/MINOR TIMES
         </h2>
       </div>
 
@@ -72,22 +72,24 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
               gap: '0.5rem'
             }}
           >
-            {data.majorPeriods.map((period, idx) => (
-              <div
-                key={idx}
-                style={{
-                  padding: '0.5rem',
-                  backgroundColor: 'var(--color-background)',
-                  borderRadius: 'var(--radius-md)',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  textAlign: 'center',
-                  border: '1px solid var(--color-border)'
-                }}
-              >
-                {formatTime(period.start)} - {formatTime(period.end)}
-              </div>
-            ))}
+            {[...data.majorPeriods]
+              .sort((a, b) => a.start.getTime() - b.start.getTime())
+              .map((period, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    padding: '0.5rem',
+                    backgroundColor: 'var(--color-background)',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    textAlign: 'center',
+                    border: '1px solid var(--color-border)'
+                  }}
+                >
+                  {formatTime(period.start)} - {formatTime(period.end)}
+                </div>
+              ))}
           </div>
         </div>
 
@@ -114,23 +116,25 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
               gap: '0.5rem'
             }}
           >
-            {data.minorPeriods.map((period, idx) => (
-              <div
-                key={idx}
-                style={{
-                  padding: '0.5rem',
-                  backgroundColor: 'var(--color-background)',
-                  borderRadius: 'var(--radius-md)',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  textAlign: 'center',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-solunar-minor)'
-                }}
-              >
-                {formatTime(period.start)} - {formatTime(period.end)}
-              </div>
-            ))}
+            {[...data.minorPeriods]
+              .sort((a, b) => a.start.getTime() - b.start.getTime())
+              .map((period, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    padding: '0.5rem',
+                    backgroundColor: 'var(--color-background)',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    textAlign: 'center',
+                    border: '1px solid var(--color-border)',
+                    color: 'var(--color-solunar-minor)'
+                  }}
+                >
+                  {formatTime(period.start)} - {formatTime(period.end)}
+                </div>
+              ))}
           </div>
         </div>
       </div>
