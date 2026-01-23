@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { calculateMoonPhase } from '../utils/moonPhase';
 
 interface DaySelectorProps {
   selectedDay: Date;
