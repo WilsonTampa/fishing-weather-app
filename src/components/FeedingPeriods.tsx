@@ -14,6 +14,12 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
     });
   };
 
+  const sortByTimeOfDay = (a: { start: Date }, b: { start: Date }) => {
+    const aMinutes = a.start.getHours() * 60 + a.start.getMinutes();
+    const bMinutes = b.start.getHours() * 60 + b.start.getMinutes();
+    return aMinutes - bMinutes;
+  };
+
   return (
     <div
       style={{
@@ -37,7 +43,7 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
             color: 'var(--color-solunar-major)'
           }}
         >
-          MAJOR/MINOR TIMES
+          MAJOR & MINOR FEEDING TIMES
         </h2>
       </div>
 
@@ -73,7 +79,7 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
             }}
           >
             {[...data.majorPeriods]
-              .sort((a, b) => a.start.getTime() - b.start.getTime())
+              .sort(sortByTimeOfDay)
               .map((period, idx) => (
                 <div
                   key={idx}
@@ -117,7 +123,7 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
             }}
           >
             {[...data.minorPeriods]
-              .sort((a, b) => a.start.getTime() - b.start.getTime())
+              .sort(sortByTimeOfDay)
               .map((period, idx) => (
                 <div
                   key={idx}

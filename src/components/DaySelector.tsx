@@ -124,7 +124,6 @@ function DaySelector({ selectedDay, onSelectDay }: DaySelectorProps) {
               fontSize: '1.25rem',
               marginTop: '0.25rem'
             }}>
-              {calculateMoonPhase(day).emoji}
             </div>
           </button>
         ))}

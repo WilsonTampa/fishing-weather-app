@@ -168,7 +168,7 @@ function TideChart({ data, selectedDay, stationName }: TideChartProps) {
             margin: 0,
             color: 'var(--color-tide)'
           }}>
-            🌊 TIDE PREDICTIONS
+            TIDE PREDICTIONS
           </h2>
         </div>
         <div style={{
@@ -207,7 +207,7 @@ function TideChart({ data, selectedDay, stationName }: TideChartProps) {
           margin: 0,
           color: 'var(--color-tide)'
         }}>
-          🌊 TIDE PREDICTIONS
+          TIDE PREDICTIONS
         </h2>
         {upcomingTide && (
           <div style={{ textAlign: 'right' }}>

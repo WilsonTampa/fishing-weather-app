@@ -37,7 +37,7 @@ function SunMoonTimes({ data }: SunMoonTimesProps) {
             color: 'var(--color-sun)'
           }}
         >
-           SUN & MOON TIMES
+           SUN & MOON
         </h2>
       </div>
 

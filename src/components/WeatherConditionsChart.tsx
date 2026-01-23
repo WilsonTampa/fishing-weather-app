@@ -86,7 +86,7 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
           margin: 0,
           color: '#60A5FA'
         }}>
-          🌧️ MARINE WEATHER CONDITIONS
+          MARINE WEATHER CONDITIONS
         </h2>
         {currentConditions && (
           <div style={{ textAlign: 'right' }}>

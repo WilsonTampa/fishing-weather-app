@@ -124,7 +124,7 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
           margin: 0,
           color: gradientColor
         }}>
-          🌡️ AIR TEMPERATURE
+          AIR TEMPERATURE
         </h2>
         {currentTemp && (
           <div style={{ textAlign: 'right' }}>
