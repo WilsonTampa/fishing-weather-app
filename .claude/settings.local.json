@@ -9,7 +9,13 @@
       "Bash(npm run build:*)",
       "Bash(npm run dev:*)",
       "Bash(open:*)",
-      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/fishingAppClaudeCode && npx tsc:*)"
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/fishingAppClaudeCode && npx tsc:*)",
+      "Bash(curl:*)",
+      "Bash(npm run fetch-stations:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr list:*)"
     ]
   }
 }
