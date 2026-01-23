@@ -1,10 +1,13 @@
+import { WeatherData } from '../types';
 import { SolunarData } from '../utils/solunarData';
 
 interface SunMoonTimesProps {
   data: SolunarData;
+  weatherData: WeatherData[];
+  selectedDay: Date;
 }
 
-function SunMoonTimes({ data }: SunMoonTimesProps) {
+function SunMoonTimes({ data, weatherData, selectedDay }: SunMoonTimesProps) {
   // Format time for display
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -13,6 +16,26 @@ function SunMoonTimes({ data }: SunMoonTimesProps) {
       hour12: true
     });
   };
+
+  const getWeatherIcon = (cloudCover: number): string => {
+    if (cloudCover >= 75) return '☁️'; // Cloudy
+    if (cloudCover >= 50) return '⛅'; // Partly cloudy
+    if (cloudCover >= 25) return '🌤️'; // Mostly sunny
+    return '☀️'; // Sunny
+  };
+
+  const startOfDay = new Date(selectedDay);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(selectedDay);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const dayWeatherData = weatherData.filter(item => {
+    const timestamp = new Date(item.timestamp);
+    return timestamp >= startOfDay && timestamp <= endOfDay;
+  });
+
+  const currentCloudCover = dayWeatherData[0]?.cloudCover ?? 0;
+  const sunIcon = getWeatherIcon(currentCloudCover);
 
   return (
     <div
@@ -62,19 +85,56 @@ function SunMoonTimes({ data }: SunMoonTimesProps) {
             }}
           >
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-secondary)' }}>Sunrise</span>
-              <span style={{ fontWeight: 600 }}>{formatTime(data.sunrise)}</span>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1fr) auto',
+              gap: '0.75rem',
+              alignItems: 'start'
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-text-secondary)' }}>Sunrise</span>
+                <span style={{ fontWeight: 600 }}>{formatTime(data.sunrise)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-text-secondary)' }}>Sunset</span>
+                <span style={{ fontWeight: 600 }}>{formatTime(data.sunset)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-text-secondary)' }}>Day Length</span>
+                <span style={{ fontWeight: 600 }}>{data.dayLength}</span>
+              </div>
             </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-secondary)' }}>Sunset</span>
-              <span style={{ fontWeight: 600 }}>{formatTime(data.sunset)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-text-secondary)' }}>Day Length</span>
-              <span style={{ fontWeight: 600 }}>{data.dayLength}</span>
+            <div
+              aria-label={`Cloud cover: ${currentCloudCover}%`}
+              role="img"
+              title={`Cloud cover: ${currentCloudCover}%`}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.35rem',
+                alignSelf: 'start'
+              }}
+            >
+              <div
+                style={{
+                  width: '72px',
+                  height: '72px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--color-background)',
+                  border: '1px solid var(--color-border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '2.5rem',
+                  lineHeight: 1
+                }}
+              >
+                {sunIcon}
+              </div>
             </div>
           </div>
         </div>
@@ -147,9 +207,6 @@ function SunMoonTimes({ data }: SunMoonTimesProps) {
               >
                 {data.moonPhaseEmoji}
               </div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                {data.moonPhase}
-              </span>
             </div>
           </div>
         </div>

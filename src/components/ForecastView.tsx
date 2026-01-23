@@ -267,6 +267,8 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
             {/* Sun & Moon Times */}
             <SunMoonTimes
               data={getSolunarData(selectedDay, location.latitude, location.longitude)}
+              weatherData={forecastData.weather}
+              selectedDay={selectedDay}
             />
 
             {/* Feeding Periods */}
