@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { calculateMoonPhase } from '../utils/moonPhase';
 
 interface DaySelectorProps {
   selectedDay: Date;
@@ -114,9 +115,16 @@ function DaySelector({ selectedDay, onSelectDay }: DaySelectorProps) {
             </div>
             <div style={{
               fontSize: '0.75rem',
-              opacity: 0.8
+              opacity: 0.8,
+              marginBottom: '0.25rem'
             }}>
               {formatDate(day)}
+            </div>
+            <div style={{
+              fontSize: '1.25rem',
+              marginTop: '0.25rem'
+            }}>
+              {calculateMoonPhase(day).emoji}
             </div>
           </button>
         ))}
