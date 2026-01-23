@@ -3,9 +3,6 @@ import { WindData, TemperatureData, TideData, WeatherData, Location } from '../t
 // NOAA CO-OPS API base URL for tide data
 const NOAA_COOPS_BASE = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
 
-// NOAA CO-OPS Metadata API for finding stations
-const NOAA_METADATA_BASE = 'https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json';
-
 // Open-Meteo API (free weather data)
 const OPEN_METEO_BASE = 'https://api.open-meteo.com/v1';
 
@@ -290,11 +287,12 @@ export async function getLocationForecast(location: Location, tideStationId?: st
     // Fetch tide data with fallback handling for invalid stations
     let tidePromise: Promise<TideData[]>;
     if (tideStation) {
-      tidePromise = fetchTideData(tideStation.id, startDate, endDate).catch(async (error) => {
+      const currentStationId = tideStation.id;
+      tidePromise = fetchTideData(currentStationId, startDate, endDate).catch(async () => {
         // If tide fetch fails (invalid station), try to find nearest valid station
-        console.warn(`Failed to fetch tides for station ${tideStation.id}, finding nearest valid station`);
+        console.warn(`Failed to fetch tides for station ${currentStationId}, finding nearest valid station`);
         const nearestStation = await findNearestTideStation(location.latitude, location.longitude);
-        if (nearestStation && nearestStation.id !== tideStation.id) {
+        if (nearestStation && nearestStation.id !== currentStationId) {
           console.log(`Retrying with nearest station: ${nearestStation.id}`);
           tideStation = nearestStation;
           return fetchTideData(nearestStation.id, startDate, endDate);
