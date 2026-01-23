@@ -64,8 +64,9 @@ function WindChart({ data, selectedDay }: WindChartProps) {
   };
 
   // Wind direction arrow component for header
+  // Arrow points in the direction the wind is coming FROM (add 180° to show source)
   const WindArrow = ({ direction }: { direction: number }) => (
-    <svg width="24" height="24" viewBox="0 0 24 24" style={{ transform: `rotate(${direction}deg)` }}>
+    <svg width="24" height="24" viewBox="0 0 24 24" style={{ transform: `rotate(${direction + 180}deg)` }}>
       <path
         d="M12 2 L16 10 L12 8 L8 10 Z"
         fill="var(--color-wind)"
@@ -77,14 +78,15 @@ function WindChart({ data, selectedDay }: WindChartProps) {
   );
 
   // Custom dot with wind direction arrow for chart points
+  // Arrow points in the direction the wind is coming FROM (add 180° to show source)
   const CustomDot = (props: any) => {
     const { cx, cy, payload } = props;
     if (!payload || payload.direction === undefined) return null;
 
     return (
       <g transform={`translate(${cx}, ${cy})`}>
-        <g transform={`rotate(${payload.direction})`}>
-          {/* Arrow pointing down, will be rotated to show wind direction */}
+        <g transform={`rotate(${payload.direction + 180})`}>
+          {/* Arrow pointing down, will be rotated to show wind direction FROM */}
           <path
             d="M0,-8 L3,0 L0,-2 L-3,0 Z"
             fill="var(--color-wind)"
