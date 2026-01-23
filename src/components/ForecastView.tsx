@@ -5,7 +5,8 @@ import WindChart from './WindChart';
 import TemperatureChart from './TemperatureChart';
 import TideChart from './TideChart';
 import WeatherConditionsChart from './WeatherConditionsChart';
-import SolunarChart from './SolunarChart';
+import SunMoonTimes from './SunMoonTimes';
+import FeedingPeriods from './FeedingPeriods';
 import DaySelector from './DaySelector';
 import TideStationSelector from './TideStationSelector';
 import { getSolunarData } from '../utils/solunarData';
@@ -263,10 +264,14 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
               />
             )}
 
-            {/* Solunar Chart */}
-            <SolunarChart
+            {/* Sun & Moon Times */}
+            <SunMoonTimes
               data={getSolunarData(selectedDay, location.latitude, location.longitude)}
-              selectedDay={selectedDay}
+            />
+
+            {/* Feeding Periods */}
+            <FeedingPeriods
+              data={getSolunarData(selectedDay, location.latitude, location.longitude)}
             />
           </div>
 
