@@ -1,4 +1,5 @@
 import { SolunarData } from '../utils/solunarData';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 
 interface SolunarChartProps {
   data: SolunarData;
@@ -25,32 +26,88 @@ function SolunarChart({ data }: SolunarChartProps) {
 
   const activityInfo = getActivityInfo(data.activityScore);
 
-  // Convert period times to position on 24-hour timeline (0-100%)
-  const getTimelinePosition = (date: Date) => {
-    const hours = date.getHours() + date.getMinutes() / 60;
-    return (hours / 24) * 100;
+  // Generate hourly activity data for the line chart
+  const generateActivityData = () => {
+    const chartData = [];
+    const startOfDay = new Date(data.sunrise);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // Generate data points for every hour
+    for (let hour = 0; hour < 24; hour++) {
+      const time = new Date(startOfDay);
+      time.setHours(hour);
+
+      // Calculate activity level for this hour (0-100)
+      let activity = 0;
+
+      // Check if this hour overlaps with any major period
+      for (const period of data.majorPeriods) {
+        if (time >= period.start && time <= period.end) {
+          activity = 100; // Peak activity during major periods
+          break;
+        }
+        // Ramp up/down near major periods
+        const hoursBefore = (period.start.getTime() - time.getTime()) / (1000 * 60 * 60);
+        const hoursAfter = (time.getTime() - period.end.getTime()) / (1000 * 60 * 60);
+        if (hoursBefore > 0 && hoursBefore <= 1) {
+          activity = Math.max(activity, 50 + (1 - hoursBefore) * 50);
+        } else if (hoursAfter > 0 && hoursAfter <= 1) {
+          activity = Math.max(activity, 50 + (1 - hoursAfter) * 50);
+        }
+      }
+
+      // Check if this hour overlaps with any minor period
+      for (const period of data.minorPeriods) {
+        if (time >= period.start && time <= period.end) {
+          activity = Math.max(activity, 60); // Moderate activity during minor periods
+        }
+        // Ramp up/down near minor periods
+        const hoursBefore = (period.start.getTime() - time.getTime()) / (1000 * 60 * 60);
+        const hoursAfter = (time.getTime() - period.end.getTime()) / (1000 * 60 * 60);
+        if (hoursBefore > 0 && hoursBefore <= 0.5) {
+          activity = Math.max(activity, 30 + hoursBefore * 60);
+        } else if (hoursAfter > 0 && hoursAfter <= 0.5) {
+          activity = Math.max(activity, 30 + hoursAfter * 60);
+        }
+      }
+
+      // Base activity level when no periods are active
+      if (activity === 0) {
+        activity = 10;
+      }
+
+      chartData.push({
+        hour,
+        timeLabel: time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
+        activity: Math.round(activity)
+      });
+    }
+
+    return chartData;
   };
 
-  // Render a period bar on the timeline
-  const renderPeriod = (start: Date, end: Date, isMajor: boolean) => {
-    const startPos = getTimelinePosition(start);
-    const endPos = getTimelinePosition(end);
-    const width = endPos - startPos;
+  const chartData = generateActivityData();
 
-    return (
-      <div
-        key={`${start.getTime()}-${isMajor ? 'major' : 'minor'}`}
-        style={{
-          position: 'absolute',
-          left: `${startPos}%`,
-          width: `${width}%`,
-          height: isMajor ? '24px' : '16px',
-          backgroundColor: isMajor ? 'var(--color-solunar-major)' : 'var(--color-solunar-minor)',
-          borderRadius: '4px',
-          top: isMajor ? '0' : '4px'
-        }}
-      />
-    );
+  // Custom tooltip
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div style={{
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          padding: '0.75rem',
+          fontSize: '0.875rem'
+        }}>
+          <p style={{ marginBottom: '0.5rem', fontWeight: 600 }}>{data.timeLabel}</p>
+          <p style={{ color: 'var(--color-solunar-major)' }}>
+            Activity: {data.activity}%
+          </p>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -80,42 +137,39 @@ function SolunarChart({ data }: SolunarChartProps) {
         </h2>
       </div>
 
-      {/* Timeline Section */}
+      {/* Activity Chart */}
       <div style={{ marginBottom: '1.5rem' }}>
-        {/* Hour markers */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.75rem',
-            color: 'var(--color-text-secondary)',
-            marginBottom: '0.5rem'
-          }}
-        >
-          <span>12AM</span>
-          <span>6AM</span>
-          <span>12PM</span>
-          <span>6PM</span>
-          <span>12AM</span>
-        </div>
-
-        {/* Timeline bar with periods */}
-        <div
-          style={{
-            position: 'relative',
-            height: '32px',
-            backgroundColor: 'var(--color-background)',
-            borderRadius: '4px',
-            border: '1px solid var(--color-solunar-timeline)',
-            marginBottom: '1rem'
-          }}
-        >
-          {/* Render major periods */}
-          {data.majorPeriods.map((period) => renderPeriod(period.start, period.end, true))}
-
-          {/* Render minor periods */}
-          {data.minorPeriods.map((period) => renderPeriod(period.start, period.end, false))}
-        </div>
+        <ResponsiveContainer width="100%" height={140}>
+          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-solunar-major)" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="var(--color-solunar-major)" stopOpacity={0.1}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+            <XAxis
+              dataKey="timeLabel"
+              stroke="var(--color-text-secondary)"
+              style={{ fontSize: '0.75rem' }}
+              interval="preserveStartEnd"
+            />
+            <YAxis
+              stroke="var(--color-text-secondary)"
+              style={{ fontSize: '0.75rem' }}
+              label={{ value: 'Activity %', angle: -90, position: 'insideLeft', style: { fill: 'var(--color-text-secondary)' } }}
+              domain={[0, 100]}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Area
+              type="monotone"
+              dataKey="activity"
+              stroke="var(--color-solunar-major)"
+              strokeWidth={2}
+              fill="url(#activityGradient)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
 
         {/* Period labels */}
         <div
@@ -123,7 +177,10 @@ function SolunarChart({ data }: SolunarChartProps) {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
             gap: '0.5rem',
-            fontSize: '0.75rem'
+            fontSize: '0.75rem',
+            marginTop: '0.5rem',
+            paddingTop: '0.5rem',
+            borderTop: '1px solid var(--color-border)'
           }}
         >
           {data.majorPeriods.map((period, idx) => (
