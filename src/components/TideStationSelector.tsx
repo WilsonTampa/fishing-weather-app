@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { findNearbyTideStations } from '../services/noaaApi';
+import { fetchNearbyTideStations } from '../services/noaaApi';
 import './TideStationSelector.css';
 
 interface TideStation {
@@ -27,16 +27,28 @@ export default function TideStationSelector({
 }: TideStationSelectorProps) {
   const [stations, setStations] = useState<TideStation[]>([]);
   const [selectedId, setSelectedId] = useState<string | undefined>(currentStationId);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Find all tide stations within 50 miles (80.47 km)
-    const nearby = findNearbyTideStations(userLat, userLng, 80.47);
-    setStations(nearby);
+    const loadStations = async () => {
+      setIsLoading(true);
+      try {
+        // Find all tide stations within 50 miles (80.47 km)
+        const nearby = await fetchNearbyTideStations(userLat, userLng, 80.47);
+        setStations(nearby);
 
-    // If no current station, select the nearest one
-    if (!currentStationId && nearby.length > 0) {
-      setSelectedId(nearby[0].id);
-    }
+        // If no current station, select the nearest one
+        if (!currentStationId && nearby.length > 0) {
+          setSelectedId(nearby[0].id);
+        }
+      } catch (error) {
+        console.error('Error loading tide stations:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadStations();
   }, [userLat, userLng, currentStationId]);
 
   const handleConfirm = () => {
@@ -57,7 +69,14 @@ export default function TideStationSelector({
         </div>
 
         <div className="tide-station-modal-body">
-          {stations.length === 0 ? (
+          {isLoading ? (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <div className="spinner" />
+              <p style={{ marginTop: '1rem', color: 'var(--color-text-secondary)' }}>
+                Loading tide stations...
+              </p>
+            </div>
+          ) : stations.length === 0 ? (
             <p className="no-stations-message">
               No tide stations found within 50 miles of your location.
             </p>

@@ -3,6 +3,9 @@ import { WindData, TemperatureData, TideData, WeatherData, Location } from '../t
 // NOAA CO-OPS API base URL for tide data
 const NOAA_COOPS_BASE = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
 
+// NOAA CO-OPS Metadata API for finding stations
+const NOAA_METADATA_BASE = 'https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json';
+
 // Open-Meteo API (free weather data)
 const OPEN_METEO_BASE = 'https://api.open-meteo.com/v1';
 
@@ -99,6 +102,92 @@ const TIDE_STATIONS = [
 ];
 
 /**
+ * Fetch tide stations from NOAA API within a bounding box around a location
+ */
+export async function fetchNearbyTideStations(lat: number, lng: number, radiusKm: number = 80.47): Promise<TideStation[]> {
+  // Calculate bounding box (approximate degrees)
+  const kmPerDegreeLat = 111; // roughly constant
+  const kmPerDegreeLng = 111 * Math.cos(lat * Math.PI / 180);
+
+  const latDelta = radiusKm / kmPerDegreeLat;
+  const lngDelta = radiusKm / kmPerDegreeLng;
+
+  const minLat = lat - latDelta;
+  const maxLat = lat + latDelta;
+  const minLng = lng - lngDelta;
+  const maxLng = lng + lngDelta;
+
+  try {
+    const response = await fetch(`${NOAA_METADATA_BASE}?type=tidepredictions`);
+
+    if (!response.ok) {
+      console.error('NOAA metadata API error:', response.status);
+      // Fallback to hardcoded stations
+      return findNearbyTideStationsFromList(lat, lng, radiusKm);
+    }
+
+    const data = await response.json();
+
+    if (!data.stations || !Array.isArray(data.stations)) {
+      console.error('Invalid response from NOAA metadata API');
+      return findNearbyTideStationsFromList(lat, lng, radiusKm);
+    }
+
+    // Filter stations within bounding box and calculate distances
+    const nearby: TideStation[] = [];
+
+    for (const station of data.stations) {
+      const stationLat = parseFloat(station.lat);
+      const stationLng = parseFloat(station.lng);
+
+      // Check if within bounding box
+      if (stationLat >= minLat && stationLat <= maxLat &&
+          stationLng >= minLng && stationLng <= maxLng) {
+        const distance = calculateDistance(lat, lng, stationLat, stationLng);
+
+        // Double-check distance is within radius (bounding box is approximate)
+        if (distance <= radiusKm) {
+          nearby.push({
+            id: station.id,
+            name: station.name,
+            lat: stationLat,
+            lng: stationLng,
+            distance
+          });
+        }
+      }
+    }
+
+    // Sort by distance, nearest first
+    return nearby.sort((a, b) => a.distance - b.distance);
+  } catch (error) {
+    console.error('Error fetching tide stations from API:', error);
+    // Fallback to hardcoded stations
+    return findNearbyTideStationsFromList(lat, lng, radiusKm);
+  }
+}
+
+/**
+ * Find nearby tide stations from hardcoded list (fallback)
+ */
+function findNearbyTideStationsFromList(lat: number, lng: number, maxDistanceKm: number = 80.47): TideStation[] {
+  const nearby: TideStation[] = [];
+
+  for (const station of TIDE_STATIONS) {
+    const distance = calculateDistance(lat, lng, station.lat, station.lng);
+    if (distance <= maxDistanceKm) {
+      nearby.push({
+        ...station,
+        distance
+      });
+    }
+  }
+
+  // Sort by distance, nearest first
+  return nearby.sort((a, b) => a.distance - b.distance);
+}
+
+/**
  * Find the nearest tide station to a given location
  */
 export function findNearestTideStation(lat: number, lng: number): TideStation | null {
@@ -121,26 +210,6 @@ export function findNearestTideStation(lat: number, lng: number): TideStation | 
   };
 }
 
-/**
- * Find nearby tide stations within a given radius (in km)
- * Returns stations sorted by distance
- */
-export function findNearbyTideStations(lat: number, lng: number, maxDistanceKm: number = 300): TideStation[] {
-  const nearby: TideStation[] = [];
-
-  for (const station of TIDE_STATIONS) {
-    const distance = calculateDistance(lat, lng, station.lat, station.lng);
-    if (distance <= maxDistanceKm) {
-      nearby.push({
-        ...station,
-        distance
-      });
-    }
-  }
-
-  // Sort by distance, nearest first
-  return nearby.sort((a, b) => a.distance - b.distance);
-}
 
 /**
  * Fetch tide predictions from NOAA CO-OPS API
