@@ -1,4 +1,4 @@
-import { SolunarData, SolunarPeriod } from '../utils/solunarData';
+import { SolunarData } from '../utils/solunarData';
 
 interface FeedingPeriodsProps {
   data: SolunarData;
@@ -13,26 +13,6 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
       hour12: true
     });
   };
-
-  // Combine and sort all periods chronologically
-  const getAllPeriods = () => {
-    const periods: Array<{ type: 'MAJOR' | 'MINOR'; period: SolunarPeriod }> = [];
-
-    data.majorPeriods.forEach(period => {
-      periods.push({ type: 'MAJOR', period });
-    });
-
-    data.minorPeriods.forEach(period => {
-      periods.push({ type: 'MINOR', period });
-    });
-
-    // Sort by start time
-    periods.sort((a, b) => a.period.start.getTime() - b.period.start.getTime());
-
-    return periods;
-  };
-
-  const allPeriods = getAllPeriods();
 
   return (
     <div
@@ -61,41 +41,98 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
         </h2>
       </div>
 
-      {/* Periods List */}
+      {/* Two Column Layout */}
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.5rem'
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '1rem'
         }}
       >
-        {allPeriods.map((item, idx) => (
+        {/* Major Periods Column */}
+        <div>
           <div
-            key={idx}
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '0.75rem',
-              backgroundColor: 'var(--color-background)',
+              backgroundColor: 'var(--color-solunar-major)',
+              color: 'white',
+              padding: '0.5rem',
               borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-border)'
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              textAlign: 'center',
+              marginBottom: '0.5rem'
             }}
           >
-            <span
-              style={{
-                fontWeight: 600,
-                color: item.type === 'MAJOR' ? 'var(--color-solunar-major)' : 'var(--color-solunar-minor)',
-                fontSize: '0.875rem'
-              }}
-            >
-              {item.type}
-            </span>
-            <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>
-              {formatTime(item.period.start)} - {formatTime(item.period.end)}
-            </span>
+            MAJOR PERIODS
           </div>
-        ))}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}
+          >
+            {data.majorPeriods.map((period, idx) => (
+              <div
+                key={idx}
+                style={{
+                  padding: '0.5rem',
+                  backgroundColor: 'var(--color-background)',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  textAlign: 'center',
+                  border: '1px solid var(--color-border)'
+                }}
+              >
+                {formatTime(period.start)} - {formatTime(period.end)}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Minor Periods Column */}
+        <div>
+          <div
+            style={{
+              backgroundColor: 'var(--color-solunar-minor)',
+              color: '#1a1a1a',
+              padding: '0.5rem',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              textAlign: 'center',
+              marginBottom: '0.5rem'
+            }}
+          >
+            MINOR PERIODS
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}
+          >
+            {data.minorPeriods.map((period, idx) => (
+              <div
+                key={idx}
+                style={{
+                  padding: '0.5rem',
+                  backgroundColor: 'var(--color-background)',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  textAlign: 'center',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-solunar-minor)'
+                }}
+              >
+                {formatTime(period.start)} - {formatTime(period.end)}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
