@@ -1,4 +1,4 @@
-import { WindData, TemperatureData, TideData, WeatherData, Location } from '../types';
+import { WindData, TemperatureData, TideData, WeatherData, Location, WaterTemperatureData } from '../types';
 
 // NOAA CO-OPS API base URL for tide data
 const NOAA_COOPS_BASE = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
@@ -128,6 +128,52 @@ export async function findNearestTideStation(lat: number, lng: number): Promise<
   };
 }
 
+
+/**
+ * Fetch current water temperature from NOAA CO-OPS API
+ */
+export async function fetchWaterTemperature(
+  stationId: string
+): Promise<number | null> {
+  const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+  const beginDate = oneHourAgo.toISOString().split('T')[0].replace(/-/g, '');
+  const endDateStr = now.toISOString().split('T')[0].replace(/-/g, '');
+
+  const params = new URLSearchParams({
+    product: 'water_temperature',
+    application: 'FishingBoatingApp',
+    begin_date: beginDate,
+    end_date: endDateStr,
+    station: stationId,
+    time_zone: 'lst_ldt',
+    units: 'english',
+    format: 'json'
+  });
+
+  try {
+    const response = await fetch(`${NOAA_COOPS_BASE}?${params}`);
+    if (!response.ok) {
+      // Station may not have water temperature sensor
+      console.log(`Water temperature not available for station: ${stationId}`);
+      return null;
+    }
+
+    const data = await response.json();
+
+    if (!data.data || data.data.length === 0) {
+      return null;
+    }
+
+    // Get the most recent temperature reading
+    const latestReading = data.data[data.data.length - 1];
+    return parseFloat(latestReading.v);
+  } catch (error) {
+    console.log('Water temperature not available:', error);
+    return null;
+  }
+}
 
 /**
  * Fetch tide predictions from NOAA CO-OPS API
@@ -286,6 +332,8 @@ export async function getLocationForecast(location: Location, tideStationId?: st
 
     // Fetch tide data with fallback handling for invalid stations
     let tidePromise: Promise<TideData[]>;
+    let waterTempPromise: Promise<number | null>;
+
     if (tideStation) {
       const currentStationId = tideStation.id;
       tidePromise = fetchTideData(currentStationId, startDate, endDate).catch(async () => {
@@ -299,18 +347,23 @@ export async function getLocationForecast(location: Location, tideStationId?: st
         }
         return [];
       });
+
+      // Fetch water temperature for the station
+      waterTempPromise = fetchWaterTemperature(currentStationId);
     } else {
       tidePromise = Promise.resolve([]);
+      waterTempPromise = Promise.resolve(null);
     }
 
-    const [weather, tides] = await Promise.all([weatherPromise, tidePromise]);
+    const [weather, tides, waterTemp] = await Promise.all([weatherPromise, tidePromise, waterTempPromise]);
 
     return {
       wind: weather.wind,
       temperature: weather.temperature,
       weather: weather.weather,
       tides,
-      tideStation: tideStation || undefined
+      tideStation: tideStation || undefined,
+      waterTemperature: waterTemp
     };
   } catch (error) {
     console.error('Error getting location forecast:', error);

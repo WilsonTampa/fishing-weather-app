@@ -5,9 +5,10 @@ interface TideChartProps {
   data: TideData[];
   selectedDay: Date;
   stationName?: string;
+  waterTemperature?: number | null;
 }
 
-function TideChart({ data, selectedDay, stationName }: TideChartProps) {
+function TideChart({ data, selectedDay, stationName, waterTemperature }: TideChartProps) {
   // Filter data for selected day and surrounding times for smooth curve
   const startOfDay = new Date(selectedDay);
   startOfDay.setHours(0, 0, 0, 0);
@@ -232,9 +233,17 @@ function TideChart({ data, selectedDay, stationName }: TideChartProps) {
         <div style={{
           fontSize: '0.75rem',
           color: 'var(--color-text-secondary)',
-          marginBottom: '1rem'
+          marginBottom: '1rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}>
-          📍 {stationName}
+          <span>📍 {stationName}</span>
+          {waterTemperature !== null && waterTemperature !== undefined && (
+            <span style={{ fontWeight: 600 }}>
+              Water Temp: {waterTemperature.toFixed(1)}°F
+            </span>
+          )}
         </div>
       )}
 

@@ -29,6 +29,7 @@ interface ForecastData {
     lng: number;
     distance: number;
   };
+  waterTemperature?: number | null;
 }
 
 function ForecastView({ location, onLocationChange, onLocationUpdate }: ForecastViewProps) {
@@ -255,6 +256,7 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
               data={forecastData.tides}
               selectedDay={selectedDay}
               stationName={forecastData.tideStation?.name}
+              waterTemperature={forecastData.waterTemperature}
             />
 
             {/* Temperature Chart */}

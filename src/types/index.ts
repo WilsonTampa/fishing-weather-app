@@ -39,6 +39,12 @@ export interface TideData {
   type: 'H' | 'L'; // High or Low
 }
 
+// Water temperature data
+export interface WaterTemperatureData {
+  timestamp: string;
+  temperature: number; // degrees F
+}
+
 // Current conditions
 export interface CurrentConditions {
   temperature: number;
