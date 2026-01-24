@@ -8,9 +8,9 @@ interface DaySelectorProps {
 function DaySelector({ selectedDay, onSelectDay }: DaySelectorProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Generate array of next 7 days
+  // Generate array of next 10 days
   const days: Date[] = [];
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 10; i++) {
     const day = new Date();
     day.setDate(day.getDate() + i);
     day.setHours(0, 0, 0, 0);

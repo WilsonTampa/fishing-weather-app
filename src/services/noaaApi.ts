@@ -192,7 +192,7 @@ export async function fetchWeatherData(
     temperature_unit: 'fahrenheit',
     wind_speed_unit: 'mph',
     timezone: 'America/New_York',
-    forecast_days: '7'
+    forecast_days: '10'
   });
 
   try {
@@ -281,7 +281,7 @@ export async function getLocationForecast(location: Location, tideStationId?: st
     const startDate = new Date();
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 7);
+    endDate.setDate(endDate.getDate() + 10);
     endDate.setHours(23, 59, 59, 999);
 
     // Fetch tide data with fallback handling for invalid stations

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Location } from '../types';
 import { getLocationForecast } from '../services/noaaApi';
 import WindChart from './WindChart';
@@ -40,6 +40,11 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
   const [selectedStationId, setSelectedStationId] = useState<string | undefined>(location.tideStationId);
 
   useEffect(() => {
+    setSelectedDay(new Date());
+    setSelectedStationId(location.tideStationId);
+  }, [location.latitude, location.longitude, location.tideStationId]);
+
+  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
@@ -73,6 +78,11 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
       onLocationUpdate();
     }
   };
+
+  const solunarData = useMemo(
+    () => getSolunarData(selectedDay, location.latitude, location.longitude),
+    [selectedDay, location.latitude, location.longitude]
+  );
 
   return (
     <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -266,14 +276,14 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
 
             {/* Sun & Moon Times */}
             <SunMoonTimes
-              data={getSolunarData(selectedDay, location.latitude, location.longitude)}
+              data={solunarData}
               weatherData={forecastData.weather}
               selectedDay={selectedDay}
             />
 
             {/* Feeding Periods */}
             <FeedingPeriods
-              data={getSolunarData(selectedDay, location.latitude, location.longitude)}
+              data={solunarData}
             />
           </div>
 
