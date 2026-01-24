@@ -91,7 +91,7 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
           margin: 0,
           color: '#60A5FA'
         }}>
-          MARINE WEATHER CONDITIONS
+          PRECIPITATION
         </h2>
         {currentConditions && (
           <div style={{ textAlign: 'right' }}>
