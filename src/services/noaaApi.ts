@@ -1,4 +1,4 @@
-import { WindData, TemperatureData, TideData, WeatherData, Location, WaterTemperatureData } from '../types';
+import { WindData, TemperatureData, TideData, WeatherData, Location } from '../types';
 
 // NOAA CO-OPS API base URL for tide data
 const NOAA_COOPS_BASE = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
