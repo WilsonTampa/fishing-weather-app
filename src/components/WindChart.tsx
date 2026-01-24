@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { WindData } from '../types';
 
 interface WindChartProps {
@@ -22,7 +22,7 @@ function WindChart({ data, selectedDay }: WindChartProps) {
   const chartData = dayData.map(item => {
     const time = new Date(item.timestamp);
     return {
-      time: time.getHours(),
+      time: time.getHours() + time.getMinutes() / 60,
       timeLabel: time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
       speed: Math.round(item.speed),
       gusts: Math.round(item.gusts),
@@ -34,6 +34,11 @@ function WindChart({ data, selectedDay }: WindChartProps) {
 
   // Get current wind conditions (first data point of selected day)
   const currentWind = dayData[0] || null;
+
+  // Check if current time is within selected day
+  const now = new Date();
+  const isToday = now >= startOfDay && now <= endOfDay;
+  const currentHour = isToday ? now.getHours() + now.getMinutes() / 60 : null;
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: any) => {
@@ -160,10 +165,18 @@ function WindChart({ data, selectedDay }: WindChartProps) {
         <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
           <XAxis
-            dataKey="timeLabel"
+            dataKey="time"
             stroke="var(--color-text-secondary)"
             style={{ fontSize: '0.75rem' }}
-            interval="preserveStartEnd"
+            tickFormatter={(value) => {
+              const hour = Math.floor(value);
+              const ampm = hour >= 12 ? 'PM' : 'AM';
+              const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+              return `${displayHour}${ampm}`;
+            }}
+            type="number"
+            domain={[0, 24]}
+            ticks={[0, 6, 12, 18, 24]}
           />
           <YAxis
             stroke="var(--color-text-secondary)"
@@ -171,6 +184,15 @@ function WindChart({ data, selectedDay }: WindChartProps) {
             label={{ value: 'mph', angle: -90, position: 'insideLeft', style: { fill: 'var(--color-text-secondary)' } }}
           />
           <Tooltip content={<CustomTooltip />} />
+          {currentHour !== null && (
+            <ReferenceLine
+              x={currentHour}
+              stroke="#FCD34D"
+              strokeWidth={2}
+              strokeDasharray="3 3"
+              label={{ value: 'Now', position: 'top', fill: '#FCD34D', fontSize: 12 }}
+            />
+          )}
           <Line
             type="monotone"
             dataKey="speed"

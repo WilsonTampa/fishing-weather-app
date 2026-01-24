@@ -1,4 +1,4 @@
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot, ReferenceLine } from 'recharts';
 import { TideData } from '../types';
 
 interface TideChartProps {
@@ -23,6 +23,10 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
   // Get next high/low tide
   const now = new Date();
   const upcomingTide = data.find(item => new Date(item.timestamp) > now);
+
+  // Check if current time is within selected day
+  const isToday = now >= startOfDay && now <= endOfDay;
+  const currentTime = isToday ? now.getHours() + now.getMinutes() / 60 : null;
 
   // Format data for chart - create smooth curve between high/low points
   const chartData: any[] = [];
@@ -278,6 +282,15 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
             label={{ value: 'feet', angle: -90, position: 'insideLeft', style: { fill: 'var(--color-text-secondary)' } }}
           />
           <Tooltip content={<CustomTooltip />} />
+          {currentTime !== null && (
+            <ReferenceLine
+              x={currentTime}
+              stroke="#FCD34D"
+              strokeWidth={2}
+              strokeDasharray="3 3"
+              label={{ value: 'Now', position: 'top', fill: '#FCD34D', fontSize: 12 }}
+            />
+          )}
           <Area
             type="natural"
             dataKey="height"

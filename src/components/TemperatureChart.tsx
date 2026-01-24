@@ -1,4 +1,4 @@
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TemperatureData, WeatherData } from '../types';
 
 interface TemperatureChartProps {
@@ -29,7 +29,7 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
     const time = new Date(item.timestamp);
     const weather = dayWeatherData[index];
     return {
-      time: time.getHours(),
+      time: time.getHours() + time.getMinutes() / 60,
       timeLabel: time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
       temperature: Math.round(item.temperature),
       feelsLike: item.feelsLike ? Math.round(item.feelsLike) : undefined,
@@ -45,6 +45,11 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
   const temperatures = chartData.map(d => d.temperature);
   const high = temperatures.length > 0 ? Math.max(...temperatures) : null;
   const low = temperatures.length > 0 ? Math.min(...temperatures) : null;
+
+  // Check if current time is within selected day
+  const now = new Date();
+  const isToday = now >= startOfDay && now <= endOfDay;
+  const currentTime = isToday ? now.getHours() + now.getMinutes() / 60 : null;
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: any) => {
@@ -154,10 +159,18 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
           <XAxis
-            dataKey="timeLabel"
+            dataKey="time"
             stroke="var(--color-text-secondary)"
             style={{ fontSize: '0.75rem' }}
-            interval="preserveStartEnd"
+            tickFormatter={(value) => {
+              const hour = Math.floor(value);
+              const ampm = hour >= 12 ? 'PM' : 'AM';
+              const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+              return `${displayHour}${ampm}`;
+            }}
+            type="number"
+            domain={[0, 24]}
+            ticks={[0, 6, 12, 18, 24]}
           />
           <YAxis
             stroke="var(--color-text-secondary)"
@@ -165,6 +178,15 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
             label={{ value: '°F', angle: -90, position: 'insideLeft', style: { fill: 'var(--color-text-secondary)' } }}
           />
           <Tooltip content={<CustomTooltip />} />
+          {currentTime !== null && (
+            <ReferenceLine
+              x={currentTime}
+              stroke="#FCD34D"
+              strokeWidth={2}
+              strokeDasharray="3 3"
+              label={{ value: 'Now', position: 'top', fill: '#FCD34D', fontSize: 12 }}
+            />
+          )}
           <Area
             type="monotone"
             dataKey="temperature"

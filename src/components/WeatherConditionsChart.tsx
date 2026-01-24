@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { WeatherData } from '../types';
 
 interface WeatherConditionsChartProps {
@@ -22,7 +22,7 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
   const chartData = dayData.map(item => {
     const time = new Date(item.timestamp);
     return {
-      time: time.getHours(),
+      time: time.getHours() + time.getMinutes() / 60,
       timeLabel: time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
       precipitation: item.precipitationProbability,
       fullTimestamp: item.timestamp
@@ -31,6 +31,11 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
 
   // Get current conditions (first data point of selected day)
   const currentConditions = dayData[0] || null;
+
+  // Check if current time is within selected day
+  const now = new Date();
+  const isToday = now >= startOfDay && now <= endOfDay;
+  const currentTime = isToday ? now.getHours() + now.getMinutes() / 60 : null;
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: any) => {
@@ -105,10 +110,18 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
         <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
           <XAxis
-            dataKey="timeLabel"
+            dataKey="time"
             stroke="var(--color-text-secondary)"
             style={{ fontSize: '0.75rem' }}
-            interval="preserveStartEnd"
+            tickFormatter={(value) => {
+              const hour = Math.floor(value);
+              const ampm = hour >= 12 ? 'PM' : 'AM';
+              const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+              return `${displayHour}${ampm}`;
+            }}
+            type="number"
+            domain={[0, 24]}
+            ticks={[0, 6, 12, 18, 24]}
           />
           <YAxis
             stroke="var(--color-text-secondary)"
@@ -117,6 +130,15 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
             domain={[0, 100]}
           />
           <Tooltip content={<CustomTooltip />} />
+          {currentTime !== null && (
+            <ReferenceLine
+              x={currentTime}
+              stroke="#FCD34D"
+              strokeWidth={2}
+              strokeDasharray="3 3"
+              label={{ value: 'Now', position: 'top', fill: '#FCD34D', fontSize: 12 }}
+            />
+          )}
           <Bar
             dataKey="precipitation"
             fill="#60A5FA"
