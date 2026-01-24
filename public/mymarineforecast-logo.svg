@@ -1,0 +1,50 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="beamGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#5DADE2;stop-opacity:0" />
+            <stop offset="50%" style="stop-color:#5DADE2;stop-opacity:0.5" />
+            <stop offset="100%" style="stop-color:#5DADE2;stop-opacity:0" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Circle border -->
+    <circle cx="60" cy="60" r="55" fill="none" stroke="#5DADE2" stroke-width="4"/>
+    
+    <!-- Lighthouse base -->
+    <rect x="48" y="88" width="24" height="8" fill="#5DADE2" rx="1"/>
+    
+    <!-- Lighthouse body -->
+    <path d="M 52 50 L 49 88 L 71 88 L 68 50 Z" fill="#5DADE2"/>
+    
+    <!-- Window -->
+    <rect x="55" y="68" width="10" height="12" fill="#1A1E29" rx="1"/>
+    
+    <!-- Mid section -->
+    <path d="M 49 50 L 52 42 L 68 42 L 71 50 Z" fill="#5DADE2"/>
+    
+    <!-- Light chamber (glowing white) -->
+    <rect x="54" y="31" width="12" height="11" fill="#FFFFFF" opacity="0.95"/>
+    
+    <!-- Roof -->
+    <path d="M 52 31 L 54 23 L 66 23 L 68 31 Z" fill="#5DADE2"/>
+    
+    <!-- Light beams (left) -->
+    <path d="M 60 28 L 15 12 L 15 22 L 60 38 Z" fill="url(#beamGradient)" opacity="0.7"/>
+    
+    <!-- Light beams (right) -->
+    <path d="M 60 28 L 105 12 L 105 22 L 60 38 Z" fill="url(#beamGradient)" opacity="0.7"/>
+    
+    <!-- Light beams (lower left) -->
+    <path d="M 60 28 L 20 45 L 23 52 L 60 38 Z" fill="url(#beamGradient)" opacity="0.5"/>
+    
+    <!-- Light beams (lower right) -->
+    <path d="M 60 28 L 100 45 L 97 52 L 60 38 Z" fill="url(#beamGradient)" opacity="0.5"/>
+    
+    <!-- Wave pattern 1 -->
+    <path d="M 15 70 Q 25 63 35 70 T 55 70 T 75 70 T 95 70 T 105 70" 
+          stroke="#5DADE2" stroke-width="3.5" fill="none"/>
+    
+    <!-- Wave pattern 2 -->
+    <path d="M 18 82 Q 28 75 38 82 T 58 82 T 78 82 T 98 82 T 108 82" 
+          stroke="#5DADE2" stroke-width="3" fill="none" opacity="0.6"/>
+</svg>
