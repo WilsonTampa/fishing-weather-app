@@ -20,9 +20,7 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
     return timestamp >= startOfDay && timestamp <= endOfDay;
   });
 
-  // Get next high/low tide
   const now = new Date();
-  const upcomingTide = data.find(item => new Date(item.timestamp) > now);
 
   // Check if current time is within selected day
   const isToday = now >= startOfDay && now <= endOfDay;
