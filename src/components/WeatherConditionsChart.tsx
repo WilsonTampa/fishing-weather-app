@@ -29,8 +29,10 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
     };
   });
 
-  // Get current conditions (first data point of selected day)
-  const currentConditions = dayData[0] || null;
+  // Calculate average rain chance for the day
+  const averageRainChance = dayData.length > 0
+    ? Math.round(dayData.reduce((sum, item) => sum + item.precipitationProbability, 0) / dayData.length)
+    : null;
 
   // Check if current time is within selected day
   const now = new Date();
@@ -93,13 +95,13 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
         }}>
           PRECIPITATION
         </h2>
-        {currentConditions && (
+        {averageRainChance !== null && (
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#60A5FA' }}>
-              {currentConditions.precipitationProbability}%
+              {averageRainChance}%
             </div>
             <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-              Rain Chance
+              Avg Rain Chance
             </div>
           </div>
         )}
