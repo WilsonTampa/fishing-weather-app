@@ -29,9 +29,9 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
     };
   });
 
-  // Calculate average rain chance for the day
-  const averageRainChance = dayData.length > 0
-    ? Math.round(dayData.reduce((sum, item) => sum + item.precipitationProbability, 0) / dayData.length)
+  // Get max rain chance for the day (most useful for planning)
+  const maxRainChance = dayData.length > 0
+    ? Math.max(...dayData.map(item => item.precipitationProbability))
     : null;
 
   // Check if current time is within selected day
@@ -95,13 +95,13 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
         }}>
           PRECIPITATION
         </h2>
-        {averageRainChance !== null && (
+        {maxRainChance !== null && (
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#60A5FA' }}>
-              {averageRainChance}%
+              {maxRainChance}%
             </div>
             <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-              Avg Rain Chance
+              Rain Chance
             </div>
           </div>
         )}
