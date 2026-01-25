@@ -32,13 +32,45 @@ function WindChart({ data, selectedDay }: WindChartProps) {
     };
   });
 
-  // Get current wind conditions (first data point of selected day)
-  const currentWind = dayData[0] || null;
-
   // Check if current time is within selected day
   const now = new Date();
   const isToday = now >= startOfDay && now <= endOfDay;
   const currentHour = isToday ? now.getHours() + now.getMinutes() / 60 : null;
+
+  // Get current wind conditions: use current hour's data if today, otherwise average for the day
+  const getCurrentWind = () => {
+    if (dayData.length === 0) return null;
+
+    if (isToday) {
+      // Find the data point closest to current time
+      const currentHourFloor = now.getHours();
+      const closest = dayData.reduce((prev, curr) => {
+        const prevTime = new Date(prev.timestamp).getHours();
+        const currTime = new Date(curr.timestamp).getHours();
+        return Math.abs(currTime - currentHourFloor) < Math.abs(prevTime - currentHourFloor) ? curr : prev;
+      });
+      return closest;
+    } else {
+      // Return average wind data for other days
+      const avgSpeed = Math.round(dayData.reduce((sum, item) => sum + item.speed, 0) / dayData.length);
+      const avgGusts = Math.round(dayData.reduce((sum, item) => sum + item.gusts, 0) / dayData.length);
+      // Use most common direction (mode) for average
+      const directions = dayData.map(d => d.directionCardinal);
+      const modeDirection = directions.sort((a, b) =>
+        directions.filter(v => v === a).length - directions.filter(v => v === b).length
+      ).pop() || '';
+      const avgDirectionDegrees = Math.round(dayData.reduce((sum, item) => sum + item.direction, 0) / dayData.length);
+      return {
+        speed: avgSpeed,
+        gusts: avgGusts,
+        direction: avgDirectionDegrees,
+        directionCardinal: modeDirection,
+        isAverage: true
+      };
+    }
+  };
+
+  const currentWind = getCurrentWind();
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: any) => {
@@ -149,7 +181,7 @@ function WindChart({ data, selectedDay }: WindChartProps) {
                 {Math.round(currentWind.speed)} mph
               </div>
               <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-                Gusts: {Math.round(currentWind.gusts)} mph
+                {'isAverage' in currentWind ? 'Avg Wind' : 'Current Wind'}
               </div>
             </div>
             <WindArrow direction={currentWind.direction} />
