@@ -183,6 +183,11 @@ function WindChart({ data, selectedDay }: WindChartProps) {
               <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
                 {'isAverage' in currentWind ? 'Avg Wind' : 'Current Wind'}
               </div>
+              {isToday && (
+                <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
+                  Gusts: {Math.round(currentWind.gusts)} mph
+                </div>
+              )}
             </div>
             <WindArrow direction={currentWind.direction} />
             <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>
