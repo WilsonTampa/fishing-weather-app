@@ -38,8 +38,10 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
     };
   });
 
-  // Get current temperature (first data point of selected day)
-  const currentTemp = dayData[0] || null;
+  // Calculate average temperature for the day
+  const averageTemp = dayData.length > 0
+    ? Math.round(dayData.reduce((sum, item) => sum + item.temperature, 0) / dayData.length)
+    : null;
 
   // Calculate high and low for the day
   const temperatures = chartData.map(d => d.temperature);
@@ -107,7 +109,7 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
     );
   }
 
-  const gradientColor = currentTemp ? getTemperatureColor(currentTemp.temperature) : '#4ADE80';
+  const gradientColor = averageTemp ? getTemperatureColor(averageTemp) : '#4ADE80';
 
   return (
     <div style={{
@@ -131,13 +133,13 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
         }}>
           AIR TEMPERATURE
         </h2>
-        {currentTemp && (
+        {averageTemp !== null && (
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: gradientColor }}>
-              {Math.round(currentTemp.temperature)}°F
+              {averageTemp}°F
             </div>
             <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-              {currentTemp.feelsLike && `Feels like: ${Math.round(currentTemp.feelsLike)}°F`}
+              Avg Temp
             </div>
             {high !== null && low !== null && (
               <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
