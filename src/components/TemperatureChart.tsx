@@ -131,7 +131,7 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
           margin: 0,
           color: gradientColor
         }}>
-          AIR TEMPERATURE
+          AIR TEMPERATURE & CLOUD COVER
         </h2>
         {averageTemp !== null && (
           <div style={{ textAlign: 'right' }}>
