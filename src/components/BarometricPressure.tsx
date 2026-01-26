@@ -1,3 +1,5 @@
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+
 interface PressureData {
   timestamp: string;
   pressure: number;
@@ -17,23 +19,35 @@ interface PressureInfo {
 }
 
 function BarometricPressure({ pressureData, selectedDay }: BarometricPressureProps) {
+  // Filter data for selected day
+  const startOfDay = new Date(selectedDay);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(selectedDay);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const dayPressure = pressureData.filter(item => {
+    const timestamp = new Date(item.timestamp);
+    return timestamp >= startOfDay && timestamp <= endOfDay;
+  });
+
+  // Format data for chart
+  const chartData = dayPressure.map(item => {
+    const time = new Date(item.timestamp);
+    return {
+      time: time.getHours() + time.getMinutes() / 60,
+      timeLabel: time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
+      pressure: item.pressure,
+      fullTimestamp: item.timestamp
+    };
+  });
+
+  // Check if current time is within selected day
+  const now = new Date();
+  const isToday = now >= startOfDay && now <= endOfDay;
+  const currentTime = isToday ? now.getHours() + now.getMinutes() / 60 : null;
+
   const getPressureInfo = (): PressureInfo | null => {
-    if (!pressureData || pressureData.length === 0) return null;
-
-    const startOfDay = new Date(selectedDay);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(selectedDay);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const dayPressure = pressureData.filter(item => {
-      const timestamp = new Date(item.timestamp);
-      return timestamp >= startOfDay && timestamp <= endOfDay;
-    });
-
     if (dayPressure.length < 2) return null;
-
-    const now = new Date();
-    const isToday = now >= startOfDay && now <= endOfDay;
 
     let currentIndex = dayPressure.length - 1;
     if (isToday) {
@@ -96,9 +110,38 @@ function BarometricPressure({ pressureData, selectedDay }: BarometricPressurePro
     }
   };
 
-  if (!pressureInfo) return null;
+  // Custom tooltip
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div style={{
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          padding: '0.75rem',
+          fontSize: '0.875rem'
+        }}>
+          <p style={{ marginBottom: '0.5rem', fontWeight: 600 }}>{data.timeLabel}</p>
+          <p style={{ color: pressureInfo ? getTrendColor(pressureInfo.trend) : '#3B82F6' }}>
+            Pressure: {data.pressure.toFixed(2)} in
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  if (!pressureInfo || chartData.length === 0) return null;
 
   const fishingCondition = getFishingCondition(pressureInfo.trend);
+  const trendColor = getTrendColor(pressureInfo.trend);
+
+  // Calculate Y-axis domain with some padding
+  const pressures = chartData.map(d => d.pressure);
+  const minPressure = Math.min(...pressures);
+  const maxPressure = Math.max(...pressures);
+  const padding = (maxPressure - minPressure) * 0.2 || 0.1;
 
   return (
     <div
@@ -123,110 +166,107 @@ function BarometricPressure({ pressureData, selectedDay }: BarometricPressurePro
           style={{
             fontSize: '1.25rem',
             margin: 0,
-            color: getTrendColor(pressureInfo.trend)
+            color: trendColor
           }}
         >
           BAROMETRIC PRESSURE
         </h2>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: getTrendColor(pressureInfo.trend) }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: trendColor }}>
             {pressureInfo.current.toFixed(2)} in
           </div>
           <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-            {pressureInfo.change >= 0 ? '+' : ''}{pressureInfo.change.toFixed(3)} in / 3hr
+            {pressureInfo.trend === 'RISING' && '↑'}
+            {pressureInfo.trend === 'FALLING' && '↓'}
+            {pressureInfo.trend === 'STABLE' && '→'}
+            {' '}{pressureInfo.trend}
           </div>
         </div>
       </div>
 
-      {/* Content */}
+      {/* Chart */}
+      <ResponsiveContainer width="100%" height={120} className="pressure-chart">
+        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <defs>
+            <linearGradient id="pressureGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={trendColor} stopOpacity={0.8}/>
+              <stop offset="95%" stopColor={trendColor} stopOpacity={0.1}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+          <XAxis
+            dataKey="time"
+            stroke="var(--color-text-secondary)"
+            style={{ fontSize: '0.75rem' }}
+            tickFormatter={(value) => {
+              const hour = Math.floor(value);
+              const ampm = hour >= 12 ? 'PM' : 'AM';
+              const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+              return `${displayHour}${ampm}`;
+            }}
+            type="number"
+            domain={[0, 24]}
+            ticks={[0, 6, 12, 18, 24]}
+          />
+          <YAxis
+            stroke="var(--color-text-secondary)"
+            style={{ fontSize: '0.75rem' }}
+            domain={[minPressure - padding, maxPressure + padding]}
+            tickFormatter={(value) => value.toFixed(1)}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          {currentTime !== null && (
+            <ReferenceLine
+              x={currentTime}
+              stroke="#FCD34D"
+              strokeWidth={2}
+              strokeDasharray="3 3"
+              label={{ value: 'Now', position: 'top', fill: '#FCD34D', fontSize: 12 }}
+            />
+          )}
+          <Area
+            type="monotone"
+            dataKey="pressure"
+            stroke={trendColor}
+            strokeWidth={2}
+            fill="url(#pressureGradient)"
+            dot={{ fill: trendColor, r: 3 }}
+            activeDot={{ r: 5 }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+
+      {/* Fishing Conditions */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: '1.5rem',
-          flexWrap: 'wrap'
-        }}
-      >
-        {/* Trend */}
-        <div style={{ flex: '1', minWidth: '150px' }}>
-          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
-            Trend
-          </div>
-          <div
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: 'var(--radius-md)',
-              border: `2px solid ${getTrendColor(pressureInfo.trend)}`,
-              color: getTrendColor(pressureInfo.trend),
-              fontWeight: 600,
-              fontSize: '1rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            {pressureInfo.trend === 'RISING' && '↑'}
-            {pressureInfo.trend === 'FALLING' && '↓'}
-            {pressureInfo.trend === 'STABLE' && '→'}
-            {pressureInfo.trend}
-          </div>
-        </div>
-
-        {/* Fishing Conditions */}
-        <div style={{ flex: '2', minWidth: '200px' }}>
-          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
-            Fishing Conditions
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginBottom: '0.5rem'
-            }}
-          >
-            <div
-              style={{
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                backgroundColor: fishingCondition.color
-              }}
-            />
-            <span style={{ fontWeight: 600, color: fishingCondition.color }}>
-              {fishingCondition.label}
-            </span>
-          </div>
-          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
-            {fishingCondition.description}
-          </div>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '1.5rem',
+          alignItems: 'center',
           marginTop: '1rem',
           paddingTop: '0.75rem',
           borderTop: '1px solid var(--color-border)',
-          fontSize: '0.75rem',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          gap: '1rem'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ color: '#22C55E', fontWeight: 600 }}>↑ RISING</span>
-          <span style={{ color: 'var(--color-text-secondary)' }}>Very Good</span>
+          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            Fishing Conditions:
+          </div>
+          <div
+            style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: fishingCondition.color
+            }}
+          />
+          <span style={{ fontWeight: 600, color: fishingCondition.color, fontSize: '0.875rem' }}>
+            {fishingCondition.label}
+          </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ color: '#3B82F6', fontWeight: 600 }}>→ STABLE</span>
-          <span style={{ color: 'var(--color-text-secondary)' }}>Good</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ color: '#EF4444', fontWeight: 600 }}>↓ FALLING</span>
-          <span style={{ color: 'var(--color-text-secondary)' }}>Fair</span>
+        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', maxWidth: '400px' }}>
+          {fishingCondition.description}
         </div>
       </div>
     </div>
