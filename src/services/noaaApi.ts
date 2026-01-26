@@ -230,11 +230,11 @@ export async function fetchTideData(
 export async function fetchWeatherData(
   lat: number,
   lng: number
-): Promise<{ wind: WindData[], temperature: TemperatureData[], weather: WeatherData[] }> {
+): Promise<{ wind: WindData[], temperature: TemperatureData[], weather: WeatherData[], pressure: { timestamp: string; pressure: number }[] }> {
   const params = new URLSearchParams({
     latitude: lat.toString(),
     longitude: lng.toString(),
-    hourly: 'temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation_probability,cloud_cover',
+    hourly: 'temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation_probability,cloud_cover,surface_pressure',
     temperature_unit: 'fahrenheit',
     wind_speed_unit: 'mph',
     timezone: 'America/New_York',
@@ -252,6 +252,7 @@ export async function fetchWeatherData(
     const windData: WindData[] = [];
     const temperatureData: TemperatureData[] = [];
     const weatherData: WeatherData[] = [];
+    const pressureData: { timestamp: string; pressure: number }[] = [];
 
     for (let i = 0; i < data.hourly.time.length; i++) {
       const timestamp = data.hourly.time[i];
@@ -275,9 +276,16 @@ export async function fetchWeatherData(
         precipitationProbability: data.hourly.precipitation_probability[i] || 0,
         cloudCover: data.hourly.cloud_cover[i] || 0
       });
+
+      // Convert hPa to inHg (1 hPa = 0.02953 inHg)
+      const pressureInHg = (data.hourly.surface_pressure[i] || 1013.25) * 0.02953;
+      pressureData.push({
+        timestamp,
+        pressure: pressureInHg
+      });
     }
 
-    return { wind: windData, temperature: temperatureData, weather: weatherData };
+    return { wind: windData, temperature: temperatureData, weather: weatherData, pressure: pressureData };
   } catch (error) {
     console.error('Error fetching weather data:', error);
     throw error;
@@ -361,6 +369,7 @@ export async function getLocationForecast(location: Location, tideStationId?: st
       wind: weather.wind,
       temperature: weather.temperature,
       weather: weather.weather,
+      pressure: weather.pressure,
       tides,
       tideStation: tideStation || undefined,
       waterTemperature: waterTemp

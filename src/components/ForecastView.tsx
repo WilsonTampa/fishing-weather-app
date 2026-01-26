@@ -7,6 +7,7 @@ import TideChart from './TideChart';
 import WeatherConditionsChart from './WeatherConditionsChart';
 import SunMoonTimes from './SunMoonTimes';
 import FeedingPeriods from './FeedingPeriods';
+import BarometricPressure from './BarometricPressure';
 import DaySelector from './DaySelector';
 import TideStationSelector from './TideStationSelector';
 import { getSolunarData } from '../utils/solunarData';
@@ -21,6 +22,7 @@ interface ForecastData {
   wind: any[];
   temperature: any[];
   weather: any[];
+  pressure: { timestamp: string; pressure: number }[];
   tides: any[];
   tideStation?: {
     id: string;
@@ -286,6 +288,12 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
             {/* Feeding Periods */}
             <FeedingPeriods
               data={solunarData}
+            />
+
+            {/* Barometric Pressure */}
+            <BarometricPressure
+              pressureData={forecastData.pressure}
+              selectedDay={selectedDay}
             />
           </div>
 
