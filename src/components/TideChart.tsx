@@ -83,7 +83,7 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
         const heightDiff = next.height - current.height;
 
         // Add interpolated points between actual tide events using cosine interpolation
-        const numPoints = 12;
+        const numPoints = 30;
         for (let j = 1; j <= numPoints; j++) {
           const fraction = j / (numPoints + 1);
           const interpTime = new Date(time.getTime() + timeDiff * fraction);
@@ -324,7 +324,7 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
             />
           )}
           <Area
-            type="natural"
+            type="monotone"
             dataKey="height"
             stroke="var(--color-tide)"
             strokeWidth={2}
