@@ -39,6 +39,20 @@ The data from reference stations is gold. It's actual measurements, verified aga
 
 **The catch?** There aren't that many of them. You might be fishing miles from the nearest reference station, which means the tidal conditions at your spot could be meaningfully different from what the reference station is showing.
 
+### What's Inside a Modern Tide Station
+
+If you've ever walked past one of those small, unassuming enclosures on a dock or pier and wondered what's inside, the answer is more impressive than you'd think. Modern NOAA tide stations are packed with sensors that go well beyond just measuring water level.
+
+![NOAA modern tide station with acoustic sensor and sounding tube](https://oceanservice.noaa.gov/education/tutorial_tides/media/tide11a_480.jpg)
+
+The primary water level sensor is an **acoustic sensor** — it sends an audio signal down a narrow sounding tube and measures how long the reflected signal takes to bounce back from the water's surface. The travel time tells the system exactly where the water level sits. There's also a **pressure sensor** as a backup, sitting in the water and measuring the weight of the water column above it.
+
+But these stations don't just measure water level. They're also recording **wind speed and direction, air and water temperature, barometric pressure, and water current speed and direction** — all the same data points that matter for fishing. Readings happen every six minutes, and the data gets transmitted hourly via satellite (NOAA's GOES system) back to headquarters.
+
+During storms, these stations can switch to a higher-frequency transmission mode, sending data every six minutes to help track storm surge in near real-time. That's the same data that emergency managers use during hurricanes — and it's the same network feeding the tide chart on your phone.
+
+> **The Fishing Connection:** All that extra data — wind, water temperature, barometric pressure — is collected at the same stations generating your tide predictions. That's why good marine forecast tools can show you [pressure trends](/learn/how-barometric-pressure-affects-fishing) and water temps alongside tides. It's all coming from the same hardware on the same dock.
+
 ### Secondary Stations: Educated Estimates
 
 Secondary stations fill in the gaps. These are locations where NOAA has calculated tide predictions based on their relationship to a nearby reference station. The agency collects short-term observations at the secondary location, compares them to the reference station data, and derives time and height corrections.
