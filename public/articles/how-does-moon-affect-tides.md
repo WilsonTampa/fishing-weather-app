@@ -131,4 +131,4 @@ The moon has been orchestrating this show for billions of years. Now that you un
 
 ## Check Today's Forecast
 
-Ready to plan your next trip? Check today's tides, moon phase, and marine forecast to find your best fishing window.
+Ready to plan your next trip? Check [My Marine Forecast](https://mymarineforecast.com) for your fishing day's tides, moon phase, and wind forecast to find your best fishing window.
