@@ -32,4 +32,12 @@ export const articles: ArticleMeta[] = [
     tags: ['fishing', 'feeding times', 'solunar', 'major period', 'minor period', 'moon transit', 'best time to fish'],
     author: 'My Marine Forecast',
   },
+  {
+    slug: 'how-tide-stations-work',
+    title: 'How Tide Stations Work: Where Your Tide Charts Actually Come From',
+    description: 'Learn how NOAA tide stations measure and predict tides, the difference between reference and secondary stations, and how to pick the right station for your fishing spot.',
+    date: '2026-01-29',
+    tags: ['fishing', 'tide stations', 'NOAA', 'tide predictions', 'tide charts', 'reference stations', 'tidal data'],
+    author: 'My Marine Forecast',
+  },
 ];
