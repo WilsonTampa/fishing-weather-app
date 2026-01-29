@@ -1,0 +1,53 @@
+<svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="700" height="340" fill="#fef3c7"/>
+
+    <!-- Title -->
+    <text x="350" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#92400e" font-weight="bold">SPRING TIDES = MAXIMUM WATER MOVEMENT</text>
+    <text x="350" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#a16207">New Moon &amp; Full Moon — Sun and Moon Aligned</text>
+
+    <!-- New Moon Configuration (left) -->
+    <text x="175" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#78716c" font-weight="bold">NEW MOON</text>
+
+    <!-- Sun (left side) -->
+    <circle cx="50" cy="150" r="25" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+    <text x="50" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#92400e">SUN</text>
+
+    <!-- Earth with exaggerated tidal bulge -->
+    <circle cx="175" cy="150" r="35" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+    <ellipse cx="175" cy="150" rx="55" ry="32" fill="#06b6d4" opacity="0.5" stroke="#0891b2" stroke-width="2"/>
+
+    <!-- Moon -->
+    <circle cx="270" cy="150" r="18" fill="#374151" stroke="#9ca3af" stroke-width="2"/>
+    <text x="270" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">MOON</text>
+
+    <!-- Alignment line -->
+    <line x1="75" y1="150" x2="250" y2="150" stroke="#f59e0b" stroke-width="1" stroke-dasharray="5,5"/>
+
+    <!-- Divider -->
+    <line x1="350" y1="70" x2="350" y2="230" stroke="#d6d3d1" stroke-width="2"/>
+
+    <!-- Full Moon Configuration (right) -->
+    <text x="525" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#78716c" font-weight="bold">FULL MOON</text>
+
+    <!-- Sun (left side) -->
+    <circle cx="400" cy="150" r="25" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+    <text x="400" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#92400e">SUN</text>
+
+    <!-- Earth with exaggerated tidal bulge -->
+    <circle cx="525" cy="150" r="35" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+    <ellipse cx="525" cy="150" rx="55" ry="32" fill="#06b6d4" opacity="0.5" stroke="#0891b2" stroke-width="2"/>
+
+    <!-- Moon (opposite side from sun) -->
+    <circle cx="650" cy="150" r="18" fill="#f5f5f4" stroke="#9ca3af" stroke-width="2"/>
+    <text x="650" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">MOON</text>
+
+    <!-- Alignment line -->
+    <line x1="425" y1="150" x2="630" y2="150" stroke="#f59e0b" stroke-width="1" stroke-dasharray="5,5"/>
+
+    <!-- Fishing result box -->
+    <rect x="100" y="250" width="500" height="70" rx="8" fill="#dc2626" opacity="0.1"/>
+    <text x="350" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#dc2626" font-weight="bold">FISHING IMPACT</text>
+    <text x="350" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#991b1b">Strongest currents • Most baitfish movement • Fish actively feeding</text>
+    <text x="350" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#991b1b">Best for: Ambush predators (stripers, snook, tarpon, redfish)</text>
+</svg>

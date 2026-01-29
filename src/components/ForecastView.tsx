@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Location } from '../types';
 import { getLocationForecast } from '../services/noaaApi';
 import WindChart from './WindChart';
@@ -312,7 +313,10 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
               lineHeight: '1.6',
               margin: 0
             }}>
-              Just the marine forecast data you need to plan a great day on the water.
+              Just the marine forecast data you need to plan a great day on the water.{' '}
+              <Link to="/learn" style={{ color: 'var(--color-accent)' }}>
+                Learn
+              </Link>
             </p>
           </div>
         </>

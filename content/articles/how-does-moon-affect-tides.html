@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How the Moon Affects Tides & Fishing | A Fisherman's Guide to Lunar Tides</title>
+    <meta name="description" content="Learn how moon phases and tides affect fishing success. Discover the best tides for catching fish, why moving water means more bites, and how to use lunar cycles to plan your next trip.">
+    <meta name="keywords" content="how does the moon affect tides fishing, best tide for fishing, moon phase fishing, lunar tides fishing, fishing tide charts, when do fish bite, spring tide fishing, neap tide fishing">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://yoursite.com/how-does-moon-affect-tides/">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="How the Moon Affects Tides & Fishing | A Fisherman's Guide">
+    <meta property="og:description" content="Learn how moon phases and tides affect fishing success and when fish are most likely to bite.">
+    <meta property="og:image" content="https://yoursite.com/images/moon-tides-fishing.jpg">
+
+    <!-- Schema.org markup for Google -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "How the Moon Affects Tides & Fishing: A Fisherman's Guide to Lunar Tides",
+        "description": "Learn how moon phases and tides affect fishing success. Discover the best tides for catching fish and how to use lunar cycles to plan your trips.",
+        "author": {
+            "@type": "Organization",
+            "name": "My Marine Forecast"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "My Marine Forecast"
+        }
+    }
+    </script>
+
+    <style>
+        :root {
+            --ocean-dark: #1a365d;
+            --ocean-medium: #2c5282;
+            --ocean-light: #4299e1;
+            --sand: #f7fafc;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --fishing-accent: #059669;
+            --fishing-highlight: #d97706;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--sand);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--ocean-dark) 0%, var(--ocean-medium) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        article {
+            background: white;
+            padding: 40px;
+            margin: -30px 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--ocean-dark);
+            font-size: 1.75rem;
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--ocean-light);
+        }
+
+        h3 {
+            color: var(--ocean-medium);
+            font-size: 1.35rem;
+            margin: 30px 0 15px;
+        }
+
+        p {
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+        }
+
+        .intro {
+            font-size: 1.15rem;
+            color: var(--text-primary);
+        }
+
+        .diagram-container {
+            margin: 35px 0;
+            text-align: center;
+        }
+
+        .diagram-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .diagram-caption {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-top: 12px;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #ebf8ff 0%, #e6fffa 100%);
+            border-left: 4px solid var(--ocean-light);
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        /* Fishing tip boxes */
+        .fishing-tip {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--fishing-highlight);
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .fishing-tip h4 {
+            color: var(--fishing-highlight);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .fishing-tip p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        /* Pro tip boxes */
+        .pro-tip {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-left: 4px solid var(--fishing-accent);
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .pro-tip h4 {
+            color: var(--fishing-accent);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .pro-tip p, .pro-tip ul {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .pro-tip ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .pro-tip li {
+            margin-bottom: 5px;
+        }
+
+        ul, ol {
+            margin: 15px 0 25px 25px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .key-takeaways {
+            background: var(--ocean-dark);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 40px 0;
+        }
+
+        .key-takeaways h2 {
+            color: white;
+            border-bottom-color: var(--ocean-light);
+            margin-top: 0;
+        }
+
+        .key-takeaways ul {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .cta-box {
+            background: linear-gradient(135deg, var(--ocean-medium) 0%, var(--ocean-dark) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .cta-box p {
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 20px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: var(--ocean-dark);
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Bite time table */
+        .bite-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.95rem;
+        }
+
+        .bite-table th {
+            background: var(--ocean-dark);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        .bite-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .bite-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .bite-table .rating-hot {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .bite-table .rating-good {
+            color: var(--fishing-highlight);
+            font-weight: bold;
+        }
+
+        .bite-table .rating-fair {
+            color: #6b7280;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            article { padding: 25px; margin: -20px 10px 30px; }
+            h2 { font-size: 1.5rem; }
+            .bite-table { font-size: 0.85rem; }
+            .bite-table th, .bite-table td { padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>How the Moon Affects Tides & Fishing</h1>
+            <p class="subtitle">A Fisherman's Guide to Reading Lunar Tides for Better Catches</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <article>
+            <p class="intro">Every experienced angler knows the frustration: you hit your favorite spot at the "right" time, but the fish just aren't biting. Meanwhile, the guy who was there two hours earlier limited out. What's his secret? Chances are, he understands something you might be overlooking—how the moon controls the tides, and how moving water triggers fish to feed.</p>
+
+            <p>The moon sitting 238,900 miles away might seem irrelevant when you're rigging your line at 5 AM, but its gravitational pull is quietly orchestrating the tidal movements that determine whether you're going home with a cooler full of fish or just a good story about "the one that got away."</p>
+
+            <p>Let's break down the science in plain terms, then get to what you really care about—how to use this knowledge to catch more fish.</p>
+
+            <h2>Why Moving Water Means More Bites</h2>
+
+            <p>Before we dive into the moon science, here's the fundamental principle every fisherman needs to understand: <strong>fish feed when water moves</strong>. Tidal movement stirs up baitfish, shrimp, crabs, and other prey. It pushes food into ambush points where gamefish wait. It flushes nutrients through channels and creates current seams where predators stack up.</p>
+
+            <p>Slack tide—that dead period when the water stops moving between high and low—is often the slowest fishing of the day. The bite typically picks up an hour or two before and after the tide changes, when current is flowing strongest.</p>
+
+            <div class="fishing-tip">
+                <h4>The 2-Hour Rule</h4>
+                <p>Many experienced anglers swear by fishing the two hours before and after a tide change. This "moving water window" often produces the most consistent action, especially for species like striped bass, redfish, snook, and tarpon that ambush prey in current.</p>
+            </div>
+
+            <p>Now, let's look at what's actually causing those tides.</p>
+
+            <h2>The Basics: How the Moon Creates Tides</h2>
+
+            <p>The moon's gravitational pull creates bulges in Earth's oceans—one on the side facing the moon, and surprisingly, another on the opposite side. These bulges are your high tides. The areas between them? Low tides.</p>
+
+            <p>Here's the part that trips people up: how does gravity create a bulge on the far side of Earth, <em>away</em> from the moon? Think of it this way—the moon pulls hardest on the water facing it, pulling it toward the moon. But the moon also pulls Earth's core toward it, leaving the water on the far side "behind," creating a second bulge.</p>
+
+            <!-- Diagram 1: Tidal Bulges with Fishing Context -->
+            <div class="diagram-container">
+                <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background -->
+                    <rect width="700" height="380" fill="#f0f9ff"/>
+
+                    <!-- Earth -->
+                    <circle cx="300" cy="175" r="80" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+                    <ellipse cx="300" cy="175" rx="25" ry="60" fill="#22c55e" opacity="0.7"/>
+
+                    <!-- Water bulges (tidal) -->
+                    <ellipse cx="300" cy="175" rx="115" ry="75" fill="#06b6d4" opacity="0.5" stroke="#0891b2" stroke-width="2"/>
+
+                    <!-- Moon -->
+                    <circle cx="580" cy="175" r="35" fill="#d1d5db" stroke="#9ca3af" stroke-width="2"/>
+                    <circle cx="570" cy="165" r="8" fill="#9ca3af" opacity="0.5"/>
+                    <circle cx="590" cy="180" r="5" fill="#9ca3af" opacity="0.5"/>
+                    <circle cx="575" cy="190" r="6" fill="#9ca3af" opacity="0.5"/>
+
+                    <!-- Arrows showing gravitational pull -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444"/>
+                        </marker>
+                        <marker id="fish-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Pull arrows -->
+                    <line x1="420" y1="175" x2="480" y2="175" stroke="#ef4444" stroke-width="3" marker-end="url(#arrowhead)"/>
+                    <line x1="300" y1="175" x2="340" y2="175" stroke="#ef4444" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <line x1="180" y1="175" x2="210" y2="175" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+                    <!-- Labels -->
+                    <text x="300" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" font-weight="bold">EARTH</text>
+                    <text x="580" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6b7280" font-weight="bold">MOON</text>
+
+                    <!-- High tide labels with fishing context -->
+                    <text x="185" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0891b2" font-weight="bold">HIGH TIDE</text>
+                    <text x="185" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#059669">Water flooding in</text>
+
+                    <text x="415" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0891b2" font-weight="bold">HIGH TIDE</text>
+                    <text x="415" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#059669">Water flooding in</text>
+
+                    <!-- Low tide labels -->
+                    <text x="300" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#64748b">LOW TIDE</text>
+                    <text x="300" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#64748b">(water draining out)</text>
+
+                    <!-- Fishing insight box -->
+                    <rect x="100" y="310" width="500" height="55" rx="8" fill="#059669" opacity="0.1"/>
+                    <text x="350" y="335" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#059669" font-weight="bold">FISHING INSIGHT</text>
+                    <text x="350" y="352" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#065f46">As Earth rotates through these bulges, your fishing spot experiences</text>
+                    <text x="350" y="367" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#065f46">incoming (flood) and outgoing (ebb) currents — triggering feeding activity.</text>
+                </svg>
+                <p class="diagram-caption">The moon's gravity creates two tidal bulges. As Earth rotates through them, you experience the flood and ebb tides that trigger fish feeding.</p>
+            </div>
+
+            <p>As Earth rotates, your fishing spot passes through these bulges roughly every 12 hours and 25 minutes. That's why most coastal areas see two high tides and two low tides each day—and why savvy anglers plan their trips around these movements.</p>
+
+            <h2>Why Tides Shift 50 Minutes Later Each Day</h2>
+
+            <p>If you've ever wondered why the tide times on your chart shift by about 50 minutes each day, here's your answer: the moon is also orbiting Earth in the same direction our planet spins. Your fishing spot needs an extra 50 minutes each day to "catch up" with where the moon has moved.</p>
+
+            <div class="highlight-box">
+                <p><strong>Planning tip:</strong> If today's incoming tide hits your spot at 6 AM and the bite is on fire, tomorrow it'll be around 6:50 AM. Plan your trips accordingly—that hot bite window moves with the tide.</p>
+            </div>
+
+            <h2>Spring Tides vs. Neap Tides: Which Is Better for Fishing?</h2>
+
+            <p>Here's where it gets interesting for anglers. The sun also exerts gravitational pull on Earth's oceans—not as strong as the moon (about 46% of its effect), but enough to matter. When the sun and moon work together, you get dramatically different tides than when they work against each other.</p>
+
+            <h3>Spring Tides: Big Water Movement, Often Big Bites</h3>
+
+            <p>During new moons and full moons, the sun and moon line up, combining their gravitational pull. The result? <strong>Spring tides</strong>—the highest highs and lowest lows of the month. Despite the name, these have nothing to do with the season (the term comes from water "springing forth").</p>
+
+            <!-- Diagram 2: Spring Tides with Fishing Emphasis -->
+            <div class="diagram-container">
+                <svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background -->
+                    <rect width="700" height="340" fill="#fef3c7"/>
+
+                    <!-- Title -->
+                    <text x="350" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#92400e" font-weight="bold">SPRING TIDES = MAXIMUM WATER MOVEMENT</text>
+                    <text x="350" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#a16207">New Moon &amp; Full Moon — Sun and Moon Aligned</text>
+
+                    <!-- New Moon Configuration (left) -->
+                    <text x="175" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#78716c" font-weight="bold">NEW MOON</text>
+
+                    <!-- Sun (left side) -->
+                    <circle cx="50" cy="150" r="25" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="50" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#92400e">SUN</text>
+
+                    <!-- Earth with exaggerated tidal bulge -->
+                    <circle cx="175" cy="150" r="35" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+                    <ellipse cx="175" cy="150" rx="55" ry="32" fill="#06b6d4" opacity="0.5" stroke="#0891b2" stroke-width="2"/>
+
+                    <!-- Moon -->
+                    <circle cx="270" cy="150" r="18" fill="#374151" stroke="#9ca3af" stroke-width="2"/>
+                    <text x="270" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">MOON</text>
+
+                    <!-- Alignment line -->
+                    <line x1="75" y1="150" x2="250" y2="150" stroke="#f59e0b" stroke-width="1" stroke-dasharray="5,5"/>
+
+                    <!-- Divider -->
+                    <line x1="350" y1="70" x2="350" y2="230" stroke="#d6d3d1" stroke-width="2"/>
+
+                    <!-- Full Moon Configuration (right) -->
+                    <text x="525" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#78716c" font-weight="bold">FULL MOON</text>
+
+                    <!-- Sun (left side) -->
+                    <circle cx="400" cy="150" r="25" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="400" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#92400e">SUN</text>
+
+                    <!-- Earth with exaggerated tidal bulge -->
+                    <circle cx="525" cy="150" r="35" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+                    <ellipse cx="525" cy="150" rx="55" ry="32" fill="#06b6d4" opacity="0.5" stroke="#0891b2" stroke-width="2"/>
+
+                    <!-- Moon (opposite side from sun) -->
+                    <circle cx="650" cy="150" r="18" fill="#f5f5f4" stroke="#9ca3af" stroke-width="2"/>
+                    <text x="650" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">MOON</text>
+
+                    <!-- Alignment line -->
+                    <line x1="425" y1="150" x2="630" y2="150" stroke="#f59e0b" stroke-width="1" stroke-dasharray="5,5"/>
+
+                    <!-- Fishing result box -->
+                    <rect x="100" y="250" width="500" height="70" rx="8" fill="#dc2626" opacity="0.1"/>
+                    <text x="350" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#dc2626" font-weight="bold">FISHING IMPACT</text>
+                    <text x="350" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#991b1b">Strongest currents • Most baitfish movement • Fish actively feeding</text>
+                    <text x="350" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#991b1b">Best for: Ambush predators (stripers, snook, tarpon, redfish)</text>
+                </svg>
+                <p class="diagram-caption">Spring tides occur when sun and moon align (new and full moons), creating the strongest tidal currents—often the best fishing of the month.</p>
+            </div>
+
+            <p>For many anglers, spring tides mean prime time. The stronger currents flush more bait through channels and over flats. Ambush predators like striped bass, snook, and tarpon position themselves at current edges, structure, and pinch points where prey gets concentrated. The increased water movement can trigger aggressive feeding.</p>
+
+            <div class="fishing-tip">
+                <h4>Spring Tide Strategy</h4>
+                <p>During spring tides, focus on current edges, bridge pilings, points, and anywhere structure creates a "funnel" for moving water. Gamefish stack up in these ambush spots. The downside? Stronger currents can make boat positioning trickier, and some shallow flats become too deep to wade effectively at high tide.</p>
+            </div>
+
+            <h3>Neap Tides: Subtle Movement, Different Opportunities</h3>
+
+            <p>During first quarter and third quarter moons, the sun and moon are at right angles to Earth. Their gravitational pulls partially cancel each other out, creating <strong>neap tides</strong>—the smallest tidal range of the month. High tides aren't as high, low tides aren't as low, and current is weaker.</p>
+
+            <!-- Diagram 3: Neap Tides with Fishing Emphasis -->
+            <div class="diagram-container">
+                <svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background -->
+                    <rect width="700" height="360" fill="#ecfdf5"/>
+
+                    <!-- Title -->
+                    <text x="350" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#065f46" font-weight="bold">NEAP TIDES = MODERATE WATER MOVEMENT</text>
+                    <text x="350" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#047857">Quarter Moons — Sun and Moon at Right Angles</text>
+
+                    <!-- Sun (left) -->
+                    <circle cx="100" cy="160" r="30" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="100" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#92400e">SUN</text>
+
+                    <!-- Sun's pull arrow -->
+                    <defs>
+                        <marker id="arrow-sun2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                            <polygon points="0 0, 8 3, 0 6" fill="#f59e0b"/>
+                        </marker>
+                        <marker id="arrow-moon2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                            <polygon points="0 0, 8 3, 0 6" fill="#6b7280"/>
+                        </marker>
+                    </defs>
+                    <line x1="160" y1="160" x2="260" y2="160" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow-sun2)"/>
+                    <text x="210" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#f59e0b">Sun's pull</text>
+
+                    <!-- Earth -->
+                    <circle cx="350" cy="160" r="50" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+
+                    <!-- Tidal bulge (more circular, less extreme) -->
+                    <ellipse cx="350" cy="160" rx="65" ry="58" fill="#06b6d4" opacity="0.4" stroke="#0891b2" stroke-width="2"/>
+
+                    <text x="350" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1e40af">EARTH</text>
+
+                    <!-- Moon (at 90 degrees) -->
+                    <circle cx="350" cy="50" r="22" fill="#e7e5e4" stroke="#9ca3af" stroke-width="2"/>
+                    <!-- Half moon shading -->
+                    <path d="M 350 28 A 22 22 0 0 1 350 72" fill="#9ca3af"/>
+                    <text x="350" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">MOON</text>
+
+                    <!-- Moon's pull arrow -->
+                    <line x1="350" y1="85" x2="350" y2="100" stroke="#6b7280" stroke-width="3" marker-end="url(#arrow-moon2)"/>
+                    <text x="385" y="95" text-anchor="start" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">Moon's pull</text>
+
+                    <!-- 90 degree angle indicator -->
+                    <path d="M 280 160 A 70 70 0 0 1 350 90" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4"/>
+                    <text x="295" y="120" font-family="Arial, sans-serif" font-size="11" fill="#10b981">90°</text>
+
+                    <!-- Fishing result box -->
+                    <rect x="100" y="270" width="500" height="70" rx="8" fill="#10b981" opacity="0.15"/>
+                    <text x="350" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#047857" font-weight="bold">FISHING IMPACT</text>
+                    <text x="350" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#065f46">Weaker currents • Longer slack periods • Fish hold tighter to structure</text>
+                    <text x="350" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#065f46">Best for: Sight fishing, finesse presentations, shallow flats</text>
+                </svg>
+                <p class="diagram-caption">Neap tides occur during quarter moons when gravitational forces partially cancel out—creating calmer conditions that favor different fishing approaches.</p>
+            </div>
+
+            <p>Does weaker current mean worse fishing? Not necessarily—it just means different fishing. Neap tides can be excellent for sight-fishing on shallow flats, where calmer water improves visibility. Fish tend to hold tighter to structure during neap tides rather than actively patrolling current edges. Finesse presentations often outperform power fishing during these periods.</p>
+
+            <div class="pro-tip">
+                <h4>Neap Tide Strategy</h4>
+                <p>During neap tides, slow down your approach. Fish aren't getting as much food delivered by current, so they're often more willing to chase or inspect a well-presented bait. Focus on:</p>
+                <ul>
+                    <li>Sight fishing on clear flats</li>
+                    <li>Working structure slowly and thoroughly</li>
+                    <li>Using lighter leaders and more natural presentations</li>
+                    <li>Fishing longer into slack tide (the "dead" period is shorter)</li>
+                </ul>
+            </div>
+
+            <h2>The Complete Moon Phase Fishing Calendar</h2>
+
+            <p>Here's how the entire lunar cycle affects your fishing opportunities:</p>
+
+            <!-- Diagram 4: Moon Phases and Fishing -->
+            <div class="diagram-container">
+                <svg viewBox="0 0 700 450" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background -->
+                    <rect width="700" height="450" fill="#1e293b"/>
+
+                    <!-- Title -->
+                    <text x="350" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#f8fafc" font-weight="bold">MOON PHASES &amp; FISHING GUIDE</text>
+
+                    <!-- Central Earth -->
+                    <circle cx="350" cy="200" r="45" fill="#3b82f6" stroke="#60a5fa" stroke-width="2"/>
+                    <text x="350" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#f0f9ff" font-weight="bold">EARTH</text>
+
+                    <!-- Sun direction indicator -->
+                    <line x1="50" y1="200" x2="100" y2="200" stroke="#fbbf24" stroke-width="3"/>
+                    <polygon points="100,195 115,200 100,205" fill="#fbbf24"/>
+                    <text x="50" y="180" font-family="Arial, sans-serif" font-size="11" fill="#fbbf24">SUNLIGHT</text>
+
+                    <!-- New Moon -->
+                    <circle cx="200" cy="200" r="25" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                    <text x="200" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#f8fafc" font-weight="bold">NEW MOON</text>
+                    <rect x="145" y="255" width="110" height="35" rx="4" fill="#dc2626"/>
+                    <text x="200" y="272" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white" font-weight="bold">SPRING TIDE</text>
+                    <text x="200" y="284" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Peak feeding activity</text>
+
+                    <!-- First Quarter -->
+                    <circle cx="350" cy="70" r="25" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                    <path d="M 350 45 A 25 25 0 0 1 350 95" fill="#e2e8f0"/>
+                    <text x="350" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#f8fafc" font-weight="bold">FIRST QUARTER</text>
+                    <rect x="430" y="50" width="110" height="35" rx="4" fill="#22c55e"/>
+                    <text x="485" y="67" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white" font-weight="bold">NEAP TIDE</text>
+                    <text x="485" y="79" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Finesse fishing best</text>
+
+                    <!-- Full Moon -->
+                    <circle cx="500" cy="200" r="25" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2"/>
+                    <text x="500" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#f8fafc" font-weight="bold">FULL MOON</text>
+                    <rect x="445" y="255" width="110" height="35" rx="4" fill="#dc2626"/>
+                    <text x="500" y="272" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white" font-weight="bold">SPRING TIDE</text>
+                    <text x="500" y="284" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Night bite can be hot</text>
+
+                    <!-- Third Quarter -->
+                    <circle cx="350" cy="330" r="25" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                    <path d="M 350 305 A 25 25 0 0 0 350 355" fill="#e2e8f0"/>
+                    <text x="350" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#f8fafc" font-weight="bold">THIRD QUARTER</text>
+                    <rect x="430" y="315" width="110" height="35" rx="4" fill="#22c55e"/>
+                    <text x="485" y="332" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white" font-weight="bold">NEAP TIDE</text>
+                    <text x="485" y="344" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Sight fishing prime</text>
+
+                    <!-- Orbital path -->
+                    <ellipse cx="350" cy="200" rx="150" ry="130" fill="none" stroke="#475569" stroke-width="1" stroke-dasharray="8,4"/>
+
+                    <!-- Legend -->
+                    <rect x="50" y="380" width="15" height="15" rx="2" fill="#dc2626"/>
+                    <text x="70" y="392" font-family="Arial, sans-serif" font-size="10" fill="#94a3b8">Strong currents, active feeding</text>
+                    <rect x="50" y="400" width="15" height="15" rx="2" fill="#22c55e"/>
+                    <text x="70" y="412" font-family="Arial, sans-serif" font-size="10" fill="#94a3b8">Calm conditions, finesse tactics</text>
+
+                    <!-- Fish icon indicators -->
+                    <text x="200" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#fbbf24">★★★★</text>
+                    <text x="500" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#fbbf24">★★★★</text>
+                    <text x="485" y="93" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">★★★</text>
+                    <text x="485" y="358" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">★★★</text>
+                </svg>
+                <p class="diagram-caption">The lunar cycle creates predictable fishing patterns. New and full moons (spring tides) often produce peak action, while quarter moons favor different techniques.</p>
+            </div>
+
+            <h2>Tidal Phases: When Fish Actually Bite</h2>
+
+            <p>Understanding spring vs. neap tides tells you which days to target. But <em>when</em> during the day should you be on the water? Here's what experienced anglers know about each tidal phase:</p>
+
+            <table class="bite-table">
+                <thead>
+                    <tr>
+                        <th>Tidal Phase</th>
+                        <th>What's Happening</th>
+                        <th>Fishing Quality</th>
+                        <th>Best Approach</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Incoming (Flood)</strong></td>
+                        <td>Water rising, current pushing into bays and flats</td>
+                        <td class="rating-hot">★★★★ HOT</td>
+                        <td>Fish ambush points where bait gets pushed through</td>
+                    </tr>
+                    <tr>
+                        <td><strong>High Slack</strong></td>
+                        <td>Water stops moving at peak high tide</td>
+                        <td class="rating-fair">★★ FAIR</td>
+                        <td>Fish structure and deeper holes; slow presentations</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Outgoing (Ebb)</strong></td>
+                        <td>Water dropping, current draining from flats</td>
+                        <td class="rating-hot">★★★★ HOT</td>
+                        <td>Target creek mouths, cuts, and drains where bait funnels out</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Low Slack</strong></td>
+                        <td>Water stops moving at lowest point</td>
+                        <td class="rating-fair">★★ FAIR</td>
+                        <td>Fish deeper channels and holes where fish concentrate</td>
+                    </tr>
+                    <tr>
+                        <td><strong>First Hour of Change</strong></td>
+                        <td>Current just starting to move</td>
+                        <td class="rating-good">★★★ GOOD</td>
+                        <td>Great transition period—fish starting to reposition</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Peak Current</strong></td>
+                        <td>Strongest water movement (mid-tide)</td>
+                        <td class="rating-hot">★★★★ HOT</td>
+                        <td>Maximum bait movement; predators actively hunting</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="pro-tip">
+                <h4>The "Last of the Outgoing" Secret</h4>
+                <p>Many guides consider the last two hours of an outgoing tide—especially on spring tides—to be the most productive window of all. As water drains from shallow flats, baitfish, shrimp, and crabs get concentrated and funneled through creek mouths and cuts. Predators know this and stack up waiting for an easy meal. Position yourself at these "drain points" and hold on.</p>
+            </div>
+
+            <h2>Other Factors That Affect Tides (and Your Fishing)</h2>
+
+            <p>The moon is the primary driver, but other factors influence what tides you'll actually see:</p>
+
+            <ul>
+                <li><strong>Moon distance (Perigee):</strong> When the moon is closest to Earth in its elliptical orbit, tidal ranges are amplified. A full or new moon at perigee creates "king tides"—the most extreme tides of the year. These can produce exceptional fishing but also flood areas that are normally dry.</li>
+
+                <li><strong>Local geography:</strong> Funnel-shaped bays amplify tides dramatically. The Bay of Fundy sees 50+ foot tides! Conversely, large open bays and enclosed seas have minimal tidal range. Know your local waters.</li>
+
+                <li><strong>Wind:</strong> Strong onshore winds can push water levels higher than predicted. Offshore winds do the opposite. Always factor wind into your tide planning—a strong northeast wind during an outgoing tide might keep water levels higher than the chart suggests.</li>
+
+                <li><strong>Weather systems:</strong> Low-pressure systems (storms) raise water levels; high-pressure systems lower them. Combine a low-pressure system with a spring high tide, and you may see flooding in areas that are normally fishable.</li>
+            </ul>
+
+            <h2>Putting It All Together: Your Fishing Game Plan</h2>
+
+            <p>Here's how to use everything you've learned to catch more fish:</p>
+
+            <ol>
+                <li><strong>Check the moon phase.</strong> New and full moons (spring tides) mean maximum current and often peak feeding. Quarter moons (neap tides) favor calmer conditions and different tactics.</li>
+
+                <li><strong>Time your trip around moving water.</strong> Plan to be fishing during the two hours before and after tide changes—not during slack water.</li>
+
+                <li><strong>Match your approach to conditions.</strong> Strong current? Fish ambush points and current edges. Weak current? Slow down, work structure, try finesse presentations.</li>
+
+                <li><strong>Factor in local conditions.</strong> Wind, weather, and geography all affect what actually happens at your spot. Use the tide chart as a starting point, not gospel.</li>
+
+                <li><strong>Keep a log.</strong> Over time, you'll notice patterns at your specific fishing spots. Maybe the outgoing tide always outproduces the incoming at your favorite creek. That kind of local knowledge is priceless.</li>
+            </ol>
+
+            <div class="key-takeaways">
+                <h2>Key Takeaways for Fishermen</h2>
+                <ul>
+                    <li><strong>Moving water = feeding fish.</strong> Plan your trips around incoming and outgoing tides, not slack periods.</li>
+                    <li><strong>New and full moons create spring tides</strong> with maximum current and often the best fishing.</li>
+                    <li><strong>Quarter moons create neap tides</strong>—calmer water that favors sight fishing and finesse tactics.</li>
+                    <li><strong>Tides shift ~50 minutes later each day</strong>, so your hot bite window moves with them.</li>
+                    <li><strong>The last 2 hours of outgoing tide</strong> is often prime time, especially at creek mouths and cuts.</li>
+                    <li><strong>Local knowledge matters.</strong> Learn how tides affect YOUR spots specifically.</li>
+                </ul>
+            </div>
+
+            <p>The moon has been orchestrating this show for billions of years. Now that you understand the rhythm, you can use it to your advantage. Tight lines out there.</p>
+
+            <div class="cta-box">
+                <p>Ready to plan your next trip? Check today's tides, moon phase, and marine forecast to find your best fishing window.</p>
+                <a href="/" class="cta-button">View Today's Tide &amp; Fishing Forecast</a>
+            </div>
+        </article>
+    </main>
+
+    <footer style="text-align: center; padding: 30px; color: #64748b; font-size: 0.9rem;">
+        <p>&copy; 2024 My Marine Forecast. All rights reserved.</p>
+    </footer>
+</body>
+</html>

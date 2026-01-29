@@ -17,7 +17,11 @@
       "Bash(git push:*)",
       "Bash(gh pr list:*)",
       "Bash(npm install suncalc)",
-      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/fishingAppClaudeCode && npm install --save-dev @types/suncalc:*)"
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/fishingAppClaudeCode && npm install --save-dev @types/suncalc:*)",
+      "Bash(xargs:*)",
+      "Bash(git -C /Users/stevewilson/Documents/Git Repos/fishingAppClaudeCode log --oneline -20)",
+      "Bash(du -sh:*)",
+      "Bash(npm install marked)"
     ]
   }
 }

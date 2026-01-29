@@ -1,0 +1,53 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="700" height="380" fill="#f0f9ff"/>
+
+    <!-- Earth -->
+    <circle cx="300" cy="175" r="80" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+    <ellipse cx="300" cy="175" rx="25" ry="60" fill="#22c55e" opacity="0.7"/>
+
+    <!-- Water bulges (tidal) -->
+    <ellipse cx="300" cy="175" rx="115" ry="75" fill="#06b6d4" opacity="0.5" stroke="#0891b2" stroke-width="2"/>
+
+    <!-- Moon -->
+    <circle cx="580" cy="175" r="35" fill="#d1d5db" stroke="#9ca3af" stroke-width="2"/>
+    <circle cx="570" cy="165" r="8" fill="#9ca3af" opacity="0.5"/>
+    <circle cx="590" cy="180" r="5" fill="#9ca3af" opacity="0.5"/>
+    <circle cx="575" cy="190" r="6" fill="#9ca3af" opacity="0.5"/>
+
+    <!-- Arrows showing gravitational pull -->
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444"/>
+        </marker>
+        <marker id="fish-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+        </marker>
+    </defs>
+
+    <!-- Pull arrows -->
+    <line x1="420" y1="175" x2="480" y2="175" stroke="#ef4444" stroke-width="3" marker-end="url(#arrowhead)"/>
+    <line x1="300" y1="175" x2="340" y2="175" stroke="#ef4444" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <line x1="180" y1="175" x2="210" y2="175" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+    <!-- Labels -->
+    <text x="300" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#1e40af" font-weight="bold">EARTH</text>
+    <text x="580" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6b7280" font-weight="bold">MOON</text>
+
+    <!-- High tide labels with fishing context -->
+    <text x="185" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0891b2" font-weight="bold">HIGH TIDE</text>
+    <text x="185" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#059669">Water flooding in</text>
+
+    <text x="415" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0891b2" font-weight="bold">HIGH TIDE</text>
+    <text x="415" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#059669">Water flooding in</text>
+
+    <!-- Low tide labels -->
+    <text x="300" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#64748b">LOW TIDE</text>
+    <text x="300" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#64748b">(water draining out)</text>
+
+    <!-- Fishing insight box -->
+    <rect x="100" y="310" width="500" height="55" rx="8" fill="#059669" opacity="0.1"/>
+    <text x="350" y="335" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#059669" font-weight="bold">FISHING INSIGHT</text>
+    <text x="350" y="352" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#065f46">As Earth rotates through these bulges, your fishing spot experiences</text>
+    <text x="350" y="367" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#065f46">incoming (flood) and outgoing (ebb) currents — triggering feeding activity.</text>
+</svg>

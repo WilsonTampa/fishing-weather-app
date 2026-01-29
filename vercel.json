@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/((?!tide-stations\\.json$).*)",
+      "source": "/((?!tide-stations\\.json$|articles/.*).*)",
       "destination": "/index.html"
     }
   ],

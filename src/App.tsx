@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useEffect, useState } from 'react';
 import MapView from './components/MapView';
 import ForecastView from './components/ForecastView';
+import LearnPage from './components/LearnPage';
+import ArticlePage from './components/ArticlePage';
 import { Location } from './types';
 import './styles/global.css';
 
@@ -105,6 +107,8 @@ function App() {
             )
           }
         />
+        <Route path="/learn" element={<LearnPage />} />
+        <Route path="/learn/:slug" element={<ArticlePage />} />
       </Routes>
     </Router>
   );
