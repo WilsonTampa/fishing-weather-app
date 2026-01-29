@@ -47,7 +47,8 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
       const heightDiff = dayData[0].height - prevTide.height;
       const timeToMidnight = startOfDay.getTime() - prevTime.getTime();
       const fraction = timeToMidnight / timeDiff;
-      const midnightHeight = prevTide.height + heightDiff * fraction;
+      const cosFraction = (1 - Math.cos(fraction * Math.PI)) / 2;
+      const midnightHeight = prevTide.height + heightDiff * cosFraction;
 
       chartData.push({
         time: 0,
@@ -81,11 +82,14 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
         const timeDiff = nextTime.getTime() - time.getTime();
         const heightDiff = next.height - current.height;
 
-        // Add 5 interpolated points between actual tide events
-        for (let j = 1; j <= 5; j++) {
-          const fraction = j / 6;
+        // Add interpolated points between actual tide events using cosine interpolation
+        const numPoints = 12;
+        for (let j = 1; j <= numPoints; j++) {
+          const fraction = j / (numPoints + 1);
           const interpTime = new Date(time.getTime() + timeDiff * fraction);
-          const interpHeight = current.height + heightDiff * fraction;
+          // Cosine interpolation for smooth, natural tide curve
+          const cosFraction = (1 - Math.cos(fraction * Math.PI)) / 2;
+          const interpHeight = current.height + heightDiff * cosFraction;
 
           chartData.push({
             time: interpTime.getHours() + interpTime.getMinutes() / 60,
@@ -107,7 +111,8 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
       const heightDiff = nextTide.height - dayData[dayData.length - 1].height;
       const timeFromLast = endOfDay.getTime() - lastTime.getTime();
       const fraction = timeFromLast / timeDiff;
-      const endHeight = dayData[dayData.length - 1].height + heightDiff * fraction;
+      const cosFraction = (1 - Math.cos(fraction * Math.PI)) / 2;
+      const endHeight = dayData[dayData.length - 1].height + heightDiff * cosFraction;
 
       chartData.push({
         time: 23.99,
