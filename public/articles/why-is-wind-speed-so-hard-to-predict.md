@@ -125,9 +125,9 @@ If you're trying to plan a day off work for a fishing trip, use the 3-day foreca
 Wind isn't always the enemy. A moderate wind can actually improve fishing conditions in several ways:
 
 - **Chop breaks up your silhouette.** On calm, clear days, fish in shallow water can see you and your boat clearly. A little wind chop on the surface makes you much less visible. This is especially helpful when sight fishing spooky species.
-- **Wind concentrates bait.** Persistent wind pushes baitfish against shorelines, seawalls, and structure on the downwind side. Predators know this and position accordingly. Fishing the downwind side of an island or point during a steady wind can be extremely productive.
+- **Wind concentrates bait.** Persistent wind pushes baitfish against shorelines, seawalls, and structure on the downwind side. Predators know this and position accordingly. Actually fishing the windward side of a shoreline during a steady wind can be extremely productive.
 - **Wind-driven current supplements tidal current.** During [neap tides](/learn/how-does-moon-affect-tides) when tidal movement is weak, wind can create enough water movement to trigger feeding activity that wouldn't otherwise happen.
-- **Overcast + wind = confidence.** Fish are generally less cautious when conditions are broken up. Overcast skies and moderate wind create the kind of "ugly" days that often produce the best fishing — if you're willing to deal with the discomfort.
+- **Oxygenating hot water.** I live in Tampa Bay, where the water is about boiling in the Summer months. Wind actually plays a big role on turning on the fish some days by turning over and cooling water on the flats.
 
 > **The Sweet Spot:** For most inshore fishing, 8-12 mph is the sweet spot. Enough to break up the surface and move bait around, not enough to make boat control a wrestling match. If the forecast says 8-12 and holds there, you're in good shape.
 
