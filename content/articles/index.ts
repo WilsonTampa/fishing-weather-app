@@ -40,4 +40,12 @@ export const articles: ArticleMeta[] = [
     tags: ['fishing', 'tide stations', 'NOAA', 'tide predictions', 'tide charts', 'reference stations', 'tidal data'],
     author: 'My Marine Forecast',
   },
+  {
+    slug: 'why-is-wind-speed-so-hard-to-predict',
+    title: 'Why Is Wind Speed So Hard to Predict? A Fisherman\'s Guide to Wind Forecasts',
+    description: 'Learn why wind forecasts are often wrong for fishing, what causes wind prediction errors, and how to read a marine wind forecast so you don\'t get caught off guard on the water.',
+    date: '2026-01-29',
+    tags: ['fishing', 'wind speed', 'wind forecast', 'marine weather', 'weather prediction', 'wind gusts', 'boating safety'],
+    author: 'My Marine Forecast',
+  },
 ];
