@@ -48,4 +48,12 @@ export const articles: ArticleMeta[] = [
     tags: ['fishing', 'wind speed', 'wind forecast', 'marine weather', 'weather prediction', 'wind gusts', 'boating safety'],
     author: 'My Marine Forecast',
   },
+  {
+    slug: 'what-is-tide-coefficient',
+    title: 'What Is Tide Coefficient? How Tidal Range Tells You When Fish Will Feed',
+    description: 'Learn what tide coefficient and tidal range mean for fishing. Understand how the difference between high and low tide predicts current strength, bait movement, and feeding activity.',
+    date: '2026-02-01',
+    tags: ['fishing', 'tide coefficient', 'tidal range', 'tide chart', 'current strength', 'spring tides', 'neap tides', 'tide predictions'],
+    author: 'My Marine Forecast',
+  },
 ];

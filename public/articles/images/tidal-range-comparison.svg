@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="waterStrong" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="waterWeak" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#94a3b8" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#94a3b8" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="#0f172a" rx="12"/>
+
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" fill="#e2e8f0" font-size="18" font-weight="bold">Tidal Range: Spring Tide vs. Neap Tide</text>
+
+  <!-- LEFT: Spring Tide (Strong Range) -->
+  <text x="200" y="65" text-anchor="middle" fill="#4ADE80" font-size="15" font-weight="bold">Spring Tide (New/Full Moon)</text>
+  <text x="200" y="82" text-anchor="middle" fill="#94a3b8" font-size="12">Large Range = Strong Current</text>
+
+  <!-- Left chart area -->
+  <rect x="40" y="95" width="320" height="260" fill="none" stroke="#334155" stroke-width="1" rx="4"/>
+
+  <!-- Left Y axis labels -->
+  <text x="35" y="110" text-anchor="end" fill="#94a3b8" font-size="11">5 ft</text>
+  <text x="35" y="162" text-anchor="end" fill="#94a3b8" font-size="11">4 ft</text>
+  <text x="35" y="214" text-anchor="end" fill="#94a3b8" font-size="11">3 ft</text>
+  <text x="35" y="266" text-anchor="end" fill="#94a3b8" font-size="11">2 ft</text>
+  <text x="35" y="318" text-anchor="end" fill="#94a3b8" font-size="11">1 ft</text>
+  <text x="35" y="350" text-anchor="end" fill="#94a3b8" font-size="11">0 ft</text>
+
+  <!-- Left grid lines -->
+  <line x1="40" y1="106" x2="360" y2="106" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="40" y1="158" x2="360" y2="158" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="40" y1="210" x2="360" y2="210" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="40" y1="262" x2="360" y2="262" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="40" y1="314" x2="360" y2="314" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- Left tide curve - spring tide (big range: 0.2 ft to 4.8 ft) -->
+  <path d="M40,340 C80,340 100,115 140,110 C180,105 200,335 240,340 C280,345 300,120 340,115 L360,160" fill="url(#waterStrong)" stroke="none"/>
+  <path d="M40,340 C80,340 100,115 140,110 C180,105 200,335 240,340 C280,345 300,120 340,115 L360,160" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+
+  <!-- Left high/low dots -->
+  <circle cx="140" cy="110" r="6" fill="#4ADE80" stroke="white" stroke-width="2"/>
+  <text x="140" y="100" text-anchor="middle" fill="#4ADE80" font-size="10" font-weight="bold">4.8 ft</text>
+  <circle cx="240" cy="340" r="6" fill="#F87171" stroke="white" stroke-width="2"/>
+  <text x="240" y="360" text-anchor="middle" fill="#F87171" font-size="10" font-weight="bold">0.2 ft</text>
+  <circle cx="340" cy="115" r="6" fill="#4ADE80" stroke="white" stroke-width="2"/>
+  <text x="340" y="105" text-anchor="middle" fill="#4ADE80" font-size="10" font-weight="bold">4.6 ft</text>
+
+  <!-- Left range bracket -->
+  <line x1="375" y1="110" x2="375" y2="340" stroke="#4ADE80" stroke-width="2"/>
+  <line x1="370" y1="110" x2="380" y2="110" stroke="#4ADE80" stroke-width="2"/>
+  <line x1="370" y1="340" x2="380" y2="340" stroke="#4ADE80" stroke-width="2"/>
+  <text x="390" y="220" fill="#4ADE80" font-size="13" font-weight="bold">4.6 ft</text>
+  <text x="390" y="236" fill="#4ADE80" font-size="11">range</text>
+
+  <!-- RIGHT: Neap Tide (Weak Range) -->
+  <text x="600" y="65" text-anchor="middle" fill="#FCD34D" font-size="15" font-weight="bold">Neap Tide (Quarter Moon)</text>
+  <text x="600" y="82" text-anchor="middle" fill="#94a3b8" font-size="12">Small Range = Weak Current</text>
+
+  <!-- Right chart area -->
+  <rect x="440" y="95" width="320" height="260" fill="none" stroke="#334155" stroke-width="1" rx="4"/>
+
+  <!-- Right Y axis labels -->
+  <text x="435" y="110" text-anchor="end" fill="#94a3b8" font-size="11">5 ft</text>
+  <text x="435" y="162" text-anchor="end" fill="#94a3b8" font-size="11">4 ft</text>
+  <text x="435" y="214" text-anchor="end" fill="#94a3b8" font-size="11">3 ft</text>
+  <text x="435" y="266" text-anchor="end" fill="#94a3b8" font-size="11">2 ft</text>
+  <text x="435" y="318" text-anchor="end" fill="#94a3b8" font-size="11">1 ft</text>
+  <text x="435" y="350" text-anchor="end" fill="#94a3b8" font-size="11">0 ft</text>
+
+  <!-- Right grid lines -->
+  <line x1="440" y1="106" x2="760" y2="106" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="440" y1="158" x2="760" y2="158" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="440" y1="210" x2="760" y2="210" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="440" y1="262" x2="760" y2="262" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="440" y1="314" x2="760" y2="314" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- Right tide curve - neap tide (small range: 1.5 ft to 3.2 ft) -->
+  <path d="M440,270 C480,270 500,195 540,190 C580,185 600,275 640,278 C680,281 700,198 740,195 L760,230" fill="url(#waterWeak)" stroke="none"/>
+  <path d="M440,270 C480,270 500,195 540,190 C580,185 600,275 640,278 C680,281 700,198 740,195 L760,230" fill="none" stroke="#94a3b8" stroke-width="2.5"/>
+
+  <!-- Right high/low dots -->
+  <circle cx="540" cy="190" r="6" fill="#4ADE80" stroke="white" stroke-width="2"/>
+  <text x="540" y="180" text-anchor="middle" fill="#4ADE80" font-size="10" font-weight="bold">3.2 ft</text>
+  <circle cx="640" cy="278" r="6" fill="#F87171" stroke="white" stroke-width="2"/>
+  <text x="640" y="298" text-anchor="middle" fill="#F87171" font-size="10" font-weight="bold">1.5 ft</text>
+  <circle cx="740" cy="195" r="6" fill="#4ADE80" stroke="white" stroke-width="2"/>
+  <text x="740" y="185" text-anchor="middle" fill="#4ADE80" font-size="10" font-weight="bold">3.0 ft</text>
+
+  <!-- Right range bracket -->
+  <line x1="775" y1="190" x2="775" y2="278" stroke="#FCD34D" stroke-width="2"/>
+  <line x1="770" y1="190" x2="780" y2="190" stroke="#FCD34D" stroke-width="2"/>
+  <line x1="770" y1="278" x2="780" y2="278" stroke="#FCD34D" stroke-width="2"/>
+  <text x="767" y="240" fill="#FCD34D" font-size="13" font-weight="bold" text-anchor="end">1.7 ft</text>
+  <text x="767" y="256" fill="#FCD34D" font-size="11" text-anchor="end">range</text>
+
+  <!-- Bottom labels -->
+  <text x="200" y="385" text-anchor="middle" fill="#94a3b8" font-size="11">12AM → 6AM → 12PM → 6PM → 12AM</text>
+  <text x="600" y="385" text-anchor="middle" fill="#94a3b8" font-size="11">12AM → 6AM → 12PM → 6PM → 12AM</text>
+</svg>
