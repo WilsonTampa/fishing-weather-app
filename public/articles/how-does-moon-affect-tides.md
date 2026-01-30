@@ -2,7 +2,7 @@
 title: "How the Moon Affects Tides & Fishing: A Fisherman's Guide to Lunar Tides"
 description: "Learn how moon phases and tides affect fishing success. Discover the best tides for catching fish, why moving water means more bites, and how to use lunar cycles to plan your next trip."
 slug: how-does-moon-affect-tides
-date: 2026-01-29
+date: 2026-01-15
 tags: [fishing, tides, moon phases, lunar tides, spring tides, neap tides]
 author: My Marine Forecast
 ---

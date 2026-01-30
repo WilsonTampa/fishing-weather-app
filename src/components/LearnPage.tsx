@@ -1,8 +1,80 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { articles } from '../../content/articles/index';
 import '../styles/article.css';
 
 function LearnPage() {
+  useEffect(() => {
+    document.title = 'Fishing Tips & Marine Weather Guides | My Marine Forecast';
+
+    const setMetaTag = (name: string, content: string, property = false) => {
+      const attr = property ? 'property' : 'name';
+      let el = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    const description = 'Fishing guides covering tides, moon phases, barometric pressure, solunar feeding times, and marine weather. Learn how to read conditions and catch more fish.';
+    setMetaTag('description', description);
+    setMetaTag('og:title', 'Fishing Tips & Marine Weather Guides | My Marine Forecast', true);
+    setMetaTag('og:description', description, true);
+    setMetaTag('og:type', 'website', true);
+    setMetaTag('og:url', 'https://mymarineforecast.com/learn', true);
+    setMetaTag('twitter:title', 'Fishing Tips & Marine Weather Guides | My Marine Forecast', true);
+    setMetaTag('twitter:description', description, true);
+
+    // Canonical link
+    let canonicalEl = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', 'https://mymarineforecast.com/learn');
+
+    // JSON-LD CollectionPage structured data
+    let scriptEl = document.getElementById('learn-jsonld');
+    if (!scriptEl) {
+      scriptEl = document.createElement('script');
+      scriptEl.id = 'learn-jsonld';
+      scriptEl.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(scriptEl);
+    }
+    scriptEl.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'Fishing Tips & Marine Weather Guides',
+      description,
+      url: 'https://mymarineforecast.com/learn',
+      publisher: {
+        '@type': 'Organization',
+        name: 'My Marine Forecast',
+        url: 'https://mymarineforecast.com',
+      },
+      mainEntity: {
+        '@type': 'ItemList',
+        itemListElement: articles.map((article, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: `https://mymarineforecast.com/learn/${article.slug}`,
+          name: article.title,
+        })),
+      },
+    });
+
+    return () => {
+      document.title = 'My Marine Forecast - Tide, Wind & Weather for Boating and Fishing';
+      const jsonLd = document.getElementById('learn-jsonld');
+      if (jsonLd) jsonLd.remove();
+      const canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) canonical.setAttribute('href', 'https://mymarineforecast.com/');
+    };
+  }, []);
+
   return (
     <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
       {/* Header */}

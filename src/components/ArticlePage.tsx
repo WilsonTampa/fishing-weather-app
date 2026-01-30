@@ -89,6 +89,16 @@ function ArticlePage() {
       setMetaTag('og:url', `https://mymarineforecast.com/learn/${slug}`, true);
     }
 
+    // Add canonical link
+    const articleUrl = `https://mymarineforecast.com/learn/${slug}`;
+    let canonicalEl = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', articleUrl);
+
     // Add JSON-LD structured data
     let scriptEl = document.getElementById('article-jsonld');
     if (!scriptEl) {
@@ -104,17 +114,20 @@ function ArticlePage() {
         headline: articleInfo.title,
         description: articleInfo.description,
         datePublished: articleInfo.date,
+        dateModified: articleInfo.date,
         author: {
           '@type': 'Organization',
           name: articleInfo.author,
+          url: 'https://mymarineforecast.com',
         },
         publisher: {
           '@type': 'Organization',
           name: 'My Marine Forecast',
+          url: 'https://mymarineforecast.com',
         },
         mainEntityOfPage: {
           '@type': 'WebPage',
-          '@id': `https://mymarineforecast.com/learn/${slug}`,
+          '@id': articleUrl,
         },
       });
     }
@@ -124,6 +137,8 @@ function ArticlePage() {
       document.title = 'My Marine Forecast - Tide, Wind & Weather for Boating and Fishing';
       const jsonLd = document.getElementById('article-jsonld');
       if (jsonLd) jsonLd.remove();
+      const canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) canonical.setAttribute('href', 'https://mymarineforecast.com/');
     };
   }, [articleMeta, articleInfo, slug]);
 

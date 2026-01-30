@@ -2,7 +2,7 @@
 title: "How Tide Stations Work: Where Your Tide Charts Actually Come From"
 description: "Learn how NOAA tide stations measure and predict tides, the difference between reference and secondary stations, and how to pick the right station for your fishing spot."
 slug: how-tide-stations-work
-date: 2026-01-29
+date: 2026-01-25
 tags: [fishing, tide stations, NOAA, tide predictions, tide charts, reference stations, tidal data]
 author: My Marine Forecast
 ---

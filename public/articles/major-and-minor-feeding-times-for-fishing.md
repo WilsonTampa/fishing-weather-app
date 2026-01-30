@@ -2,7 +2,7 @@
 title: "Why You Should Care About Major and Minor Feeding Times for Fishing, An Explanation"
 description: "Learn what major and minor feeding periods are, how they're calculated from moon position, and how to use them to plan your fishing trips for more consistent action."
 slug: major-and-minor-feeding-times-for-fishing
-date: 2026-01-29
+date: 2026-01-21
 tags: [fishing, feeding times, solunar, major period, minor period, moon transit, best time to fish]
 author: My Marine Forecast
 ---
