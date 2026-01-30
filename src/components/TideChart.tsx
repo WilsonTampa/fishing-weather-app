@@ -20,6 +20,16 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
     return timestamp >= startOfDay && timestamp <= endOfDay;
   });
 
+  // Calculate tidal range for the day
+  const highs = dayData.filter(t => t.type === 'H').map(t => t.height);
+  const lows = dayData.filter(t => t.type === 'L').map(t => t.height);
+  const tidalRange = highs.length && lows.length
+    ? Math.max(...highs) - Math.min(...lows)
+    : null;
+  const rangeLabel = tidalRange !== null
+    ? tidalRange >= 4 ? 'Strong' : tidalRange >= 2 ? 'Moderate' : 'Weak'
+    : null;
+
   const now = new Date();
 
   // Check if current time is within selected day
@@ -259,6 +269,26 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
                     </div>
                   );
                 })}
+              </div>
+            )}
+            {/* Tidal Range */}
+            {tidalRange !== null && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
+                  Tidal range
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--color-text)' }}>
+                    {tidalRange.toFixed(2)} ft
+                  </span>
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: rangeLabel === 'Strong' ? '#4ADE80' : rangeLabel === 'Moderate' ? '#FCD34D' : 'var(--color-text-secondary)',
+                  fontWeight: 600
+                }}>
+                  {rangeLabel}
+                </div>
               </div>
             )}
           </div>
