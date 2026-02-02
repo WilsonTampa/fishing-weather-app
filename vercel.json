@@ -1,7 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/((?!tide-stations\\.json$|articles/.*|robots\\.txt$|sitemap\\.xml$).*)",
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/((?!tide-stations\\.json$|articles/.*|robots\\.txt$|sitemap\\.xml$|api/).*)",
       "destination": "/index.html"
     }
   ],

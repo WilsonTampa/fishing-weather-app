@@ -1,0 +1,187 @@
+import { useState, useEffect, createContext, useContext } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import SavedLocationsPanel from './SavedLocationsPanel';
+import './AppLayout.css';
+
+// Context to allow ForecastView header to trigger mobile menu
+const MobileMenuContext = createContext<() => void>(() => {});
+
+export function useMobileMenu() {
+  return useContext(MobileMenuContext);
+}
+
+interface AppLayoutProps {
+  children: React.ReactNode;
+  onLocationChange: () => void;
+  onOpenStationSelector: () => void;
+  onOpenAuth: () => void;
+  onOpenUpgrade: () => void;
+  onSaveLocation: () => void;
+  onSelectSavedLocation: (lat: number, lng: number, tideStationId: string | null, name: string) => void;
+  savedLocationsRefreshKey: number;
+}
+
+export default function AppLayout({
+  children,
+  onLocationChange,
+  onOpenStationSelector,
+  onOpenAuth,
+  onOpenUpgrade,
+  onSaveLocation,
+  onSelectSavedLocation,
+  savedLocationsRefreshKey,
+}: AppLayoutProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [savedLocationsOpen, setSavedLocationsOpen] = useState(false);
+  const { user, tier, isConfigured } = useAuth();
+
+  // Close sidebar on route change or resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) setMobileOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleNavClick = (action: () => void) => {
+    action();
+    setMobileOpen(false);
+  };
+
+  const handleAccountClick = () => {
+    if (!isConfigured) return;
+    if (!user) {
+      onOpenAuth();
+    } else if (tier === 'free' || tier === 'trial') {
+      onOpenUpgrade();
+    }
+    // For paid users, could navigate to account page in future
+    setMobileOpen(false);
+  };
+
+  return (
+    <div className="app-layout">
+      {/* Mobile overlay */}
+      <div
+        className={`sidebar-overlay ${mobileOpen ? 'visible' : ''}`}
+        onClick={() => setMobileOpen(false)}
+      />
+
+      {/* Sidebar */}
+      <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
+        <div className="sidebar-brand">
+          <div className="sidebar-logo-text">
+            <span className="sidebar-logo-top">My Marine</span>
+            <span className="sidebar-logo-bottom">Forecast</span>
+          </div>
+        </div>
+
+        <nav className="sidebar-nav">
+          <button className="sidebar-nav-item active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            Dashboard
+          </button>
+
+          <button
+            className="sidebar-nav-item"
+            onClick={() => handleNavClick(onLocationChange)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            Change Location
+          </button>
+
+          <button
+            className="sidebar-nav-item"
+            onClick={() => handleNavClick(onOpenStationSelector)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 12h4l3-9 6 18 3-9h4" />
+            </svg>
+            Change Tide Station
+          </button>
+
+          {/* Save Current Location */}
+          <button
+            className="sidebar-nav-item"
+            onClick={() => handleNavClick(onSaveLocation)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            Save Location
+          </button>
+
+          {/* Saved Locations - collapsible */}
+          <button
+            className="sidebar-nav-item"
+            onClick={() => setSavedLocationsOpen(prev => !prev)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            Saved Locations
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                marginLeft: 'auto',
+                transition: 'transform 0.2s ease',
+                transform: savedLocationsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              }}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          {savedLocationsOpen && (
+            <SavedLocationsPanel
+              onSelectLocation={(lat, lng, stationId, name) => {
+                onSelectSavedLocation(lat, lng, stationId, name);
+                setMobileOpen(false);
+              }}
+              onOpenAuth={() => handleNavClick(onOpenAuth)}
+              onOpenUpgrade={() => handleNavClick(onOpenUpgrade)}
+              refreshKey={savedLocationsRefreshKey}
+            />
+          )}
+
+          <button
+            className="sidebar-nav-item"
+            onClick={handleAccountClick}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            Account
+          </button>
+        </nav>
+      </aside>
+
+      {/* Main content */}
+      <main className="app-main">
+        {/* Expose mobile menu toggle to children via a button in header */}
+        <MobileMenuContext.Provider value={() => setMobileOpen(true)}>
+          {children}
+        </MobileMenuContext.Provider>
+      </main>
+    </div>
+  );
+}

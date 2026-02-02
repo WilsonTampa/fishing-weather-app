@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchNearbyTideStations } from '../services/noaaApi';
+import { useAuth } from '../contexts/AuthContext';
 import './TideStationSelector.css';
 
 interface TideStation {
@@ -16,6 +17,7 @@ interface TideStationSelectorProps {
   currentStationId?: string;
   onSelect: (stationId: string) => void;
   onClose: () => void;
+  onUpgrade?: () => void;
 }
 
 export default function TideStationSelector({
@@ -23,11 +25,14 @@ export default function TideStationSelector({
   userLng,
   currentStationId,
   onSelect,
-  onClose
+  onClose,
+  onUpgrade
 }: TideStationSelectorProps) {
   const [stations, setStations] = useState<TideStation[]>([]);
   const [selectedId, setSelectedId] = useState<string | undefined>(currentStationId);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
+  const { canSaveLocations } = useAuth();
 
   useEffect(() => {
     const loadStations = async () => {
@@ -55,8 +60,86 @@ export default function TideStationSelector({
     if (selectedId) {
       onSelect(selectedId);
     }
+
+    // Show save prompt for non-paid users
+    if (!canSaveLocations) {
+      setShowSavePrompt(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleMaybeLater = () => {
+    setShowSavePrompt(false);
     onClose();
   };
+
+  const handleUpgrade = () => {
+    setShowSavePrompt(false);
+    if (onUpgrade) {
+      onUpgrade();
+    } else {
+      onClose();
+    }
+  };
+
+  // Save location upsell prompt
+  if (showSavePrompt) {
+    return (
+      <div className="tide-station-modal-overlay" onClick={handleMaybeLater}>
+        <div className="tide-station-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px' }}>
+          <div className="tide-station-modal-header">
+            <h2>Save This Location?</h2>
+            <button className="close-button" onClick={handleMaybeLater}>
+              &times;
+            </button>
+          </div>
+
+          <div className="tide-station-modal-body">
+            <div className="save-prompt-content">
+              <div className="save-prompt-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </div>
+              <p className="save-prompt-text">
+                Save your favorite locations for quick access. Switch between saved spots instantly with one click.
+              </p>
+              <ul className="save-prompt-features">
+                <li>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Save unlimited locations
+                </li>
+                <li>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Switch locations instantly
+                </li>
+                <li>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  7-day extended forecast
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="tide-station-modal-footer save-prompt-footer">
+            <button className="cancel-button" onClick={handleMaybeLater}>
+              Maybe Later
+            </button>
+            <button className="confirm-button" onClick={handleUpgrade}>
+              Upgrade
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="tide-station-modal-overlay" onClick={onClose}>
@@ -64,7 +147,7 @@ export default function TideStationSelector({
         <div className="tide-station-modal-header">
           <h2>Select Tide Station</h2>
           <button className="close-button" onClick={onClose}>
-            ×
+            &times;
           </button>
         </div>
 

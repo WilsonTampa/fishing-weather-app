@@ -11,12 +11,24 @@ import FeedingPeriods from './FeedingPeriods';
 import BarometricPressure from './BarometricPressure';
 import DaySelector from './DaySelector';
 import TideStationSelector from './TideStationSelector';
+import UserMenu from './UserMenu';
+import AuthModal from './AuthModal';
+import UpgradeModal from './UpgradeModal';
+import { useMobileMenu } from './AppLayout';
 import { getSolunarData } from '../utils/solunarData';
 
 interface ForecastViewProps {
   location: Location;
   onLocationChange: () => void;
   onLocationUpdate?: () => void;
+  showStationSelector?: boolean;
+  onCloseStationSelector?: () => void;
+  showAuthModal?: boolean;
+  onCloseAuthModal?: () => void;
+  showUpgradeModal?: boolean;
+  onCloseUpgradeModal?: () => void;
+  onOpenAuthModal?: () => void;
+  onOpenUpgradeModal?: () => void;
 }
 
 interface ForecastData {
@@ -35,13 +47,40 @@ interface ForecastData {
   waterTemperature?: number | null;
 }
 
-function ForecastView({ location, onLocationChange, onLocationUpdate }: ForecastViewProps) {
+function ForecastView({
+  location,
+  onLocationChange: _onLocationChange,
+  onLocationUpdate,
+  showStationSelector: showStationSelectorProp,
+  onCloseStationSelector,
+  showAuthModal: showAuthModalProp,
+  onCloseAuthModal,
+  showUpgradeModal: showUpgradeModalProp,
+  onCloseUpgradeModal,
+  onOpenAuthModal,
+  onOpenUpgradeModal
+}: ForecastViewProps) {
   const [selectedDay, setSelectedDay] = useState<Date>(new Date());
   const [forecastData, setForecastData] = useState<ForecastData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showStationSelector, setShowStationSelector] = useState(false);
   const [selectedStationId, setSelectedStationId] = useState<string | undefined>(location.tideStationId);
+
+  // Use props if provided (from AppLayout), otherwise fall back to internal state
+  const [internalShowStation, setInternalShowStation] = useState(false);
+  const [internalShowAuth, setInternalShowAuth] = useState(false);
+  const [internalShowUpgrade, setInternalShowUpgrade] = useState(false);
+  const [upgradeFeatureDescription, setUpgradeFeatureDescription] = useState('Access extended 7-day forecasts');
+
+  const showStationSelector = showStationSelectorProp ?? internalShowStation;
+  const showAuthModal = showAuthModalProp ?? internalShowAuth;
+  const showUpgradeModal = showUpgradeModalProp ?? internalShowUpgrade;
+
+  const closeStationSelector = onCloseStationSelector ?? (() => setInternalShowStation(false));
+  const closeAuthModal = onCloseAuthModal ?? (() => setInternalShowAuth(false));
+  const closeUpgradeModal = onCloseUpgradeModal ?? (() => setInternalShowUpgrade(false));
+  const openAuthModal = onOpenAuthModal ?? (() => setInternalShowAuth(true));
+  const openUpgradeModal = onOpenUpgradeModal ?? (() => setInternalShowUpgrade(true));
 
   useEffect(() => {
     setSelectedDay(new Date());
@@ -83,6 +122,8 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
     }
   };
 
+  const openMobileMenu = useMobileMenu();
+
   const solunarData = useMemo(
     () => getSolunarData(selectedDay, location.latitude, location.longitude),
     [selectedDay, location.latitude, location.longitude]
@@ -94,82 +135,42 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
       <header style={{
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         marginBottom: '1rem',
         borderBottom: '1px solid var(--color-border)',
         paddingBottom: '0.75rem',
-        flexWrap: 'wrap',
         gap: '1rem'
       }}>
-        <h1>My Marine Forecast</h1>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '0.5rem', minWidth: '200px' }}>
-          <button
-            onClick={onLocationChange}
-            style={{
-              padding: '0.625rem 1.25rem',
-              backgroundColor: 'var(--color-surface)',
-              color: 'var(--color-text-primary)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)';
-              e.currentTarget.style.borderColor = 'var(--color-accent)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--color-surface)';
-              e.currentTarget.style.borderColor = 'var(--color-border)';
-            }}
-          >
-            Change Location
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button className="mobile-menu-btn" onClick={openMobileMenu}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </button>
+          <h1 style={{ fontSize: '1.25rem' }}>Dashboard</h1>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {forecastData?.tideStation && (
-            <>
-              <button
-                onClick={() => setShowStationSelector(true)}
-                style={{
-                  padding: '0.625rem 1.25rem',
-                  backgroundColor: 'var(--color-surface)',
-                  color: 'var(--color-text-primary)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)';
-                  e.currentTarget.style.borderColor = 'var(--color-accent)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-surface)';
-                  e.currentTarget.style.borderColor = 'var(--color-border)';
-                }}
-              >
-                Change Tide Station
-              </button>
-              <div style={{
-                fontSize: '0.75rem',
-                color: 'var(--color-text-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                paddingTop: '0.25rem'
-              }}>
-                <span style={{ fontSize: '0.8rem' }}>📍</span>
-                <span>{forecastData.tideStation.name}</span>
-                <span style={{ color: 'var(--color-text-muted)' }}>
-                  ({(forecastData.tideStation.distance * 0.621371).toFixed(1)} miles)
-                </span>
-              </div>
-            </>
+            <div style={{
+              fontSize: '0.75rem',
+              color: 'var(--color-text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}>
+              <span style={{ fontSize: '0.8rem' }}>📍</span>
+              <span>{forecastData.tideStation.name}</span>
+              <span style={{ color: 'var(--color-text-muted)' }}>
+                ({(forecastData.tideStation.distance * 0.621371).toFixed(1)} mi)
+              </span>
+            </div>
           )}
+          <UserMenu
+            onOpenAuth={openAuthModal}
+            onOpenUpgrade={openUpgradeModal}
+          />
         </div>
       </header>
 
@@ -237,6 +238,10 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
           <DaySelector
             selectedDay={selectedDay}
             onSelectDay={setSelectedDay}
+            onLockedDayClick={() => {
+              setUpgradeFeatureDescription('Access extended 7-day forecasts');
+              openUpgradeModal();
+            }}
           />
 
           {/* Charts */}
@@ -329,7 +334,31 @@ function ForecastView({ location, onLocationChange, onLocationUpdate }: Forecast
           userLng={location.longitude}
           currentStationId={selectedStationId}
           onSelect={handleStationSelect}
-          onClose={() => setShowStationSelector(false)}
+          onClose={closeStationSelector}
+          onUpgrade={() => {
+            closeStationSelector();
+            openAuthModal();
+          }}
+        />
+      )}
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthModal
+          onClose={closeAuthModal}
+          initialMode="signup"
+        />
+      )}
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <UpgradeModal
+          onClose={closeUpgradeModal}
+          onOpenAuth={() => {
+            closeUpgradeModal();
+            openAuthModal();
+          }}
+          featureDescription={upgradeFeatureDescription}
         />
       )}
     </div>

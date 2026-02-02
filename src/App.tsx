@@ -2,10 +2,77 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useEffect, useState } from 'react';
 import MapView from './components/MapView';
 import ForecastView from './components/ForecastView';
+import AppLayout from './components/AppLayout';
+import SaveLocationModal from './components/SaveLocationModal';
 import LearnPage from './components/LearnPage';
 import ArticlePage from './components/ArticlePage';
+import WindMap from './components/WindMap';
 import { Location } from './types';
 import './styles/global.css';
+
+function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate }: {
+  location: Location;
+  onLocationChange: () => void;
+  onLocationUpdate?: () => void;
+}) {
+  const [showStationSelector, setShowStationSelector] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showSaveLocationModal, setShowSaveLocationModal] = useState(false);
+  const [savedLocationsRefreshKey, setSavedLocationsRefreshKey] = useState(0);
+
+  const handleSelectSavedLocation = (lat: number, lng: number, tideStationId: string | null, name: string) => {
+    const newLocation: Location = {
+      latitude: lat,
+      longitude: lng,
+      name,
+      tideStationId: tideStationId ?? undefined,
+    };
+    localStorage.setItem('savedLocation', JSON.stringify(newLocation));
+    if (onLocationUpdate) {
+      onLocationUpdate();
+    }
+  };
+
+  return (
+    <AppLayout
+      onLocationChange={onLocationChange}
+      onOpenStationSelector={() => setShowStationSelector(true)}
+      onOpenAuth={() => setShowAuthModal(true)}
+      onOpenUpgrade={() => setShowUpgradeModal(true)}
+      onSaveLocation={() => setShowSaveLocationModal(true)}
+      onSelectSavedLocation={handleSelectSavedLocation}
+      savedLocationsRefreshKey={savedLocationsRefreshKey}
+    >
+      <ForecastView
+        location={location}
+        onLocationChange={onLocationChange}
+        onLocationUpdate={onLocationUpdate}
+        showStationSelector={showStationSelector}
+        onCloseStationSelector={() => setShowStationSelector(false)}
+        showAuthModal={showAuthModal}
+        onCloseAuthModal={() => setShowAuthModal(false)}
+        showUpgradeModal={showUpgradeModal}
+        onCloseUpgradeModal={() => setShowUpgradeModal(false)}
+        onOpenAuthModal={() => setShowAuthModal(true)}
+        onOpenUpgradeModal={() => setShowUpgradeModal(true)}
+      />
+
+      {/* Save Location Modal */}
+      {showSaveLocationModal && (
+        <SaveLocationModal
+          latitude={location.latitude}
+          longitude={location.longitude}
+          tideStationId={location.tideStationId ?? null}
+          onClose={() => setShowSaveLocationModal(false)}
+          onSaved={() => setSavedLocationsRefreshKey(prev => prev + 1)}
+          onOpenAuth={() => { setShowSaveLocationModal(false); setShowAuthModal(true); }}
+          onOpenUpgrade={() => { setShowSaveLocationModal(false); setShowUpgradeModal(true); }}
+        />
+      )}
+    </AppLayout>
+  );
+}
 
 function App() {
   const [savedLocation, setSavedLocation] = useState<Location | null>(null);
@@ -97,7 +164,7 @@ function App() {
           path="/forecast"
           element={
             savedLocation ? (
-              <ForecastView
+              <ForecastViewWithLayout
                 location={savedLocation}
                 onLocationChange={handleLocationChange}
                 onLocationUpdate={handleLocationUpdate}
@@ -107,6 +174,7 @@ function App() {
             )
           }
         />
+        <Route path="/wind-map" element={<WindMap location={savedLocation} onLocationChange={handleLocationChange} />} />
         <Route path="/learn" element={<LearnPage />} />
         <Route path="/learn/:slug" element={<ArticlePage />} />
       </Routes>

@@ -18,10 +18,25 @@
       "Bash(gh pr list:*)",
       "Bash(npm install suncalc)",
       "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/fishingAppClaudeCode && npm install --save-dev @types/suncalc:*)",
-      "Bash(xargs:*)",
-      "Bash(git -C /Users/stevewilson/Documents/Git Repos/fishingAppClaudeCode log --oneline -20)",
-      "Bash(du -sh:*)",
-      "Bash(npm install marked)"
+      "Bash(tree:*)",
+      "Bash(ls:*)",
+      "Bash(npm install @supabase/supabase-js @stripe/stripe-js)",
+      "Bash(npm install:*)",
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && npx tsc:*)",
+      "Bash(git stash --include-untracked)",
+      "Bash(git reset:*)",
+      "WebFetch(domain:www.windfinder.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:open-meteo.com)",
+      "WebFetch(domain:wlog.viltstigen.se)",
+      "WebFetch(domain:kulkarniprem.hashnode.dev)",
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && npx tsc --noEmit:*)",
+      "WebFetch(domain:api.tidesandcurrents.noaa.gov)",
+      "Bash(python3:*)",
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build:*)",
+      "Bash(echo:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(git rm:*)"
     ]
   }
 }

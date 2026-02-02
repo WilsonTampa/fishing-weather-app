@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Location } from '../types';
 import TideStationSelector from './TideStationSelector';
+import UpgradeModal from './UpgradeModal';
+import AuthModal from './AuthModal';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default marker icons in React-Leaflet
@@ -60,6 +62,10 @@ function MapView({ onLocationSelect }: MapViewProps) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
   const [showStationSelector, setShowStationSelector] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  // Stores the confirmed location+station to navigate after upsell is dismissed
+  const [confirmedLocation, setConfirmedLocation] = useState<Location | null>(null);
 
   const handleLocationClick = (location: Location) => {
     setPendingLocation(location);
@@ -68,10 +74,39 @@ function MapView({ onLocationSelect }: MapViewProps) {
 
   const handleStationSelect = (stationId: string) => {
     if (pendingLocation) {
-      onLocationSelect({
+      // Store confirmed location but don't navigate yet —
+      // TideStationSelector will show the upsell prompt for non-paid users
+      setConfirmedLocation({
         ...pendingLocation,
         tideStationId: stationId
       });
+    }
+  };
+
+  const handleStationSelectorClose = () => {
+    setShowStationSelector(false);
+    setPendingLocation(null);
+
+    // If a location was confirmed, now navigate
+    if (confirmedLocation) {
+      onLocationSelect(confirmedLocation);
+      setConfirmedLocation(null);
+    }
+  };
+
+  const handleUpgradeFromStation = () => {
+    // Close station selector, then show auth/sign-in modal
+    setShowStationSelector(false);
+    setPendingLocation(null);
+    setShowAuthModal(true);
+  };
+
+  const handleUpgradeModalClose = () => {
+    setShowUpgradeModal(false);
+    // Navigate to forecast with the confirmed location
+    if (confirmedLocation) {
+      onLocationSelect(confirmedLocation);
+      setConfirmedLocation(null);
     }
   };
 
@@ -169,10 +204,35 @@ function MapView({ onLocationSelect }: MapViewProps) {
           userLat={pendingLocation.latitude}
           userLng={pendingLocation.longitude}
           onSelect={handleStationSelect}
-          onClose={() => {
-            setShowStationSelector(false);
-            setPendingLocation(null);
+          onClose={handleStationSelectorClose}
+          onUpgrade={handleUpgradeFromStation}
+        />
+      )}
+
+      {/* Upgrade Modal (shown after upsell prompt) */}
+      {showUpgradeModal && (
+        <UpgradeModal
+          onClose={handleUpgradeModalClose}
+          onOpenAuth={() => {
+            setShowUpgradeModal(false);
+            setShowAuthModal(true);
           }}
+          featureDescription="Save your favorite locations"
+        />
+      )}
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => {
+            setShowAuthModal(false);
+            // Navigate to forecast after auth modal closes
+            if (confirmedLocation) {
+              onLocationSelect(confirmedLocation);
+              setConfirmedLocation(null);
+            }
+          }}
+          initialMode="signup"
         />
       )}
     </div>
