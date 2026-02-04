@@ -218,7 +218,9 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
         alignItems: 'flex-start',
         marginBottom: '1rem',
         borderBottom: '1px solid var(--color-border)',
-        paddingBottom: '0.75rem'
+        paddingBottom: '0.75rem',
+        flexWrap: 'wrap',
+        gap: '0.5rem',
       }}>
         <h2 style={{
           fontSize: '1.25rem',
@@ -228,7 +230,7 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
           TIDE PREDICTIONS
         </h2>
         {dayData.length > 0 && (
-          <div style={{ display: 'flex', gap: '2rem', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
             {/* Low Tides */}
             {dayData.some(t => t.type === 'L') && (
               <div style={{ textAlign: 'center' }}>

@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import SavedLocationsPanel from './SavedLocationsPanel';
 import './AppLayout.css';
@@ -8,6 +8,16 @@ const MobileMenuContext = createContext<() => void>(() => {});
 
 export function useMobileMenu() {
   return useContext(MobileMenuContext);
+}
+
+// Context to allow sidebar to trigger dashboard edit mode
+const DashboardEditContext = createContext<{ enter: () => void; register: (fn: () => void) => void }>({
+  enter: () => {},
+  register: () => {},
+});
+
+export function useDashboardEditContext() {
+  return useContext(DashboardEditContext);
 }
 
 interface AppLayoutProps {
@@ -34,6 +44,12 @@ export default function AppLayout({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [savedLocationsOpen, setSavedLocationsOpen] = useState(false);
   const { user, tier, isConfigured } = useAuth();
+
+  // Dashboard edit mode bridge
+  const enterEditRef = useRef<() => void>(() => {});
+  const register = useCallback((fn: () => void) => { enterEditRef.current = fn; }, []);
+  const enter = useCallback(() => { enterEditRef.current(); }, []);
+  const dashboardEditValue = useMemo(() => ({ enter, register }), [enter, register]);
 
   // Close sidebar on route change or resize to desktop
   useEffect(() => {
@@ -99,29 +115,6 @@ export default function AppLayout({
             Change Location
           </button>
 
-          <button
-            className="sidebar-nav-item"
-            onClick={() => handleNavClick(onOpenStationSelector)}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 12h4l3-9 6 18 3-9h4" />
-            </svg>
-            Change Tide Station
-          </button>
-
-          {/* Save Current Location */}
-          <button
-            className="sidebar-nav-item"
-            onClick={() => handleNavClick(onSaveLocation)}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
-              <polyline points="17 21 17 13 7 13 7 21" />
-              <polyline points="7 3 7 8 15 8" />
-            </svg>
-            Save Location
-          </button>
-
           {/* Saved Locations - collapsible */}
           <button
             className="sidebar-nav-item"
@@ -179,7 +172,9 @@ export default function AppLayout({
       <main className="app-main">
         {/* Expose mobile menu toggle to children via a button in header */}
         <MobileMenuContext.Provider value={() => setMobileOpen(true)}>
-          {children}
+          <DashboardEditContext.Provider value={dashboardEditValue}>
+            {children}
+          </DashboardEditContext.Provider>
         </MobileMenuContext.Provider>
       </main>
     </div>

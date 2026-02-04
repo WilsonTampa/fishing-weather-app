@@ -1,3 +1,5 @@
+import type { DashboardLayout } from './dashboard';
+
 // Subscription types
 export type SubscriptionTier = 'free' | 'trial' | 'paid';
 export type SubscriptionStatus = 'free' | 'trial' | 'active' | 'canceled' | 'past_due';
@@ -8,6 +10,7 @@ export interface Profile {
   email: string;
   display_name: string | null;
   avatar_url: string | null;
+  dashboard_layout: DashboardLayout | null;
   created_at: string;
   updated_at: string;
 }

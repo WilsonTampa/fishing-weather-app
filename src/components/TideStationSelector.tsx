@@ -15,7 +15,7 @@ interface TideStationSelectorProps {
   userLat: number;
   userLng: number;
   currentStationId?: string;
-  onSelect: (stationId: string) => void;
+  onSelect: (stationId: string, stationName: string) => void;
   onClose: () => void;
   onUpgrade?: () => void;
 }
@@ -58,15 +58,18 @@ export default function TideStationSelector({
 
   const handleConfirm = () => {
     if (selectedId) {
-      onSelect(selectedId);
+      const selectedStation = stations.find(s => s.id === selectedId);
+      const stationName = selectedStation?.name || 'Unknown Station';
+      onSelect(selectedId, stationName);
     }
 
     // Show save prompt for non-paid users
+    // For paid users, MapView handles navigation directly in onSelect
     if (!canSaveLocations) {
       setShowSavePrompt(true);
-    } else {
-      onClose();
     }
+    // Note: We don't call onClose() for paid users here anymore
+    // MapView.handleStationSelect handles the navigation directly for paid users
   };
 
   const handleMaybeLater = () => {

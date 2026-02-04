@@ -124,7 +124,9 @@ function TemperatureChart({ data, weatherData, selectedDay }: TemperatureChartPr
         alignItems: 'center',
         marginBottom: '1rem',
         borderBottom: '1px solid var(--color-border)',
-        paddingBottom: '0.75rem'
+        paddingBottom: '0.75rem',
+        flexWrap: 'wrap',
+        gap: '0.5rem',
       }}>
         <h2 style={{
           fontSize: '1.25rem',

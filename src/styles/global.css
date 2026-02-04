@@ -72,6 +72,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-background);
   color: var(--color-text-primary);
+  overflow-x: hidden;
 }
 
 #root {
@@ -196,11 +197,11 @@ button:disabled {
 .mb-md { margin-bottom: var(--spacing-md); }
 .mb-lg { margin-bottom: var(--spacing-lg); }
 
-/* Desktop layout - 2x2 grid */
+/* Desktop layout - 2x2 grid with uniform card heights */
 @media (min-width: 1200px) {
   .charts-grid {
     grid-template-columns: 1fr 1fr !important;
-    grid-template-rows: auto auto !important;
+    grid-auto-rows: 1fr !important;
   }
 }
 

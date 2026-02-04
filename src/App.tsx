@@ -4,22 +4,36 @@ import MapView from './components/MapView';
 import ForecastView from './components/ForecastView';
 import AppLayout from './components/AppLayout';
 import SaveLocationModal from './components/SaveLocationModal';
+import SaveLocationPrompt from './components/SaveLocationPrompt';
 import LearnPage from './components/LearnPage';
 import ArticlePage from './components/ArticlePage';
 import WindMap from './components/WindMap';
 import { Location } from './types';
 import './styles/global.css';
 
-function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate }: {
+function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, showSavePromptOnLoad, onSavePromptHandled }: {
   location: Location;
   onLocationChange: () => void;
   onLocationUpdate?: () => void;
+  showSavePromptOnLoad?: boolean;
+  onSavePromptHandled?: () => void;
 }) {
   const [showStationSelector, setShowStationSelector] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showSaveLocationModal, setShowSaveLocationModal] = useState(false);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
   const [savedLocationsRefreshKey, setSavedLocationsRefreshKey] = useState(0);
+
+  // Show save prompt when navigating from map (for paid users)
+  useEffect(() => {
+    if (showSavePromptOnLoad) {
+      setShowSavePrompt(true);
+      if (onSavePromptHandled) {
+        onSavePromptHandled();
+      }
+    }
+  }, [showSavePromptOnLoad, onSavePromptHandled]);
 
   const handleSelectSavedLocation = (lat: number, lng: number, tideStationId: string | null, name: string) => {
     const newLocation: Location = {
@@ -58,7 +72,7 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate }
         onOpenUpgradeModal={() => setShowUpgradeModal(true)}
       />
 
-      {/* Save Location Modal */}
+      {/* Save Location Modal (manual save with custom name) */}
       {showSaveLocationModal && (
         <SaveLocationModal
           latitude={location.latitude}
@@ -70,6 +84,18 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate }
           onOpenUpgrade={() => { setShowSaveLocationModal(false); setShowUpgradeModal(true); }}
         />
       )}
+
+      {/* Save Location Prompt (auto-prompt after selecting location from map) */}
+      {showSavePrompt && location.name && (
+        <SaveLocationPrompt
+          locationName={location.name}
+          latitude={location.latitude}
+          longitude={location.longitude}
+          tideStationId={location.tideStationId ?? null}
+          onClose={() => setShowSavePrompt(false)}
+          onSaved={() => setSavedLocationsRefreshKey(prev => prev + 1)}
+        />
+      )}
     </AppLayout>
   );
 }
@@ -77,6 +103,7 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate }
 function App() {
   const [savedLocation, setSavedLocation] = useState<Location | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
 
   useEffect(() => {
     // Load saved location from localStorage on app startup
@@ -110,10 +137,12 @@ function App() {
     loadSavedLocation();
   }, []);
 
-  const handleLocationSelect = (location: Location) => {
+  const handleLocationSelect = (location: Location, promptSave: boolean = false) => {
     // Save location to localStorage
     localStorage.setItem('savedLocation', JSON.stringify(location));
     setSavedLocation(location);
+    // Show save prompt for paid users who selected a new location
+    setShowSavePrompt(promptSave);
   };
 
   const handleLocationChange = () => {
@@ -168,6 +197,8 @@ function App() {
                 location={savedLocation}
                 onLocationChange={handleLocationChange}
                 onLocationUpdate={handleLocationUpdate}
+                showSavePromptOnLoad={showSavePrompt}
+                onSavePromptHandled={() => setShowSavePrompt(false)}
               />
             ) : (
               <Navigate to="/" replace />

@@ -5,6 +5,7 @@ import { Location } from '../types';
 import TideStationSelector from './TideStationSelector';
 import UpgradeModal from './UpgradeModal';
 import AuthModal from './AuthModal';
+import { useAuth } from '../contexts/AuthContext';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default marker icons in React-Leaflet
@@ -21,7 +22,7 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapViewProps {
-  onLocationSelect: (location: Location) => void;
+  onLocationSelect: (location: Location, promptSave?: boolean) => void;
 }
 
 function LocationMarker({ onLocationClick }: { onLocationClick: (location: Location) => void }) {
@@ -66,20 +67,34 @@ function MapView({ onLocationSelect }: MapViewProps) {
   const [showAuthModal, setShowAuthModal] = useState(false);
   // Stores the confirmed location+station to navigate after upsell is dismissed
   const [confirmedLocation, setConfirmedLocation] = useState<Location | null>(null);
+  const { canSaveLocations } = useAuth();
 
   const handleLocationClick = (location: Location) => {
     setPendingLocation(location);
     setShowStationSelector(true);
   };
 
-  const handleStationSelect = (stationId: string) => {
+  const handleStationSelect = (stationId: string, stationName: string) => {
     if (pendingLocation) {
-      // Store confirmed location but don't navigate yet —
-      // TideStationSelector will show the upsell prompt for non-paid users
-      setConfirmedLocation({
+      // Build the confirmed location with station info
+      const locationWithStation: Location = {
         ...pendingLocation,
-        tideStationId: stationId
-      });
+        tideStationId: stationId,
+        name: stationName
+      };
+
+      // For paid users, TideStationSelector will call onClose immediately after this
+      // We need to store the location so handleStationSelectorClose can navigate
+      // But due to React's async state updates, we also navigate directly here for paid users
+      if (canSaveLocations) {
+        // Paid users: navigate immediately with save prompt
+        setShowStationSelector(false);
+        setPendingLocation(null);
+        onLocationSelect(locationWithStation, true);
+      } else {
+        // Free users: store location, TideStationSelector will show upsell then call onClose
+        setConfirmedLocation(locationWithStation);
+      }
     }
   };
 
@@ -87,9 +102,9 @@ function MapView({ onLocationSelect }: MapViewProps) {
     setShowStationSelector(false);
     setPendingLocation(null);
 
-    // If a location was confirmed, now navigate
+    // If a location was confirmed (free users after upsell), now navigate
     if (confirmedLocation) {
-      onLocationSelect(confirmedLocation);
+      onLocationSelect(confirmedLocation, false);
       setConfirmedLocation(null);
     }
   };
@@ -105,7 +120,7 @@ function MapView({ onLocationSelect }: MapViewProps) {
     setShowUpgradeModal(false);
     // Navigate to forecast with the confirmed location
     if (confirmedLocation) {
-      onLocationSelect(confirmedLocation);
+      onLocationSelect(confirmedLocation, false);
       setConfirmedLocation(null);
     }
   };
@@ -228,7 +243,7 @@ function MapView({ onLocationSelect }: MapViewProps) {
             setShowAuthModal(false);
             // Navigate to forecast after auth modal closes
             if (confirmedLocation) {
-              onLocationSelect(confirmedLocation);
+              onLocationSelect(confirmedLocation, false);
               setConfirmedLocation(null);
             }
           }}

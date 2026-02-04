@@ -13,6 +13,7 @@ interface AuthContextType {
   tier: SubscriptionTier;
   canAccessFutureDays: boolean;
   canSaveLocations: boolean;
+  canCustomizeDashboard: boolean;
   daysRemaining: number | null;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -71,18 +72,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // Listen for auth state changes
+    // IMPORTANT: Keep this callback synchronous to avoid deadlocks
+    // Using async/await inside onAuthStateChange causes the auth client to hang
+    // See: https://github.com/supabase/auth-js/issues/762
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
+        // Synchronously update session and user state
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          await fetchUserData(session.user.id);
+          // Defer async operations using setTimeout to avoid deadlock
+          // This releases the auth client's internal lock before we make more API calls
+          setTimeout(() => {
+            fetchUserData(session.user.id).finally(() => {
+              setIsLoading(false);
+            });
+          }, 0);
         } else {
           setProfile(null);
           setSubscription(null);
+          setIsLoading(false);
         }
-        setIsLoading(false);
       }
     );
 
@@ -115,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const tier = computeTier();
   const canAccessFutureDays = tier === 'trial' || tier === 'paid';
   const canSaveLocations = tier === 'paid';
+  const canCustomizeDashboard = tier === 'paid';
 
   // Calculate days remaining in trial
   const daysRemaining = subscription?.trial_ends_at && tier === 'trial'
@@ -136,8 +148,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithEmail = async (email: string, password: string) => {
     if (!supabase) return { error: new Error('Auth not configured') };
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error as Error | null };
+    try {
+      // Add timeout to prevent indefinite hanging
+      const signInPromise = supabase.auth.signInWithPassword({ email, password });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Sign in timeout - please try again')), 15000)
+      );
+
+      const { error } = await Promise.race([signInPromise, timeoutPromise]);
+      return { error: error as Error | null };
+    } catch (error) {
+      return { error: error as Error };
+    }
   };
 
   const signUpWithEmail = async (email: string, password: string) => {
@@ -156,11 +178,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     if (!supabase) return;
 
-    await supabase.auth.signOut();
+    // Clear local state first for immediate UI feedback
     setUser(null);
     setSession(null);
     setProfile(null);
     setSubscription(null);
+
+    try {
+      // Use Promise.race to avoid hanging if signOut takes too long
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('SignOut timeout')), 5000)
+      );
+
+      await Promise.race([signOutPromise, timeoutPromise]);
+    } catch (err) {
+      // Log timeout but continue - local state is already cleared
+      console.warn('signOut timeout or error:', err);
+
+      // Clear Supabase's localStorage session manually if API times out
+      // This ensures session doesn't persist on page refresh
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        if (supabaseUrl) {
+          const projectRef = supabaseUrl.split('//')[1]?.split('.')[0];
+          if (projectRef) {
+            localStorage.removeItem(`sb-${projectRef}-auth-token`);
+          }
+        }
+      } catch {
+        // Ignore localStorage errors
+      }
+    }
   };
 
   const refreshSubscription = async () => {
@@ -186,6 +235,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       tier,
       canAccessFutureDays,
       canSaveLocations,
+      canCustomizeDashboard,
       daysRemaining,
       signInWithGoogle,
       signInWithEmail,

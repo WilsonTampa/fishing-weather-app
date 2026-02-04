@@ -159,7 +159,9 @@ function BarometricPressure({ pressureData, selectedDay }: BarometricPressurePro
           alignItems: 'center',
           borderBottom: '1px solid var(--color-border)',
           paddingBottom: '0.75rem',
-          marginBottom: '1rem'
+          marginBottom: '1rem',
+          flexWrap: 'wrap',
+          gap: '0.5rem',
         }}
       >
         <h2

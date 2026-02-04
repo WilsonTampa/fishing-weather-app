@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import './DaySelector.css';
 
 interface DaySelectorProps {
   selectedDay: Date;
@@ -11,9 +12,9 @@ function DaySelector({ selectedDay, onSelectDay, onLockedDayClick }: DaySelector
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { canAccessFutureDays, isConfigured } = useAuth();
 
-  // Generate array of next 7 days (changed from 10 to match PRD)
+  // Generate array of next 8 days (today + 7)
   const days: Date[] = [];
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 8; i++) {
     const day = new Date();
     day.setDate(day.getDate() + i);
     day.setHours(0, 0, 0, 0);
@@ -57,12 +58,12 @@ function DaySelector({ selectedDay, onSelectDay, onLockedDayClick }: DaySelector
     if (isToday(day)) return 'Today';
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    if (day.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+    if (day.toDateString() === tomorrow.toDateString()) return 'Tmrw';
     return day.toLocaleDateString('en-US', { weekday: 'short' });
   };
 
   const formatDate = (day: Date) => {
-    return day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return `${day.getMonth() + 1}/${day.getDate()}`;
   };
 
   const handleDayClick = (day: Date, index: number) => {
@@ -82,21 +83,17 @@ function DaySelector({ selectedDay, onSelectDay, onLockedDayClick }: DaySelector
   };
 
   return (
-    <div style={{
+    <div className="day-selector" style={{
       backgroundColor: 'var(--color-surface)',
       borderRadius: 'var(--radius-lg)',
-      padding: '1rem',
-      marginBottom: '1.5rem',
-      overflowX: 'auto',
-      scrollbarWidth: 'thin',
-      scrollbarColor: 'var(--color-border) transparent'
+      padding: '0.375rem',
+      marginBottom: 0,
     }}>
       <div
         ref={scrollContainerRef}
         style={{
           display: 'flex',
-          gap: '0.75rem',
-          minWidth: 'min-content'
+          gap: '3px',
         }}
       >
         {days.map((day, index) => {
@@ -107,20 +104,23 @@ function DaySelector({ selectedDay, onSelectDay, onLockedDayClick }: DaySelector
             <button
               key={index}
               onClick={() => handleDayClick(day, index)}
+              className="day-selector__btn"
               style={{
-                minWidth: '90px',
-                padding: '0.75rem 1rem',
+                flex: '1 1 0',
+                minWidth: 0,
+                padding: '0.3rem 0.15rem',
                 backgroundColor: selected ? 'var(--color-accent)' : 'var(--color-background)',
                 border: selected ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
                 borderRadius: 'var(--radius-md)',
-                cursor: locked ? 'pointer' : 'pointer',
+                cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 color: selected ? 'white' : 'var(--color-text-primary)',
                 fontWeight: selected ? 600 : 400,
                 textAlign: 'center',
                 outline: 'none',
                 position: 'relative',
-                opacity: locked ? 0.7 : 1
+                opacity: locked ? 0.7 : 1,
+                overflow: 'hidden',
               }}
               onMouseEnter={(e) => {
                 if (!selected) {
@@ -136,46 +136,24 @@ function DaySelector({ selectedDay, onSelectDay, onLockedDayClick }: DaySelector
               }}
               aria-label={locked ? `${formatDay(day)} - Premium feature` : formatDay(day)}
             >
-              <div style={{
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                marginBottom: '0.25rem'
-              }}>
-                {formatDay(day)}
-              </div>
-              <div style={{
-                fontSize: '0.75rem',
-                opacity: 0.8,
-                marginBottom: '0.25rem'
-              }}>
-                {formatDate(day)}
-              </div>
-              {locked ? (
-                <div style={{
-                  fontSize: '1rem',
-                  marginTop: '0.25rem',
-                  color: 'var(--color-text-secondary)'
-                }}>
+              <div className="day-selector__label">
+                <span className="day-selector__day">{formatDay(day)}</span>
+                <span className="day-selector__date">{formatDate(day)}</span>
+                {locked && (
                   <svg
-                    width="16"
-                    height="16"
+                    className="day-selector__lock"
+                    width="10"
+                    height="10"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2"
-                    style={{ display: 'inline-block' }}
+                    strokeWidth="2.5"
                   >
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0110 0v4" />
                   </svg>
-                </div>
-              ) : (
-                <div style={{
-                  fontSize: '1.25rem',
-                  marginTop: '0.25rem'
-                }}>
-                </div>
-              )}
+                )}
+              </div>
             </button>
           );
         })}

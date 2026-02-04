@@ -1,0 +1,48 @@
+/* ---- Day Selector styles ---- */
+
+.day-selector__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.day-selector__day {
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.day-selector__date {
+  font-size: 0.6rem;
+  opacity: 0.8;
+  line-height: 1.3;
+}
+
+.day-selector__lock {
+  opacity: 0.5;
+  margin-top: 1px;
+}
+
+/* Shrink font on smaller screens so all 10 buttons still fit */
+@media (max-width: 680px) {
+  .day-selector__day {
+    font-size: 0.6rem;
+  }
+  .day-selector__date {
+    font-size: 0.5rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .day-selector__day {
+    font-size: 0.55rem;
+  }
+  .day-selector__date {
+    font-size: 0.45rem;
+  }
+  .day-selector__btn {
+    padding: 0.2rem 0.1rem !important;
+  }
+}

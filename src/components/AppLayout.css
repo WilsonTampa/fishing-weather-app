@@ -230,6 +230,7 @@
   flex: 1;
   margin-left: 220px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Mobile hamburger button */
