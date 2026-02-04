@@ -5,12 +5,14 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Location } from '../types';
 import { getLocationForecast } from '../services/noaaApi';
 import WindChart from './WindChart';
+import WaveChart from './WaveChart';
 import TemperatureChart from './TemperatureChart';
 import TideChart from './TideChart';
 import WeatherConditionsChart from './WeatherConditionsChart';
 import SunMoonTimes from './SunMoonTimes';
 import FeedingPeriods from './FeedingPeriods';
 import BarometricPressure from './BarometricPressure';
+import AlertBanner from './AlertBanner';
 import DashboardCard from './DashboardCard';
 import DaySelector from './DaySelector';
 import TideStationSelector from './TideStationSelector';
@@ -51,6 +53,8 @@ interface ForecastData {
     distance: number;
   };
   waterTemperature?: number | null;
+  waves?: any[];
+  alerts?: any[];
 }
 
 function ForecastView({
@@ -409,11 +413,17 @@ function ForecastView({
             </>
           )}
 
+          {/* Marine Alerts Banner */}
+          {forecastData.alerts && forecastData.alerts.length > 0 && (
+            <AlertBanner alerts={forecastData.alerts} selectedDay={selectedDay} />
+          )}
+
           {/* Charts - Sortable Grid */}
           {(() => {
             // Build card availability map
             const cardAvailability: Record<CardId, boolean> = {
               wind: forecastData.wind.length > 0,
+              waves: (forecastData.waves?.length ?? 0) > 0,
               tide: true,
               temperature: forecastData.temperature.length > 0,
               weather: forecastData.weather.length > 0,
@@ -425,6 +435,7 @@ function ForecastView({
             // Build card renderer map
             const cardRenderers: Record<CardId, React.ReactNode> = {
               wind: <WindChart data={forecastData.wind} selectedDay={selectedDay} />,
+              waves: <WaveChart data={forecastData.waves || []} selectedDay={selectedDay} />,
               tide: (
                 <TideChart
                   data={forecastData.tides}

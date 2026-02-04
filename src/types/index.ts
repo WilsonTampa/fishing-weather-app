@@ -39,6 +39,28 @@ export interface TideData {
   type: 'H' | 'L'; // High or Low
 }
 
+// Wave data
+export interface WaveData {
+  timestamp: string;           // ISO 8601
+  height: number;              // combined wave height in feet
+  windWaveHeight: number;      // wind-generated wave height in feet
+  direction: number;           // wave direction in degrees (0-360)
+  directionCardinal: string;   // N, NE, E, etc.
+  period: number;              // wave period in seconds
+}
+
+// Marine alert data (from NWS API)
+export interface MarineAlert {
+  event: string;            // e.g. "Small Craft Advisory"
+  severity: string;         // Minor, Moderate, Severe, Extreme
+  headline: string;         // Full headline text
+  description: string;      // Detailed description
+  instruction: string;      // Safety instructions
+  onset: string;            // ISO 8601 start time
+  ends: string;             // ISO 8601 end time
+  senderName: string;       // e.g. "NWS Tampa Bay Ruskin FL"
+}
+
 // Water temperature data
 export interface WaterTemperatureData {
   timestamp: string;

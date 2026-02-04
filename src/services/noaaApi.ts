@@ -1,10 +1,16 @@
-import { WindData, TemperatureData, TideData, WeatherData, Location } from '../types';
+import { WindData, TemperatureData, TideData, WeatherData, WaveData, MarineAlert, Location } from '../types';
 
 // NOAA CO-OPS API base URL for tide data
 const NOAA_COOPS_BASE = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
 
 // Open-Meteo API (free weather data)
 const OPEN_METEO_BASE = 'https://api.open-meteo.com/v1';
+
+// Open-Meteo Marine API (free wave/ocean data)
+const OPEN_METEO_MARINE_BASE = 'https://marine-api.open-meteo.com/v1';
+
+// NWS API (free, no key required — marine alerts)
+const NWS_API_BASE = 'https://api.weather.gov';
 
 interface TideStation {
   id: string;
@@ -303,6 +309,106 @@ function degreesToCardinal(degrees: number): string {
 }
 
 /**
+ * Fetch wave data from Open-Meteo Marine API (free, no key required)
+ */
+export async function fetchWaveData(
+  lat: number,
+  lng: number
+): Promise<WaveData[]> {
+  const params = new URLSearchParams({
+    latitude: lat.toString(),
+    longitude: lng.toString(),
+    hourly: 'wave_height,wave_direction,wave_period,wind_wave_height',
+    length_unit: 'imperial',
+    timezone: 'America/New_York',
+    forecast_days: '10'
+  });
+
+  try {
+    const response = await fetch(`${OPEN_METEO_MARINE_BASE}/marine?${params}`);
+    if (!response.ok) {
+      throw new Error(`Open-Meteo Marine API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const waveData: WaveData[] = [];
+
+    if (!data.hourly || !data.hourly.time) {
+      return [];
+    }
+
+    for (let i = 0; i < data.hourly.time.length; i++) {
+      waveData.push({
+        timestamp: data.hourly.time[i],
+        height: data.hourly.wave_height[i] ?? 0,
+        windWaveHeight: data.hourly.wind_wave_height[i] ?? 0,
+        direction: data.hourly.wave_direction[i] ?? 0,
+        directionCardinal: degreesToCardinal(data.hourly.wave_direction[i] ?? 0),
+        period: data.hourly.wave_period[i] ?? 0
+      });
+    }
+
+    return waveData;
+  } catch (error) {
+    console.error('Error fetching wave data:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch marine alerts from NWS API using tide station coordinates
+ * Uses the tide station lat/lng since those are on/near water and fall within marine forecast zones
+ */
+export async function fetchMarineAlerts(
+  lat: number,
+  lng: number
+): Promise<MarineAlert[]> {
+  try {
+    const response = await fetch(
+      `${NWS_API_BASE}/alerts/active?point=${lat},${lng}`,
+      {
+        headers: {
+          'Accept': 'application/geo+json',
+          'User-Agent': 'FishingBoatingApp'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`NWS API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.features || data.features.length === 0) {
+      return [];
+    }
+
+    // Filter for Small Craft Advisory only
+    const smallCraftAlerts = data.features
+      .filter((f: any) => f.properties?.event === 'Small Craft Advisory')
+      .map((f: any) => {
+        const p = f.properties;
+        return {
+          event: p.event,
+          severity: p.severity || 'Minor',
+          headline: p.headline || '',
+          description: p.description || '',
+          instruction: p.instruction || '',
+          onset: p.onset || p.effective || '',
+          ends: p.ends || p.expires || '',
+          senderName: p.senderName || ''
+        } as MarineAlert;
+      });
+
+    return smallCraftAlerts;
+  } catch (error) {
+    console.error('Error fetching marine alerts:', error);
+    return [];
+  }
+}
+
+/**
  * Get complete forecast data for a location
  */
 export async function getLocationForecast(location: Location, tideStationId?: string) {
@@ -327,8 +433,13 @@ export async function getLocationForecast(location: Location, tideStationId?: st
       tideStation = await findNearestTideStation(location.latitude, location.longitude);
     }
 
-    // Fetch weather data
+    // Fetch weather data, wave data, and marine alerts in parallel
     const weatherPromise = fetchWeatherData(location.latitude, location.longitude);
+    const wavePromise = fetchWaveData(location.latitude, location.longitude);
+    // Use tide station coords for alerts since they're on/near water (within marine forecast zones)
+    const alertsPromise = tideStation
+      ? fetchMarineAlerts(tideStation.lat, tideStation.lng)
+      : Promise.resolve([]) as Promise<MarineAlert[]>;
 
     // Fetch tide data if station found
     // Set start date to beginning of today to include all tides for today
@@ -363,7 +474,7 @@ export async function getLocationForecast(location: Location, tideStationId?: st
       waterTempPromise = Promise.resolve(null);
     }
 
-    const [weather, tides, waterTemp] = await Promise.all([weatherPromise, tidePromise, waterTempPromise]);
+    const [weather, tides, waterTemp, waves, alerts] = await Promise.all([weatherPromise, tidePromise, waterTempPromise, wavePromise, alertsPromise]);
 
     return {
       wind: weather.wind,
@@ -372,7 +483,9 @@ export async function getLocationForecast(location: Location, tideStationId?: st
       pressure: weather.pressure,
       tides,
       tideStation: tideStation || undefined,
-      waterTemperature: waterTemp
+      waterTemperature: waterTemp,
+      waves,
+      alerts
     };
   } catch (error) {
     console.error('Error getting location forecast:', error);
