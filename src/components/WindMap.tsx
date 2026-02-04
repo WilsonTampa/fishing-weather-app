@@ -7,7 +7,6 @@ import 'leaflet-velocity';
 import {
   fetchWindGrid,
   fetchNearbyStationWinds,
-  fetchForecastMarkers,
   WindGridResult,
   WindStationPoint,
 } from '../services/windGridApi';
@@ -159,29 +158,6 @@ function WindStationMarkers({ stations }: { stations: WindStationPoint[] }) {
   );
 }
 
-/** Merge real NOAA stations with forecast grid points, removing forecast points too close to real stations */
-function mergeStations(
-  realStations: WindStationPoint[],
-  forecastPoints: WindStationPoint[],
-  minDistKm: number = 20
-): WindStationPoint[] {
-  const merged: WindStationPoint[] = [...realStations];
-
-  for (const fp of forecastPoints) {
-    const tooClose = realStations.some((rs) => {
-      const dLat = fp.lat - rs.lat;
-      const dLon = fp.lon - rs.lon;
-      // Rough km estimate: 1 deg lat ≈ 111km, 1 deg lon ≈ 85km at 28°N
-      const distKm = Math.sqrt((dLat * 111) ** 2 + (dLon * 85) ** 2);
-      return distKm < minDistKm;
-    });
-    if (!tooClose) {
-      merged.push(fp);
-    }
-  }
-
-  return merged;
-}
 
 // ── Main WindMap page ──
 
@@ -199,7 +175,6 @@ function WindMap({ location, onLocationChange }: WindMapProps) {
 
   const [windData, setWindData] = useState<WindGridResult | null>(null);
   const [stationData, setStationData] = useState<WindStationPoint[]>([]);
-  const [forecastPoints, setForecastPoints] = useState<WindStationPoint[]>([]);
   const [forecastHour, setForecastHour] = useState(0);
   const [loading, setLoading] = useState(true);
   const [stationsLoading, setStationsLoading] = useState(true);

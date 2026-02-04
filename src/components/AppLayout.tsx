@@ -34,10 +34,10 @@ interface AppLayoutProps {
 export default function AppLayout({
   children,
   onLocationChange,
-  onOpenStationSelector,
+  onOpenStationSelector: _onOpenStationSelector,
   onOpenAuth,
   onOpenUpgrade,
-  onSaveLocation,
+  onSaveLocation: _onSaveLocation,
   onSelectSavedLocation,
   savedLocationsRefreshKey,
 }: AppLayoutProps) {
