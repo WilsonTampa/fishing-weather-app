@@ -158,12 +158,14 @@ export default function AppLayout({
           <button
             className="sidebar-nav-item"
             onClick={handleAccountClick}
+            disabled={!isConfigured}
+            style={{ opacity: isConfigured ? 1 : 0.5 }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            Account
+            {!user ? 'Sign In' : 'Account'}
           </button>
         </nav>
       </aside>
