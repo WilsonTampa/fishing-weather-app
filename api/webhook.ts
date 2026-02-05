@@ -1,6 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { sendEmail, getUserEmail } from './lib/email';
+import {
+  welcomeTrialEmail,
+  trialEndingSoonEmail,
+  subscriptionActivatedEmail,
+  paymentFailedEmail,
+  subscriptionCanceledEmail,
+} from './lib/email-templates';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16'
@@ -133,6 +141,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } else {
           console.log(`Subscription updated for user ${userId}: status=${status}, tier=${tier}`);
         }
+
+        // Send lifecycle emails
+        const email = await getUserEmail(supabase, userId);
+        if (email) {
+          if (subscription.status === 'trialing' && event.type === 'customer.subscription.created') {
+            // Welcome email for new trial
+            const trialEnd = subscription.trial_end
+              ? new Date(subscription.trial_end * 1000).toLocaleDateString('en-US', {
+                  month: 'long', day: 'numeric', year: 'numeric'
+                })
+              : 'soon';
+            sendEmail({
+              to: email,
+              subject: 'Welcome to My Marine Forecast - Your trial has started!',
+              html: welcomeTrialEmail(trialEnd),
+            });
+          } else if (subscription.status === 'active' && event.type === 'customer.subscription.updated') {
+            // Subscription activated (trial converted or direct purchase)
+            // Only send when status actually changed to active (avoid duplicates)
+            const previousAttributes = (event.data as any).previous_attributes;
+            if (previousAttributes?.status && previousAttributes.status !== 'active') {
+              sendEmail({
+                to: email,
+                subject: 'Your My Marine Forecast subscription is active',
+                html: subscriptionActivatedEmail(),
+              });
+            }
+          }
+        }
+
         break;
       }
 
@@ -162,14 +200,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } else {
           console.log(`Subscription canceled for user ${userId}, reverted to free tier`);
         }
+
+        // Send cancellation email
+        const cancelEmail = await getUserEmail(supabase, userId);
+        if (cancelEmail) {
+          sendEmail({
+            to: cancelEmail,
+            subject: 'Your My Marine Forecast subscription has been canceled',
+            html: subscriptionCanceledEmail(),
+          });
+        }
+
         break;
       }
 
       case 'customer.subscription.trial_will_end': {
-        // Fires 3 days before trial ends — Stripe handles reminder emails if enabled
+        // Fires 3 days before trial ends
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata.supabase_user_id;
         console.log(`Trial ending soon for user ${userId}`);
+
+        if (userId) {
+          const trialEmail = await getUserEmail(supabase, userId);
+          if (trialEmail) {
+            const daysLeft = subscription.trial_end
+              ? Math.max(0, Math.ceil((subscription.trial_end * 1000 - Date.now()) / (1000 * 60 * 60 * 24)))
+              : 3;
+            sendEmail({
+              to: trialEmail,
+              subject: `Your My Marine Forecast trial ends in ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}`,
+              html: trialEndingSoonEmail(daysLeft),
+            });
+          }
+        }
         break;
       }
 
@@ -198,6 +261,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } else {
           console.log(`Payment failed for user ${userId}, status set to past_due`);
         }
+
+        // Send payment failed email
+        const failedEmail = await getUserEmail(supabase, userId);
+        if (failedEmail) {
+          sendEmail({
+            to: failedEmail,
+            subject: 'Action needed: Payment failed for My Marine Forecast',
+            html: paymentFailedEmail(),
+          });
+        }
+
         break;
       }
 
