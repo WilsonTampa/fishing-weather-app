@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import SavedLocationsPanel from './SavedLocationsPanel';
+import ContactModal from './ContactModal';
 import './AppLayout.css';
 
 // Context to allow ForecastView header to trigger mobile menu
@@ -88,6 +89,8 @@ export default function AppLayout({
 
   const { signOut } = useAuth();
   const [accountOpen, setAccountOpen] = useState(false);
+  const [helpCenterOpen, setHelpCenterOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
 
   const handleAccountClick = () => {
     if (!isConfigured) return;
@@ -284,8 +287,63 @@ export default function AppLayout({
               )}
             </>
           )}
+
+          {/* Help Center - collapsible */}
+          <div style={{ marginTop: 'auto' }}>
+            <button
+              className="sidebar-nav-item"
+              onClick={() => setHelpCenterOpen(prev => !prev)}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="4" />
+                <line x1="4.93" y1="4.93" x2="9.17" y2="9.17" />
+                <line x1="14.83" y1="14.83" x2="19.07" y2="19.07" />
+                <line x1="14.83" y1="9.17" x2="19.07" y2="4.93" />
+                <line x1="14.83" y1="9.17" x2="18.36" y2="5.64" />
+                <line x1="4.93" y1="19.07" x2="9.17" y2="14.83" />
+              </svg>
+              Help Center
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  marginLeft: 'auto',
+                  transition: 'transform 0.2s ease',
+                  transform: helpCenterOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                }}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            {helpCenterOpen && (
+              <div className="sidebar-account-submenu">
+                <button
+                  className="sidebar-submenu-item"
+                  onClick={() => { setContactModalOpen(true); setMobileOpen(false); }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Contact Us
+                </button>
+              </div>
+            )}
+          </div>
         </nav>
       </aside>
+
+      {/* Contact Us modal */}
+      {contactModalOpen && (
+        <ContactModal onClose={() => setContactModalOpen(false)} />
+      )}
 
       {/* Main content */}
       <main className="app-main">
