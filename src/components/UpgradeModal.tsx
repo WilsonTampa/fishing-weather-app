@@ -129,33 +129,15 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
             </div>
           )}
 
-          {tier === 'trial' && (
-            <div style={{
-              backgroundColor: 'rgba(245, 158, 11, 0.1)',
-              border: '1px solid #F59E0B',
-              borderRadius: '8px',
-              padding: '0.75rem 1rem',
-              marginBottom: '1.5rem',
-              fontSize: '0.875rem',
-              color: '#F59E0B'
-            }}>
-              You're currently on a free trial. Upgrade now to keep access after your trial ends.
-            </div>
-          )}
-
-          {tier === 'free' && !hasUsedTrial && (
-            <div style={{
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
-              border: '1px solid #10B981',
-              borderRadius: '8px',
-              padding: '0.75rem 1rem',
-              marginBottom: '1.5rem',
-              fontSize: '0.875rem',
-              color: '#10B981'
-            }}>
-              Start your 7-day free trial to access all Pro features. You won't be charged until the trial ends.
-            </div>
-          )}
+          {/* Features list */}
+          <div className="trial-benefits" style={{ marginBottom: '1.5rem' }}>
+            <h3>Upgrade to Pro to unlock:</h3>
+            <ul>
+              <li>{checkIcon} View forecast up to 7 days in advance</li>
+              <li>{checkIcon} Customize your forecast dashboard</li>
+              <li>{checkIcon} Save unlimited locations</li>
+            </ul>
+          </div>
 
           {/* Pricing options */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
@@ -233,15 +215,33 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
             </button>
           </div>
 
-          {/* Features list */}
-          <div className="trial-benefits" style={{ marginBottom: '1.5rem' }}>
-            <h3>Pro includes:</h3>
-            <ul>
-              <li>{checkIcon} View forecast up to 7 days in advance</li>
-              <li>{checkIcon} Customize your forecast dashboard</li>
-              <li>{checkIcon} Save unlimited locations</li>
-            </ul>
-          </div>
+          {tier === 'trial' && (
+            <div style={{
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
+              border: '1px solid #F59E0B',
+              borderRadius: '8px',
+              padding: '0.75rem 1rem',
+              marginBottom: '1rem',
+              fontSize: '0.875rem',
+              color: '#F59E0B'
+            }}>
+              You're currently on a free trial. Upgrade now to keep access after your trial ends.
+            </div>
+          )}
+
+          {tier === 'free' && !hasUsedTrial && (
+            <div style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              border: '1px solid #10B981',
+              borderRadius: '8px',
+              padding: '0.75rem 1rem',
+              marginBottom: '1rem',
+              fontSize: '0.875rem',
+              color: '#10B981'
+            }}>
+              You won't be charged until the trial ends, cancel at any time.
+            </div>
+          )}
 
           {error && (
             <div className="error-message">
