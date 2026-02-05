@@ -249,27 +249,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Sync subscription after returning from Stripe checkout.
   // Calls a backend endpoint that checks Stripe directly and updates Supabase,
   // so we don't depend on the webhook having fired yet.
-  useEffect(() => {
-    if (!user || !supabase) return;
-
+  // We read the flag from the URL on mount (before any effect can clear it) and
+  // store it in a ref so it survives across re-renders and user-state changes.
+  const [pendingUpgrade, setPendingUpgrade] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('upgraded') !== 'true') return;
+    if (params.get('upgraded') === 'true') {
+      // Clean the URL immediately so browser history stays tidy
+      const url = new URL(window.location.href);
+      url.searchParams.delete('upgraded');
+      window.history.replaceState({}, '', url.pathname + url.search);
+      return true;
+    }
+    return false;
+  });
 
-    // Clean the URL param so we don't re-trigger on re-renders
-    const url = new URL(window.location.href);
-    url.searchParams.delete('upgraded');
-    window.history.replaceState({}, '', url.pathname + url.search);
+  useEffect(() => {
+    if (!pendingUpgrade || !user || !supabase) return;
+
+    console.log('[sync] Starting post-checkout subscription sync for user', user.id);
 
     let cancelled = false;
     let attempts = 0;
-    const maxAttempts = 10;
-    const pollInterval = 3000;
+    const maxAttempts = 12;
+    const pollInterval = 2500;
 
     const syncAndPoll = async () => {
       if (cancelled) return;
+      attempts++;
+      console.log(`[sync] Attempt ${attempts}/${maxAttempts}`);
 
       try {
-        // Ask the backend to check Stripe and sync to Supabase
         const response = await fetch('/api/sync-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -278,31 +287,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (cancelled) return;
 
-        if (response.ok) {
-          const result = await response.json();
-          if (result.tier === 'trial' || result.tier === 'paid') {
-            // Backend confirmed and synced — now refresh from Supabase
-            await refreshSubscription();
-            return; // Done
+        const result = await response.json();
+        console.log('[sync] API response:', result);
+
+        if (response.ok && (result.tier === 'trial' || result.tier === 'paid')) {
+          console.log('[sync] Subscription confirmed as', result.tier, '— refreshing from Supabase');
+          // Read the updated row from Supabase so React state updates
+          const { data } = await supabase!
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          console.log('[sync] Supabase subscription row:', data);
+          if (data) {
+            setSubscription(data as Subscription);
           }
+          setPendingUpgrade(false);
+          return; // Done
         }
-      } catch {
-        // Network error — will retry
+      } catch (err) {
+        console.warn('[sync] Network error, will retry:', err);
       }
 
-      attempts++;
       if (attempts < maxAttempts && !cancelled) {
         setTimeout(syncAndPoll, pollInterval);
+      } else {
+        console.warn('[sync] Gave up after', attempts, 'attempts');
+        setPendingUpgrade(false);
       }
     };
 
-    // Start after a short delay to let Stripe process the subscription
+    // Start after a short delay to let Stripe finalize the subscription
     const timer = setTimeout(syncAndPoll, 1500);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [user]);
+  }, [pendingUpgrade, user]);
 
   // Auto-refresh subscription on window focus to catch webhook updates (cancellations, trial expiry, etc.)
   useEffect(() => {

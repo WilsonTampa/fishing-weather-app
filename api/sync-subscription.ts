@@ -2,20 +2,29 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16'
-});
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Validate required env vars at startup
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Check env vars inside the handler so we get a clear error in logs
+  if (!STRIPE_SECRET_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    const missing = [];
+    if (!STRIPE_SECRET_KEY) missing.push('STRIPE_SECRET_KEY');
+    if (!SUPABASE_URL) missing.push('VITE_SUPABASE_URL');
+    if (!SUPABASE_SERVICE_ROLE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+    console.error('Missing env vars:', missing.join(', '));
+    return res.status(500).json({ error: 'Server configuration error', missing });
+  }
+
+  const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' });
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
     const { userId } = req.body;
@@ -24,22 +33,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Missing userId' });
     }
 
+    console.log(`[sync] Starting sync for user ${userId}`);
+
     // Get the user's subscription record to find their Stripe customer ID
-    const { data: subRow } = await supabase
+    const { data: subRow, error: subError } = await supabase
       .from('subscriptions')
       .select('stripe_customer_id, stripe_subscription_id')
       .eq('user_id', userId)
       .single();
 
+    console.log('[sync] Supabase subscription row:', JSON.stringify(subRow), 'error:', subError?.message);
+
     // Strategy 1: If we already have a subscription ID, check it directly
     if (subRow?.stripe_subscription_id) {
+      console.log('[sync] Strategy 1: retrieving subscription', subRow.stripe_subscription_id);
       const subscription = await stripe.subscriptions.retrieve(subRow.stripe_subscription_id);
-      const result = await syncSubscriptionToSupabase(userId, subscription);
+      const result = await syncSubscriptionToSupabase(supabase, userId, subscription);
+      console.log('[sync] Strategy 1 result:', JSON.stringify(result));
       return res.status(200).json(result);
     }
 
     // Strategy 2: Look up subscriptions by customer ID
     if (subRow?.stripe_customer_id) {
+      console.log('[sync] Strategy 2: listing subscriptions for customer', subRow.stripe_customer_id);
       const subscriptions = await stripe.subscriptions.list({
         customer: subRow.stripe_customer_id,
         limit: 1,
@@ -48,36 +64,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (subscriptions.data.length > 0) {
         const subscription = subscriptions.data[0];
-        const result = await syncSubscriptionToSupabase(userId, subscription);
+        console.log('[sync] Found subscription:', subscription.id, 'status:', subscription.status);
+        const result = await syncSubscriptionToSupabase(supabase, userId, subscription);
+        console.log('[sync] Strategy 2 result:', JSON.stringify(result));
         return res.status(200).json(result);
       }
+      console.log('[sync] Strategy 2: no subscriptions found for customer');
     }
 
-    // Strategy 3: Look up the Stripe customer by the user's email (fallback for
-    // cases where the customer ID wasn't saved to Supabase)
+    // Strategy 3: Look up the Stripe customer by the user's email
     const { data: profile } = await supabase
       .from('profiles')
       .select('email')
       .eq('id', userId)
       .single();
 
+    console.log('[sync] Strategy 3: looking up customer by email', profile?.email);
+
     if (profile?.email) {
       const customers = await stripe.customers.list({
         email: profile.email,
-        limit: 1,
+        limit: 5,
       });
 
-      if (customers.data.length > 0) {
-        const customer = customers.data[0];
+      console.log('[sync] Found', customers.data.length, 'Stripe customers for email');
 
-        // Backfill the customer ID into Supabase if we have a row
-        if (subRow) {
-          await supabase
-            .from('subscriptions')
-            .update({ stripe_customer_id: customer.id, updated_at: new Date().toISOString() })
-            .eq('user_id', userId);
-        }
-
+      for (const customer of customers.data) {
         const subscriptions = await stripe.subscriptions.list({
           customer: customer.id,
           limit: 1,
@@ -86,22 +98,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         if (subscriptions.data.length > 0) {
           const subscription = subscriptions.data[0];
-          const result = await syncSubscriptionToSupabase(userId, subscription);
+          console.log('[sync] Found subscription via email:', subscription.id, 'status:', subscription.status);
+
+          // Backfill the customer ID
+          await supabase
+            .from('subscriptions')
+            .upsert(
+              { user_id: userId, stripe_customer_id: customer.id, status: 'free', tier: 'free' },
+              { onConflict: 'user_id' }
+            );
+
+          const result = await syncSubscriptionToSupabase(supabase, userId, subscription);
+          console.log('[sync] Strategy 3 result:', JSON.stringify(result));
           return res.status(200).json(result);
         }
       }
     }
 
-    // No Stripe subscription found
+    // No Stripe subscription found at all
+    console.log('[sync] No Stripe subscription found for user');
     return res.status(200).json({ status: 'free', tier: 'free' });
   } catch (error) {
-    console.error('Error syncing subscription:', error);
+    console.error('[sync] Error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return res.status(500).json({ error: message });
   }
 }
 
-async function syncSubscriptionToSupabase(userId: string, subscription: Stripe.Subscription) {
+async function syncSubscriptionToSupabase(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  subscription: Stripe.Subscription
+) {
   let status: string;
   let tier: string;
   let trialEndsAt: string | null = null;
@@ -123,25 +151,29 @@ async function syncSubscriptionToSupabase(userId: string, subscription: Stripe.S
     tier = 'free';
   }
 
-  const { error } = await supabase
+  const upsertData = {
+    user_id: userId,
+    stripe_customer_id: subscription.customer as string,
+    stripe_subscription_id: subscription.id,
+    status,
+    tier,
+    trial_ends_at: trialEndsAt,
+    current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
+    cancel_at_period_end: subscription.cancel_at_period_end,
+    updated_at: new Date().toISOString(),
+  };
+
+  console.log('[sync] Upserting subscription data:', JSON.stringify(upsertData));
+
+  const { error, data } = await supabase
     .from('subscriptions')
-    .upsert(
-      {
-        user_id: userId,
-        stripe_customer_id: subscription.customer as string,
-        stripe_subscription_id: subscription.id,
-        status,
-        tier,
-        trial_ends_at: trialEndsAt,
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-        cancel_at_period_end: subscription.cancel_at_period_end,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' }
-    );
+    .upsert(upsertData, { onConflict: 'user_id' })
+    .select();
 
   if (error) {
-    console.error('Error upserting subscription during sync:', error);
+    console.error('[sync] Upsert error:', JSON.stringify(error));
+  } else {
+    console.log('[sync] Upsert success, returned:', JSON.stringify(data));
   }
 
   return { status, tier, trial_ends_at: trialEndsAt };
