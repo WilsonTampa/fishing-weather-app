@@ -22,7 +22,7 @@ export default function SaveLocationModal({
   onOpenAuth,
   onOpenUpgrade,
 }: SaveLocationModalProps) {
-  const { user, canSaveLocations } = useAuth();
+  const { user, canSaveLocations, isEmailVerified } = useAuth();
   const [name, setName] = useState('');
   const [isDefault, setIsDefault] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -115,7 +115,11 @@ export default function SaveLocationModal({
       onSaved();
       onClose();
     } catch {
-      setError('Failed to save location. Please try again.');
+      if (!isEmailVerified) {
+        setError('Please verify your email before saving locations. Check your inbox for the verification link.');
+      } else {
+        setError('Failed to save location. Please try again.');
+      }
     } finally {
       setIsSaving(false);
     }

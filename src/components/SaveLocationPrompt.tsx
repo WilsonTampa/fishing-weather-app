@@ -20,7 +20,7 @@ export default function SaveLocationPrompt({
   onClose,
   onSaved,
 }: SaveLocationPromptProps) {
-  const { user } = useAuth();
+  const { user, isEmailVerified } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,11 @@ export default function SaveLocationPrompt({
         onClose();
       }, 1500);
     } catch {
-      setError('Failed to save location. Please try again.');
+      if (!isEmailVerified) {
+        setError('Please verify your email before saving locations. Check your inbox for the verification link.');
+      } else {
+        setError('Failed to save location. Please try again.');
+      }
       setIsSaving(false);
     }
   };
