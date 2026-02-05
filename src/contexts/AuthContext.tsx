@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { Profile, Subscription, SubscriptionTier } from '../types/database';
@@ -38,6 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [savedLocationCount, setSavedLocationCount] = useState(0);
+  // Track when we've manually set a user from signup (no session).
+  // Prevents onAuthStateChange from wiping the user when it fires with session=null.
+  const manualUserRef = useRef(false);
 
   // Fetch user profile and subscription from database
   const fetchUserData = async (userId: string) => {
@@ -85,19 +88,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // See: https://github.com/supabase/auth-js/issues/762
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        // Synchronously update session and user state
-        setSession(session);
-        setUser(session?.user ?? null);
-
         if (session?.user) {
-          // Defer async operations using setTimeout to avoid deadlock
-          // This releases the auth client's internal lock before we make more API calls
+          // Real session arrived (e.g. after email verification) — always use it
+          manualUserRef.current = false;
+          setSession(session);
+          setUser(session.user);
           setTimeout(() => {
             fetchUserData(session.user.id).finally(() => {
               setIsLoading(false);
             });
           }, 0);
+        } else if (manualUserRef.current) {
+          // We manually set a user from signup (no session).
+          // Don't wipe it when onAuthStateChange fires with session=null.
+          setIsLoading(false);
         } else {
+          setSession(null);
+          setUser(null);
           setProfile(null);
           setSubscription(null);
           setIsLoading(false);
@@ -209,6 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set the user state directly so the app knows someone is logged in,
     // and the "Verify your email" banner will show instead of "Create Free Account".
     if (!error && data.user && !data.session) {
+      manualUserRef.current = true;
       setUser(data.user);
       // Fetch profile and subscription data for this unverified user
       fetchUserData(data.user.id);
@@ -234,6 +242,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return;
 
     // Clear local state first for immediate UI feedback
+    manualUserRef.current = false;
     setUser(null);
     setSession(null);
     setProfile(null);

@@ -49,7 +49,8 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
       if (newUser) {
         await saveLocationToDatabase(newUser.id);
       }
-      onSignupComplete();
+      // Don't call onSignupComplete here — it unmounts the modal before
+      // the user sees the success screen. Instead, call it from "Continue to Dashboard".
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An error occurred';
       setError(message);
@@ -170,7 +171,7 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
         <div className="freemium-modal" onClick={e => e.stopPropagation()}>
           <div className="freemium-modal-header">
             <h2>Check Your Email</h2>
-            <button className="close-button" onClick={onClose} aria-label="Close">
+            <button className="close-button" onClick={() => { onSignupComplete(); onClose(); }} aria-label="Close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
@@ -187,7 +188,7 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
               <p className="email-address">{email}</p>
               <p>You can start using the app now! Verify your email to complete setup.</p>
             </div>
-            <button className="freemium-cta-primary" onClick={onClose} style={{ marginTop: '1rem' }}>
+            <button className="freemium-cta-primary" onClick={() => { onSignupComplete(); onClose(); }} style={{ marginTop: '1rem' }}>
               Continue to Dashboard
             </button>
           </div>
