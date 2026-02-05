@@ -266,8 +266,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!pendingUpgrade || !user || !supabase) return;
 
-    console.log('[sync] Starting post-checkout subscription sync for user', user.id);
-
     let cancelled = false;
     let attempts = 0;
     const maxAttempts = 12;
@@ -276,7 +274,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const syncAndPoll = async () => {
       if (cancelled) return;
       attempts++;
-      console.log(`[sync] Attempt ${attempts}/${maxAttempts}`);
 
       try {
         const response = await fetch('/api/sync-subscription', {
@@ -288,10 +285,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
 
         const result = await response.json();
-        console.log('[sync] API response:', result);
 
         if (response.ok && (result.tier === 'trial' || result.tier === 'paid')) {
-          console.log('[sync] Subscription confirmed as', result.tier, '— refreshing from Supabase');
           // Read the updated row from Supabase so React state updates
           const { data } = await supabase!
             .from('subscriptions')
@@ -299,21 +294,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .eq('user_id', user.id)
             .single();
 
-          console.log('[sync] Supabase subscription row:', data);
           if (data) {
             setSubscription(data as Subscription);
           }
           setPendingUpgrade(false);
           return; // Done
         }
-      } catch (err) {
-        console.warn('[sync] Network error, will retry:', err);
+      } catch {
+        // Network error — will retry
       }
 
       if (attempts < maxAttempts && !cancelled) {
         setTimeout(syncAndPoll, pollInterval);
       } else {
-        console.warn('[sync] Gave up after', attempts, 'attempts');
         setPendingUpgrade(false);
       }
     };

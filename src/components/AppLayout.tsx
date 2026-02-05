@@ -64,7 +64,7 @@ export default function AppLayout({
 }: AppLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [savedLocationsOpen, setSavedLocationsOpen] = useState(false);
-  const { user, tier, isConfigured, isEmailVerified } = useAuth();
+  const { user, tier, daysRemaining, isConfigured, isEmailVerified } = useAuth();
 
   // Dashboard edit mode bridge
   const enterEditRef = useRef<() => void>(() => {});
@@ -249,7 +249,16 @@ export default function AppLayout({
 
               {accountOpen && (
                 <div className="sidebar-account-submenu">
-                  {(tier === 'free' || tier === 'trial') && (
+                  {tier === 'trial' && daysRemaining !== null && (
+                    <div className="sidebar-trial-banner">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <span>{daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} left in Trial</span>
+                    </div>
+                  )}
+                  {tier === 'free' && (
                     <button
                       className="sidebar-submenu-item sidebar-submenu-upgrade"
                       onClick={() => { onOpenUpgrade(); setMobileOpen(false); }}
