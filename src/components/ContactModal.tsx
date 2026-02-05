@@ -107,57 +107,41 @@ export default function ContactModal({ onClose }: ContactModalProps) {
           </p>
 
           <form onSubmit={handleSubmit}>
-            <div className="form-field" style={{ marginBottom: '1rem' }}>
-              <label
-                htmlFor="contact-subject"
-                style={{
-                  display: 'block',
-                  fontSize: '0.8125rem',
-                  fontWeight: 500,
-                  color: 'var(--color-text-secondary)',
-                  marginBottom: '0.375rem',
-                }}
-              >
-                Subject
-              </label>
+            <div className="form-group">
+              <label htmlFor="contact-subject">Subject</label>
               <input
                 id="contact-subject"
                 type="text"
-                className="auth-input"
                 value={subject}
                 onChange={e => setSubject(e.target.value)}
-                placeholder="What's this about?"
+                placeholder="Subject"
                 maxLength={200}
                 disabled={isLoading}
               />
             </div>
 
-            <div className="form-field" style={{ marginBottom: '1rem' }}>
-              <label
-                htmlFor="contact-message"
-                style={{
-                  display: 'block',
-                  fontSize: '0.8125rem',
-                  fontWeight: 500,
-                  color: 'var(--color-text-secondary)',
-                  marginBottom: '0.375rem',
-                }}
-              >
-                Message
-              </label>
+            <div className="form-group">
+              <label htmlFor="contact-message">Message</label>
               <textarea
                 id="contact-message"
-                className="auth-input"
                 value={message}
                 onChange={e => setMessage(e.target.value)}
-                placeholder="Tell us what's on your mind..."
+                placeholder="Message..."
                 rows={5}
                 maxLength={2000}
                 disabled={isLoading}
                 style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  backgroundColor: 'var(--color-background)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '8px',
+                  color: 'var(--color-text)',
+                  fontSize: '0.875rem',
                   resize: 'vertical',
                   minHeight: '100px',
                   fontFamily: 'inherit',
+                  boxSizing: 'border-box',
                 }}
               />
             </div>
