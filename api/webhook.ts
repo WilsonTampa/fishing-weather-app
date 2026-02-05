@@ -89,6 +89,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           tier = 'free';
         }
 
+        const currentPeriodEnd = (subscription as any).current_period_end
+          ? new Date((subscription as any).current_period_end * 1000).toISOString()
+          : null;
+
         const { error, count } = await supabase
           .from('subscriptions')
           .update({
@@ -96,8 +100,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             status,
             tier,
             trial_ends_at: trialEndsAt,
-            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-            cancel_at_period_end: subscription.cancel_at_period_end,
+            current_period_end: currentPeriodEnd,
+            cancel_at_period_end: subscription.cancel_at_period_end ?? false,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', userId)
@@ -118,8 +122,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               status,
               tier,
               trial_ends_at: trialEndsAt,
-              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-              cancel_at_period_end: subscription.cancel_at_period_end,
+              current_period_end: currentPeriodEnd,
+              cancel_at_period_end: subscription.cancel_at_period_end ?? false,
             });
           if (insertError) {
             console.error('Error inserting subscription row:', insertError);
