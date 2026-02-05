@@ -11,10 +11,16 @@ interface AuthContextType {
   isLoading: boolean;
   isConfigured: boolean;
   tier: SubscriptionTier;
+  isEmailVerified: boolean;
+  isSubscriptionEnding: boolean;
+  subscriptionEndDate: Date | null;
   canAccessFutureDays: boolean;
   canSaveLocations: boolean;
+  canSaveMoreLocations: boolean;
   canCustomizeDashboard: boolean;
   daysRemaining: number | null;
+  savedLocationCount: number;
+  setSavedLocationCount: (count: number) => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUpWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -30,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [savedLocationCount, setSavedLocationCount] = useState(0);
 
   // Fetch user profile and subscription from database
   const fetchUserData = async (userId: string) => {
@@ -110,23 +117,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (trialEnd > new Date()) {
         return 'trial';
       }
-      // Trial expired
+      // Trial expired - revert to free
       return 'free';
     }
 
-    // Check if paid subscription is active
+    // Check if paid subscription is active (including cancel_at_period_end - still paid until period ends)
     if (subscription.status === 'active') return 'paid';
 
     // Past due still gets access during grace period
     if (subscription.status === 'past_due') return 'paid';
 
+    // Canceled or any other status reverts to free
     return 'free';
   };
 
   const tier = computeTier();
+
+  // Email verification status
+  const isEmailVerified = !!user?.email_confirmed_at;
+
+  // Subscription ending (paid but cancel_at_period_end is true)
+  const isSubscriptionEnding = tier === 'paid' && !!subscription?.cancel_at_period_end;
+  const subscriptionEndDate = isSubscriptionEnding && subscription?.current_period_end
+    ? new Date(subscription.current_period_end)
+    : null;
+
+  // Feature permissions
   const canAccessFutureDays = tier === 'trial' || tier === 'paid';
-  const canSaveLocations = tier === 'paid';
-  const canCustomizeDashboard = tier === 'paid';
+  const canSaveLocations = !!user; // Any logged-in user can save at least 1 location
+  const canSaveMoreLocations = tier === 'trial' || tier === 'paid'
+    ? true // Unlimited for trial/paid
+    : savedLocationCount < 1; // Free users: only 1 location
+  const canCustomizeDashboard = tier === 'trial' || tier === 'paid';
 
   // Calculate days remaining in trial
   const daysRemaining = subscription?.trial_ends_at && tier === 'trial'
@@ -224,6 +246,76 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data) setSubscription(data);
   };
 
+  // Sync subscription after returning from Stripe checkout.
+  // Calls a backend endpoint that checks Stripe directly and updates Supabase,
+  // so we don't depend on the webhook having fired yet.
+  useEffect(() => {
+    if (!user || !supabase) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('upgraded') !== 'true') return;
+
+    // Clean the URL param so we don't re-trigger on re-renders
+    const url = new URL(window.location.href);
+    url.searchParams.delete('upgraded');
+    window.history.replaceState({}, '', url.pathname + url.search);
+
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 10;
+    const pollInterval = 3000;
+
+    const syncAndPoll = async () => {
+      if (cancelled) return;
+
+      try {
+        // Ask the backend to check Stripe and sync to Supabase
+        const response = await fetch('/api/sync-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id }),
+        });
+
+        if (cancelled) return;
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.tier === 'trial' || result.tier === 'paid') {
+            // Backend confirmed and synced — now refresh from Supabase
+            await refreshSubscription();
+            return; // Done
+          }
+        }
+      } catch {
+        // Network error — will retry
+      }
+
+      attempts++;
+      if (attempts < maxAttempts && !cancelled) {
+        setTimeout(syncAndPoll, pollInterval);
+      }
+    };
+
+    // Start after a short delay to let Stripe process the subscription
+    const timer = setTimeout(syncAndPoll, 1500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [user]);
+
+  // Auto-refresh subscription on window focus to catch webhook updates (cancellations, trial expiry, etc.)
+  useEffect(() => {
+    if (!user) return;
+
+    const handleFocus = () => {
+      refreshSubscription();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user]);
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -233,10 +325,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       isConfigured: isSupabaseConfigured,
       tier,
+      isEmailVerified,
+      isSubscriptionEnding,
+      subscriptionEndDate,
       canAccessFutureDays,
       canSaveLocations,
+      canSaveMoreLocations,
       canCustomizeDashboard,
       daysRemaining,
+      savedLocationCount,
+      setSavedLocationCount,
       signInWithGoogle,
       signInWithEmail,
       signUpWithEmail,

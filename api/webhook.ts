@@ -66,23 +66,66 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           break;
         }
 
-        const status = subscription.status === 'active' ? 'active' : subscription.status;
-        const tier = subscription.status === 'active' ? 'paid' : 'free';
+        // Determine tier based on subscription status and trial
+        let status: string;
+        let tier: string;
+        let trialEndsAt: string | null = null;
 
-        const { error } = await supabase
+        if (subscription.status === 'trialing') {
+          // Active trial period (from Stripe Checkout with trial_period_days)
+          status = 'trial';
+          tier = 'trial';
+          if (subscription.trial_end) {
+            trialEndsAt = new Date(subscription.trial_end * 1000).toISOString();
+          }
+        } else if (subscription.status === 'active') {
+          status = 'active';
+          tier = 'paid';
+        } else if (subscription.status === 'past_due') {
+          status = 'past_due';
+          tier = 'paid'; // Grace period
+        } else {
+          status = subscription.status;
+          tier = 'free';
+        }
+
+        const { error, count } = await supabase
           .from('subscriptions')
           .update({
             stripe_subscription_id: subscription.id,
             status,
             tier,
+            trial_ends_at: trialEndsAt,
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
             cancel_at_period_end: subscription.cancel_at_period_end,
             updated_at: new Date().toISOString()
           })
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .select('id');
 
         if (error) {
           console.error('Error updating subscription:', error);
+        } else if (!count) {
+          // No row matched — the subscription row may not exist yet.
+          // Insert one so the user's trial/paid status is captured.
+          console.warn(`No subscription row found for user ${userId}, inserting new row`);
+          const { error: insertError } = await supabase
+            .from('subscriptions')
+            .insert({
+              user_id: userId,
+              stripe_customer_id: subscription.customer as string,
+              stripe_subscription_id: subscription.id,
+              status,
+              tier,
+              trial_ends_at: trialEndsAt,
+              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+              cancel_at_period_end: subscription.cancel_at_period_end,
+            });
+          if (insertError) {
+            console.error('Error inserting subscription row:', insertError);
+          } else {
+            console.log(`Subscription inserted for user ${userId}: status=${status}, tier=${tier}`);
+          }
         } else {
           console.log(`Subscription updated for user ${userId}: status=${status}, tier=${tier}`);
         }
@@ -90,6 +133,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       case 'customer.subscription.deleted': {
+        // Subscription fully canceled — revert to free tier
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata.supabase_user_id;
 
@@ -101,18 +145,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const { error } = await supabase
           .from('subscriptions')
           .update({
-            status: 'canceled',
+            status: 'free',
             tier: 'free',
             stripe_subscription_id: null,
+            cancel_at_period_end: false,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', userId);
 
         if (error) {
-          console.error('Error canceling subscription:', error);
+          console.error('Error reverting subscription to free:', error);
         } else {
-          console.log(`Subscription canceled for user ${userId}`);
+          console.log(`Subscription canceled for user ${userId}, reverted to free tier`);
         }
+        break;
+      }
+
+      case 'customer.subscription.trial_will_end': {
+        // Fires 3 days before trial ends — Stripe handles reminder emails if enabled
+        const subscription = event.data.object as Stripe.Subscription;
+        const userId = subscription.metadata.supabase_user_id;
+        console.log(`Trial ending soon for user ${userId}`);
         break;
       }
 

@@ -215,7 +215,14 @@ function ForecastView({
           </button>
           {!isEditMode && (
             <button
-              onClick={enterEditMode}
+              onClick={() => {
+                if (canCustomizeDashboard) {
+                  enterEditMode();
+                } else {
+                  setUpgradeFeatureDescription('Customize your dashboard layout');
+                  openUpgradeModal();
+                }
+              }}
               title="Customize Dashboard"
               style={{
                 background: 'none',
@@ -545,10 +552,6 @@ function ForecastView({
           currentStationId={selectedStationId}
           onSelect={handleStationSelect}
           onClose={closeStationSelector}
-          onUpgrade={() => {
-            closeStationSelector();
-            openAuthModal();
-          }}
         />
       )}
 

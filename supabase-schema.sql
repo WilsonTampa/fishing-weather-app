@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
-  status TEXT NOT NULL DEFAULT 'trial', -- 'free', 'trial', 'active', 'canceled', 'past_due'
-  tier TEXT NOT NULL DEFAULT 'trial', -- 'free', 'trial', 'paid'
+  status TEXT NOT NULL DEFAULT 'free', -- 'free', 'trial', 'active', 'canceled', 'past_due'
+  tier TEXT NOT NULL DEFAULT 'free', -- 'free', 'trial', 'paid'
   trial_ends_at TIMESTAMPTZ,
   current_period_end TIMESTAMPTZ,
   cancel_at_period_end BOOLEAN DEFAULT FALSE,
@@ -87,13 +87,12 @@ BEGIN
     NEW.raw_user_meta_data->>'avatar_url'
   );
 
-  -- Create subscription with 7-day trial
-  INSERT INTO public.subscriptions (user_id, status, tier, trial_ends_at)
+  -- Create subscription with free tier (no trial - trial starts on explicit upgrade)
+  INSERT INTO public.subscriptions (user_id, status, tier)
   VALUES (
     NEW.id,
-    'trial',
-    'trial',
-    NOW() + INTERVAL '7 days'
+    'free',
+    'free'
   );
 
   RETURN NEW;

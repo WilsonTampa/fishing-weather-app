@@ -73,7 +73,7 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
             </div>
             <p>We sent a verification link to</p>
             <p className="email-address">{email}</p>
-            <p className="email-hint">Click the link in your email to complete signup and start your 7-day free trial.</p>
+            <p className="email-hint">Click the link in your email to verify your account.</p>
           </div>
         </div>
       </div>
@@ -84,7 +84,7 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
     <div className="auth-modal-overlay" onClick={onClose}>
       <div className="auth-modal" onClick={e => e.stopPropagation()}>
         <div className="auth-modal-header">
-          <h2>{mode === 'login' ? 'Welcome Back' : 'Start Free Trial'}</h2>
+          <h2>{mode === 'login' ? 'Welcome Back' : 'Create Free Account'}</h2>
           <button className="close-button" onClick={onClose} aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -105,25 +105,19 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
 
           {mode === 'signup' && (
             <div className="trial-benefits">
-              <h3>7-Day Free Trial Includes:</h3>
+              <h3>Free Account Includes:</h3>
               <ul>
                 <li>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  7-day marine forecast access
+                  Today's marine forecast
                 </li>
                 <li>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  All tide predictions
-                </li>
-                <li>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  Extended wind & weather data
+                  Save your favorite location
                 </li>
               </ul>
             </div>
@@ -188,7 +182,7 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
               {isLoading ? (
                 <span className="loading-spinner" />
               ) : (
-                mode === 'login' ? 'Sign In' : 'Start Free Trial'
+                mode === 'login' ? 'Sign In' : 'Create Free Account'
               )}
             </button>
           </form>
@@ -198,7 +192,7 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
               <p>
                 Don't have an account?{' '}
                 <button type="button" onClick={() => { setMode('signup'); setError(null); }}>
-                  Start free trial
+                  Create free account
                 </button>
               </p>
             ) : (

@@ -94,6 +94,55 @@
   stroke: var(--color-text-primary);
 }
 
+/* Sidebar CTA button (Create Free Account) */
+.sidebar-nav-cta {
+  color: var(--color-accent) !important;
+}
+
+.sidebar-nav-cta svg {
+  stroke: var(--color-accent) !important;
+}
+
+/* Email verification banner */
+.sidebar-verify-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  margin: 0.25rem 0.5rem;
+  background-color: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-md);
+  color: #F59E0B;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.sidebar-verify-banner svg {
+  flex-shrink: 0;
+  stroke: #F59E0B;
+}
+
+/* Subscription ending banner */
+.sidebar-ending-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  margin: 0.25rem 0.5rem;
+  background-color: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: var(--radius-md);
+  color: #F87171;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.sidebar-ending-banner svg {
+  flex-shrink: 0;
+  stroke: #F87171;
+}
+
 /* Saved Locations Panel */
 .saved-locations-panel {
   padding: 0 0.5rem 0.25rem 2.25rem;
@@ -223,6 +272,63 @@
 .saved-location-confirm-no:hover {
   border-color: var(--color-text-primary);
   color: var(--color-text-primary);
+}
+
+/* Account submenu */
+.sidebar-account-submenu {
+  padding: 0 0.5rem 0.25rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sidebar-submenu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+}
+
+.sidebar-submenu-item:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.sidebar-submenu-item:hover svg {
+  stroke: var(--color-text-primary);
+}
+
+.sidebar-submenu-item svg {
+  flex-shrink: 0;
+  stroke: var(--color-text-secondary);
+  transition: stroke 0.15s ease;
+}
+
+.sidebar-submenu-upgrade {
+  color: var(--color-accent);
+}
+
+.sidebar-submenu-upgrade svg {
+  stroke: var(--color-accent);
+}
+
+.sidebar-submenu-upgrade:hover {
+  color: var(--color-accent);
+}
+
+.sidebar-submenu-upgrade:hover svg {
+  stroke: var(--color-accent);
 }
 
 /* Main content area */

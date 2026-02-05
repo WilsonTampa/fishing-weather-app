@@ -134,7 +134,7 @@ function DaySelector({ selectedDay, onSelectDay, onLockedDayClick }: DaySelector
                   e.currentTarget.style.borderColor = 'var(--color-border)';
                 }
               }}
-              aria-label={locked ? `${formatDay(day)} - Premium feature` : formatDay(day)}
+              aria-label={locked ? `${formatDay(day)} - Pro feature` : formatDay(day)}
             >
               <div className="day-selector__label">
                 <span className="day-selector__day">{formatDay(day)}</span>

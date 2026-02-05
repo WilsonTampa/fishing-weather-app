@@ -3,8 +3,6 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Location } from '../types';
 import TideStationSelector from './TideStationSelector';
-import UpgradeModal from './UpgradeModal';
-import AuthModal from './AuthModal';
 import { useAuth } from '../contexts/AuthContext';
 import 'leaflet/dist/leaflet.css';
 
@@ -63,11 +61,7 @@ function MapView({ onLocationSelect }: MapViewProps) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
   const [showStationSelector, setShowStationSelector] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  // Stores the confirmed location+station to navigate after upsell is dismissed
-  const [confirmedLocation, setConfirmedLocation] = useState<Location | null>(null);
-  const { canSaveLocations } = useAuth();
+  const { user, canSaveMoreLocations } = useAuth();
 
   const handleLocationClick = (location: Location) => {
     setPendingLocation(location);
@@ -76,53 +70,25 @@ function MapView({ onLocationSelect }: MapViewProps) {
 
   const handleStationSelect = (stationId: string, stationName: string) => {
     if (pendingLocation) {
-      // Build the confirmed location with station info
       const locationWithStation: Location = {
         ...pendingLocation,
         tideStationId: stationId,
         name: stationName
       };
 
-      // For paid users, TideStationSelector will call onClose immediately after this
-      // We need to store the location so handleStationSelectorClose can navigate
-      // But due to React's async state updates, we also navigate directly here for paid users
-      if (canSaveLocations) {
-        // Paid users: navigate immediately with save prompt
-        setShowStationSelector(false);
-        setPendingLocation(null);
-        onLocationSelect(locationWithStation, true);
-      } else {
-        // Free users: store location, TideStationSelector will show upsell then call onClose
-        setConfirmedLocation(locationWithStation);
-      }
+      setShowStationSelector(false);
+      setPendingLocation(null);
+
+      // Logged-in users with save capacity: persist and prompt to save to DB
+      // Everyone else (guests, free users at limit): use temporary location
+      const shouldPersist = !!user && canSaveMoreLocations;
+      onLocationSelect(locationWithStation, shouldPersist);
     }
   };
 
   const handleStationSelectorClose = () => {
     setShowStationSelector(false);
     setPendingLocation(null);
-
-    // If a location was confirmed (free users after upsell), now navigate
-    if (confirmedLocation) {
-      onLocationSelect(confirmedLocation, false);
-      setConfirmedLocation(null);
-    }
-  };
-
-  const handleUpgradeFromStation = () => {
-    // Close station selector, then show auth/sign-in modal
-    setShowStationSelector(false);
-    setPendingLocation(null);
-    setShowAuthModal(true);
-  };
-
-  const handleUpgradeModalClose = () => {
-    setShowUpgradeModal(false);
-    // Navigate to forecast with the confirmed location
-    if (confirmedLocation) {
-      onLocationSelect(confirmedLocation, false);
-      setConfirmedLocation(null);
-    }
   };
 
   const handleGetCurrentLocation = () => {
@@ -220,34 +186,6 @@ function MapView({ onLocationSelect }: MapViewProps) {
           userLng={pendingLocation.longitude}
           onSelect={handleStationSelect}
           onClose={handleStationSelectorClose}
-          onUpgrade={handleUpgradeFromStation}
-        />
-      )}
-
-      {/* Upgrade Modal (shown after upsell prompt) */}
-      {showUpgradeModal && (
-        <UpgradeModal
-          onClose={handleUpgradeModalClose}
-          onOpenAuth={() => {
-            setShowUpgradeModal(false);
-            setShowAuthModal(true);
-          }}
-          featureDescription="Save your favorite locations"
-        />
-      )}
-
-      {/* Auth Modal */}
-      {showAuthModal && (
-        <AuthModal
-          onClose={() => {
-            setShowAuthModal(false);
-            // Navigate to forecast after auth modal closes
-            if (confirmedLocation) {
-              onLocationSelect(confirmedLocation, false);
-              setConfirmedLocation(null);
-            }
-          }}
-          initialMode="signup"
         />
       )}
     </div>

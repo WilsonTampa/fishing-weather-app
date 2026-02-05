@@ -40,7 +40,7 @@ export default function UserMenu({ onOpenAuth, onOpenUpgrade }: UserMenuProps) {
     return null;
   }
 
-  // Show sign in button when not logged in
+  // Show Sign Up button for guests (not logged in)
   if (!user) {
     return (
       <button
@@ -59,7 +59,7 @@ export default function UserMenu({ onOpenAuth, onOpenUpgrade }: UserMenuProps) {
         onMouseEnter={e => e.currentTarget.style.backgroundColor = '#4a9eff'}
         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-accent)'}
       >
-        Sign In
+        Sign Up
       </button>
     );
   }

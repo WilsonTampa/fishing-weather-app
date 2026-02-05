@@ -16,7 +16,7 @@ export default function SavedLocationsPanel({
   onOpenUpgrade,
   refreshKey,
 }: SavedLocationsPanelProps) {
-  const { user, canSaveLocations, isConfigured } = useAuth();
+  const { user, canSaveLocations, canSaveMoreLocations, setSavedLocationCount, isConfigured } = useAuth();
   const [locations, setLocations] = useState<SavedLocation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -24,26 +24,34 @@ export default function SavedLocationsPanel({
   useEffect(() => {
     if (!user || !canSaveLocations) {
       setLocations([]);
+      setSavedLocationCount(0);
       return;
     }
 
     setIsLoading(true);
     fetchSavedLocations(user.id)
-      .then(setLocations)
+      .then(locs => {
+        setLocations(locs);
+        setSavedLocationCount(locs.length);
+      })
       .finally(() => setIsLoading(false));
-  }, [user, canSaveLocations, refreshKey]);
+  }, [user, canSaveLocations, refreshKey, setSavedLocationCount]);
 
   const handleDelete = async (id: string) => {
     try {
       await deleteSavedLocation(id);
-      setLocations(prev => prev.filter(loc => loc.id !== id));
+      setLocations(prev => {
+        const updated = prev.filter(loc => loc.id !== id);
+        setSavedLocationCount(updated.length);
+        return updated;
+      });
     } catch {
       // Error logged in service
     }
     setConfirmDeleteId(null);
   };
 
-  // Not configured or not logged in
+  // Not configured or not logged in — prompt to create account
   if (!isConfigured || !user) {
     return (
       <div className="saved-locations-panel">
@@ -52,28 +60,10 @@ export default function SavedLocationsPanel({
           onClick={onOpenAuth}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0110 0v4" />
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
-          Sign up to save locations
-        </button>
-      </div>
-    );
-  }
-
-  // Logged in but not paid
-  if (!canSaveLocations) {
-    return (
-      <div className="saved-locations-panel">
-        <button
-          className="saved-locations-cta"
-          onClick={onOpenUpgrade}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0110 0v4" />
-          </svg>
-          Upgrade to save locations
+          Create free account to save locations
         </button>
       </div>
     );
@@ -133,6 +123,20 @@ export default function SavedLocationsPanel({
           )}
         </div>
       ))}
+
+      {/* Show upgrade CTA for free users who have reached their 1-location limit */}
+      {!canSaveMoreLocations && (
+        <button
+          className="saved-locations-cta"
+          onClick={onOpenUpgrade}
+          style={{ marginTop: '0.25rem' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          Upgrade for unlimited locations
+        </button>
+      )}
     </div>
   );
 }

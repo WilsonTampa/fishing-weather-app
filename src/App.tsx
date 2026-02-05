@@ -8,24 +8,28 @@ import SaveLocationPrompt from './components/SaveLocationPrompt';
 import LearnPage from './components/LearnPage';
 import ArticlePage from './components/ArticlePage';
 import WindMap from './components/WindMap';
+import FreemiumSignupModal from './components/FreemiumSignupModal';
 import { Location } from './types';
 import './styles/global.css';
 
-function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, showSavePromptOnLoad, onSavePromptHandled }: {
+function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, showSavePromptOnLoad, onSavePromptHandled, isTemporaryLocation, onLocationSaved }: {
   location: Location;
   onLocationChange: () => void;
   onLocationUpdate?: () => void;
   showSavePromptOnLoad?: boolean;
   onSavePromptHandled?: () => void;
+  isTemporaryLocation?: boolean;
+  onLocationSaved?: () => void;
 }) {
   const [showStationSelector, setShowStationSelector] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showSaveLocationModal, setShowSaveLocationModal] = useState(false);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
+  const [showFreemiumSignup, setShowFreemiumSignup] = useState(false);
   const [savedLocationsRefreshKey, setSavedLocationsRefreshKey] = useState(0);
 
-  // Show save prompt when navigating from map (for paid users)
+  // Show save prompt when navigating from map (for paid/trial users)
   useEffect(() => {
     if (showSavePromptOnLoad) {
       setShowSavePrompt(true);
@@ -34,6 +38,18 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, 
       }
     }
   }, [showSavePromptOnLoad, onSavePromptHandled]);
+
+  // Show freemium signup modal every time a guest arrives with a temporary location.
+  // Triggers on first visit AND every subsequent location change while still a guest.
+  useEffect(() => {
+    if (isTemporaryLocation) {
+      // Short delay so user can see the dashboard first
+      const timer = setTimeout(() => {
+        setShowFreemiumSignup(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [isTemporaryLocation, location]);
 
   const handleSelectSavedLocation = (lat: number, lng: number, tideStationId: string | null, name: string) => {
     const newLocation: Location = {
@@ -85,7 +101,7 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, 
         />
       )}
 
-      {/* Save Location Prompt (auto-prompt after selecting location from map) */}
+      {/* Save Location Prompt (auto-prompt after selecting location from map for trial/paid users) */}
       {showSavePrompt && location.name && (
         <SaveLocationPrompt
           locationName={location.name}
@@ -96,14 +112,36 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, 
           onSaved={() => setSavedLocationsRefreshKey(prev => prev + 1)}
         />
       )}
+
+      {/* Freemium Signup Modal (shown to guests after they see the dashboard) */}
+      {showFreemiumSignup && isTemporaryLocation && location.name && (
+        <FreemiumSignupModal
+          locationName={location.name}
+          latitude={location.latitude}
+          longitude={location.longitude}
+          tideStationId={location.tideStationId}
+          onClose={() => setShowFreemiumSignup(false)}
+          onSignupComplete={() => {
+            setShowFreemiumSignup(false);
+            if (onLocationSaved) {
+              onLocationSaved();
+            }
+            setSavedLocationsRefreshKey(prev => prev + 1);
+          }}
+        />
+      )}
     </AppLayout>
   );
 }
 
 function App() {
   const [savedLocation, setSavedLocation] = useState<Location | null>(null);
+  const [temporaryLocation, setTemporaryLocation] = useState<Location | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
+
+  // The active location is either saved (persisted) or temporary (guest, in-memory only)
+  const activeLocation = savedLocation || temporaryLocation;
 
   useEffect(() => {
     // Load saved location from localStorage on app startup
@@ -114,13 +152,11 @@ function App() {
           const location: Location = JSON.parse(saved);
 
           // Clean up invalid station IDs from old deployments
-          // Station 8725354 was incorrectly added and should be 8725441
           const invalidStationIds = ['8725354', '8725384', '8725392', '8725405', '8725412',
                                      '8725435', '8725437', '8725440', '8725447', '8725480', '8725500'];
 
           if (location.tideStationId && invalidStationIds.includes(location.tideStationId)) {
             console.warn(`Removing invalid tide station ${location.tideStationId} from saved location`);
-            // Remove the invalid station ID, will auto-select nearest on next load
             delete location.tideStationId;
             localStorage.setItem('savedLocation', JSON.stringify(location));
           }
@@ -138,16 +174,33 @@ function App() {
   }, []);
 
   const handleLocationSelect = (location: Location, promptSave: boolean = false) => {
-    // Save location to localStorage
-    localStorage.setItem('savedLocation', JSON.stringify(location));
-    setSavedLocation(location);
-    // Show save prompt for paid users who selected a new location
-    setShowSavePrompt(promptSave);
+    if (promptSave) {
+      // Logged-in trial/paid user: save to localStorage and prompt to save to DB
+      localStorage.setItem('savedLocation', JSON.stringify(location));
+      setSavedLocation(location);
+      setShowSavePrompt(true);
+    } else {
+      // Guest or free user selecting from map: use temporary location
+      // Don't persist to localStorage — they need to sign up to save
+      // The FreemiumSignupModal will auto-show via the isTemporaryLocation effect
+      setTemporaryLocation(location);
+    }
+  };
+
+  const handleLocationSaved = () => {
+    // Called after a guest signs up and their temporary location is saved
+    // Promote temporary location to saved location
+    if (temporaryLocation) {
+      localStorage.setItem('savedLocation', JSON.stringify(temporaryLocation));
+      setSavedLocation(temporaryLocation);
+      setTemporaryLocation(null);
+    }
   };
 
   const handleLocationChange = () => {
     // Allow user to change location by returning to map
     setSavedLocation(null);
+    setTemporaryLocation(null);
   };
 
   const handleLocationUpdate = () => {
@@ -182,7 +235,7 @@ function App() {
         <Route
           path="/"
           element={
-            savedLocation ? (
+            activeLocation ? (
               <Navigate to="/forecast" replace />
             ) : (
               <MapView onLocationSelect={handleLocationSelect} />
@@ -192,20 +245,22 @@ function App() {
         <Route
           path="/forecast"
           element={
-            savedLocation ? (
+            activeLocation ? (
               <ForecastViewWithLayout
-                location={savedLocation}
+                location={activeLocation}
                 onLocationChange={handleLocationChange}
                 onLocationUpdate={handleLocationUpdate}
                 showSavePromptOnLoad={showSavePrompt}
                 onSavePromptHandled={() => setShowSavePrompt(false)}
+                isTemporaryLocation={!savedLocation && !!temporaryLocation}
+                onLocationSaved={handleLocationSaved}
               />
             ) : (
               <Navigate to="/" replace />
             )
           }
         />
-        <Route path="/wind-map" element={<WindMap location={savedLocation} onLocationChange={handleLocationChange} />} />
+        <Route path="/wind-map" element={<WindMap location={activeLocation} onLocationChange={handleLocationChange} />} />
         <Route path="/learn" element={<LearnPage />} />
         <Route path="/learn/:slug" element={<ArticlePage />} />
       </Routes>

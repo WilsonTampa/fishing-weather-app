@@ -36,7 +36,32 @@
       "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build:*)",
       "Bash(echo:*)",
       "Bash(npx tsc --noEmit)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(lsof:*)",
+      "WebFetch(domain:mymarineforecast.com)",
+      "Bash(wc:*)",
+      "Bash(git log:*)",
+      "Bash(find:*)",
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && grep:*)",
+      "Bash(xargs cat:*)",
+      "WebFetch(domain:supabase.com)",
+      "WebFetch(domain:www.answeroverflow.com)",
+      "Bash(vercel --version:*)",
+      "Bash(xargs kill:*)",
+      "WebFetch(domain:www.weather.gov)",
+      "WebFetch(domain:api.weather.gov)",
+      "Bash(# Test with a point that is clearly on water \\(offshore\\) curl -s -H \"\"Accept: application/json\"\" -H \"\"User-Agent: FishingBoatingApp\"\" \"\"https://api.weather.gov/zones?type=marine&point=26.0,-79.9\"\" | python3 -m json.tool)",
+      "Bash(# Test: get the zone ID from the alerts response and fetch alerts for that zone curl -s -H \"\"Accept: application/geo+json\"\" -H \"\"User-Agent: FishingBoatingApp\"\" \"\"https://api.weather.gov/alerts/active?zone=AMZ651\"\")",
+      "Bash(# Test with a land-based point \\(downtown Fort Lauderdale\\) vs the offshore point # First, land point echo \"\"=== LAND POINT \\(Fort Lauderdale downtown: 26.12, -80.14\\) ===\"\" curl -s -H \"\"Accept: application/geo+json\"\" -H \"\"User-Agent: FishingBoatingApp\"\" \"\"https://api.weather.gov/alerts/active?point=26.12,-80.14\"\")",
+      "Bash(# The key question: how do we get marine alerts for a user who is on land near the coast? # Option 1: Use the zones endpoint to find nearby marine zones echo \"\"=== Option 1: Find marine zones near a land point ===\"\" echo \"\"Trying /zones?type=marine&point=26.12,-80.14 \\(land point\\)\"\" curl -s -H \"\"Accept: application/json\"\" -H \"\"User-Agent: FishingBoatingApp\"\" \"\"https://api.weather.gov/zones?type=marine&point=26.12,-80.14\"\")",
+      "Bash(# Check if we can find marine forecast zones for the CWA office \\(MFL = Miami\\) curl -s -H \"\"Accept: application/json\"\" -H \"\"User-Agent: FishingBoatingApp\"\" \"\"https://api.weather.gov/zones?type=marine&area=FL\"\")",
+      "Bash(# The area parameter for zones likely uses a different code for marine. Let me try different approaches echo \"\"=== Try listing marine zones by office ===\"\" curl -s -H \"\"Accept: application/json\"\" -H \"\"User-Agent: FishingBoatingApp\"\" \"\"https://api.weather.gov/offices/MFL\"\")",
+      "Bash(# Check the Open-Meteo Marine API docs to definitively confirm no advisory data curl -s \"\"https://marine-api.open-meteo.com/v1/marine?latitude=26.1&longitude=-80.1&hourly=wave_height,wave_period&forecast_days=1\"\")",
+      "Bash(# Let me also check what the Open-Meteo Marine API offers as hourly parameters curl -s \"\"https://open-meteo.com/en/docs/marine-weather-api\"\")",
+      "WebFetch(domain:docs.stripe.com)",
+      "Bash(npx vercel:*)",
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && grep -h \"process.env\\\\.\" api/*.ts:*)",
+      "Bash(kill:*)"
     ]
   }
 }

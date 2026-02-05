@@ -9,18 +9,27 @@ interface UpgradeModalProps {
 }
 
 export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }: UpgradeModalProps) {
-  const { user, tier } = useAuth();
+  const { user, tier, subscription } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // If user is not logged in, show auth modal instead
+  // Check if user has already used a trial (had a trial_ends_at set at some point)
+  const hasUsedTrial = !!subscription?.trial_ends_at;
+
+  const checkIcon = (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+
+  // If user is not logged in, prompt them to create an account first
   if (!user) {
     return (
       <div className="auth-modal-overlay" onClick={onClose}>
         <div className="auth-modal" onClick={e => e.stopPropagation()}>
           <div className="auth-modal-header">
-            <h2>Unlock Premium Features</h2>
+            <h2>Upgrade to Pro</h2>
             <button className="close-button" onClick={onClose} aria-label="Close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 6L6 18M6 6l12 12" />
@@ -28,23 +37,21 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
             </button>
           </div>
           <div className="auth-modal-body">
-            {featureDescription && (
-              <div className="upgrade-prompt">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0110 0v4" />
-                </svg>
-                <span>{featureDescription}</span>
-              </div>
-            )}
-            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem', textAlign: 'center' }}>
-              Sign up for a free 7-day trial to access all premium features.
+            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.25rem', textAlign: 'center' }}>
+              Create a free account first, then start your 7-day free trial to access all Pro features:
             </p>
+            <div className="trial-benefits" style={{ marginBottom: '1.5rem' }}>
+              <ul>
+                <li>{checkIcon} View forecast up to 7 days in advance</li>
+                <li>{checkIcon} Customize your forecast dashboard</li>
+                <li>{checkIcon} Save unlimited locations</li>
+              </ul>
+            </div>
             <button
               className="submit-button"
               onClick={() => { onClose(); onOpenAuth(); }}
             >
-              Start Free Trial
+              Create Free Account
             </button>
           </div>
         </div>
@@ -52,7 +59,7 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
     );
   }
 
-  // User is in trial and wants to upgrade early
+  // Handle checkout — with or without trial
   const handleCheckout = async () => {
     setError(null);
     setIsLoading(true);
@@ -69,12 +76,16 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
         return;
       }
 
+      // Include 7-day trial if user hasn't used one before
+      const trialDays = hasUsedTrial ? undefined : 7;
+
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           priceId,
+          trialDays,
           successUrl: `${window.location.origin}/forecast?upgraded=true`,
           cancelUrl: window.location.href
         })
@@ -129,6 +140,20 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
               color: '#F59E0B'
             }}>
               You're currently on a free trial. Upgrade now to keep access after your trial ends.
+            </div>
+          )}
+
+          {tier === 'free' && !hasUsedTrial && (
+            <div style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              border: '1px solid #10B981',
+              borderRadius: '8px',
+              padding: '0.75rem 1rem',
+              marginBottom: '1.5rem',
+              fontSize: '0.875rem',
+              color: '#10B981'
+            }}>
+              Start your 7-day free trial to access all Pro features. You won't be charged until the trial ends.
             </div>
           )}
 
@@ -212,36 +237,9 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
           <div className="trial-benefits" style={{ marginBottom: '1.5rem' }}>
             <h3>Pro includes:</h3>
             <ul>
-              <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                7-day extended forecast
-              </li>
-              <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                Save unlimited locations
-              </li>
-              <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                Full tide predictions
-              </li>
-              <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                Extended wind & weather data
-              </li>
-              <li>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                Customizable dashboard layout
-              </li>
+              <li>{checkIcon} View forecast up to 7 days in advance</li>
+              <li>{checkIcon} Customize your forecast dashboard</li>
+              <li>{checkIcon} Save unlimited locations</li>
             </ul>
           </div>
 
@@ -263,6 +261,8 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
           >
             {isLoading ? (
               <span className="loading-spinner" />
+            ) : !hasUsedTrial ? (
+              'Start 7-Day Free Trial'
             ) : (
               `Subscribe - $${selectedPlan === 'annual' ? annualPrice + '/year' : monthlyPrice + '/month'}`
             )}

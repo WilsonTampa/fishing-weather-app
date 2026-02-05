@@ -19,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { userId, priceId, successUrl, cancelUrl } = req.body;
+    const { userId, priceId, trialDays, successUrl, cancelUrl } = req.body;
 
     if (!userId || !priceId || !successUrl || !cancelUrl) {
       return res.status(400).json({ error: 'Missing required parameters' });
@@ -69,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // Create Stripe Checkout session
+    // Create Stripe Checkout session (with optional trial period)
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
@@ -77,7 +77,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success_url: successUrl,
       cancel_url: cancelUrl,
       subscription_data: {
-        metadata: { supabase_user_id: userId }
+        metadata: { supabase_user_id: userId },
+        ...(trialDays ? { trial_period_days: trialDays } : {})
       },
       allow_promotion_codes: true
     });
