@@ -22,7 +22,10 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { signUpWithEmail, signInWithEmail } = useAuth();
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [showResendVerification, setShowResendVerification] = useState(false);
+
+  const { signUpWithEmail, signInWithEmail, resendVerificationEmail } = useAuth();
 
   const saveLocationToDatabase = async (userId: string) => {
     try {
@@ -38,22 +41,32 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
     setIsLoading(true);
 
     try {
-      const { error } = await signUpWithEmail(email, password);
+      const { error, user: newUser } = await signUpWithEmail(email, password);
       if (error) throw error;
       setView('success');
-      // After signup, get the current user session and save location to DB
-      // Give time for auth state to update, then save location and notify parent
-      setTimeout(async () => {
-        if (supabase) {
-          const { data: { user: newUser } } = await supabase.auth.getUser();
-          if (newUser) {
-            await saveLocationToDatabase(newUser.id);
-          }
-        }
-        onSignupComplete();
-      }, 1000);
+      // Save the location for the new user (works even without a session
+      // since signUpWithEmail returns the user directly)
+      if (newUser) {
+        await saveLocationToDatabase(newUser.id);
+      }
+      onSignupComplete();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An error occurred';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setIsLoading(true);
+    setResendSuccess(false);
+    try {
+      const { error } = await resendVerificationEmail(email);
+      if (error) throw error;
+      setResendSuccess(true);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to resend email';
       setError(message);
     } finally {
       setIsLoading(false);
@@ -67,7 +80,14 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
 
     try {
       const { error } = await signInWithEmail(email, password);
-      if (error) throw error;
+      if (error) {
+        if (error.message?.toLowerCase().includes('email not confirmed')) {
+          setShowResendVerification(true);
+          setError(null);
+          return;
+        }
+        throw error;
+      }
       // Save the location to DB for the logged-in user
       if (supabase) {
         const { data: { user: loggedInUser } } = await supabase.auth.getUser();
@@ -91,6 +111,58 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
     </svg>
   );
 
+  // Resend verification view (shown when login fails due to unverified email)
+  if (showResendVerification) {
+    return (
+      <div className="freemium-modal-overlay">
+        <div className="freemium-modal" onClick={e => e.stopPropagation()}>
+          <div className="freemium-modal-header">
+            <h2>Verify Your Email</h2>
+            <button className="close-button" onClick={onClose} aria-label="Close">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="freemium-modal-body">
+            <div className="freemium-success">
+              <div className="freemium-success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5">
+                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p>Your account exists but your email hasn't been verified yet.</p>
+              <p className="email-address">{email}</p>
+              {resendSuccess ? (
+                <p style={{ color: 'var(--color-accent)' }}>Verification email sent! Check your inbox.</p>
+              ) : (
+                <p>Click below to resend the verification link.</p>
+              )}
+              {error && (
+                <div className="error-message">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  {error}
+                </div>
+              )}
+            </div>
+            <button
+              className="freemium-cta-primary"
+              onClick={handleResendVerification}
+              disabled={isLoading || resendSuccess}
+              style={{ marginTop: '1rem' }}
+            >
+              {isLoading ? <span className="loading-spinner" /> : resendSuccess ? 'Email Sent!' : 'Resend Verification Email'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Success view after signup
   if (view === 'success') {
     return (
@@ -113,7 +185,7 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
               </div>
               <p>We sent a verification link to</p>
               <p className="email-address">{email}</p>
-              <p>Your location has been saved. You can start using the app now!</p>
+              <p>You can start using the app now! Verify your email to complete setup.</p>
             </div>
             <button className="freemium-cta-primary" onClick={onClose} style={{ marginTop: '1rem' }}>
               Continue to Dashboard

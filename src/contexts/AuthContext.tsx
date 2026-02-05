@@ -23,7 +23,8 @@ interface AuthContextType {
   setSavedLocationCount: (count: number) => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUpWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUpWithEmail: (email: string, password: string) => Promise<{ error: Error | null; user?: User | null }>;
+  resendVerificationEmail: (email: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshSubscription: () => Promise<void>;
 }
@@ -187,9 +188,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUpWithEmail = async (email: string, password: string) => {
     if (!supabase) return { error: new Error('Auth not configured') };
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/forecast`
+      }
+    });
+
+    // Detect duplicate signup: Supabase returns a user with empty identities
+    // when the email is already registered (to avoid leaking account existence)
+    if (!error && data.user && data.user.identities?.length === 0) {
+      return {
+        error: new Error('An account with this email already exists. Please sign in instead.'),
+        user: null
+      };
+    }
+
+    // When email confirmation is enabled, Supabase returns a user but no session.
+    // Set the user state directly so the app knows someone is logged in,
+    // and the "Verify your email" banner will show instead of "Create Free Account".
+    if (!error && data.user && !data.session) {
+      setUser(data.user);
+      // Fetch profile and subscription data for this unverified user
+      fetchUserData(data.user.id);
+    }
+
+    return { error: error as Error | null, user: data?.user ?? null };
+  };
+
+  const resendVerificationEmail = async (emailAddress: string) => {
+    if (!supabase) return { error: new Error('Auth not configured') };
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: emailAddress,
       options: {
         emailRedirectTo: `${window.location.origin}/forecast`
       }
@@ -353,6 +386,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithGoogle,
       signInWithEmail,
       signUpWithEmail,
+      resendVerificationEmail,
       signOut,
       refreshSubscription
     }}>

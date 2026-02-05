@@ -15,8 +15,10 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailSent, setShowEmailSent] = useState(false);
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
-  const { signInWithEmail, signUpWithEmail } = useAuth();
+  const { signInWithEmail, signUpWithEmail, resendVerificationEmail } = useAuth();
 
   // Google Sign-In temporarily disabled - needs OAuth setup in Supabase
   // const { signInWithGoogle } = useAuth();
@@ -38,10 +40,19 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
     try {
       if (mode === 'login') {
         const { error } = await signInWithEmail(email, password);
-        if (error) throw error;
+        if (error) {
+          // Detect unverified email and show resend option instead of generic error
+          if (error.message?.toLowerCase().includes('email not confirmed')) {
+            setShowResendVerification(true);
+            setError(null);
+          } else {
+            throw error;
+          }
+          return;
+        }
         onClose();
       } else {
-        const { error } = await signUpWithEmail(email, password);
+        const { error, user: newUser } = await signUpWithEmail(email, password);
         if (error) throw error;
         setShowEmailSent(true);
       }
@@ -52,6 +63,70 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
       setIsLoading(false);
     }
   };
+
+  const handleResendVerification = async () => {
+    setIsLoading(true);
+    setResendSuccess(false);
+    try {
+      const { error } = await resendVerificationEmail(email);
+      if (error) throw error;
+      setResendSuccess(true);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to resend email';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (showResendVerification) {
+    return (
+      <div className="auth-modal-overlay" onClick={onClose}>
+        <div className="auth-modal" onClick={e => e.stopPropagation()}>
+          <div className="auth-modal-header">
+            <h2>Verify Your Email</h2>
+            <button className="close-button" onClick={onClose} aria-label="Close">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="auth-modal-body email-sent">
+            <div className="email-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5">
+                <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p>Your account exists but your email hasn't been verified yet.</p>
+            <p className="email-address">{email}</p>
+            {resendSuccess ? (
+              <p className="email-hint" style={{ color: 'var(--color-accent)' }}>Verification email sent! Check your inbox.</p>
+            ) : (
+              <p className="email-hint">Click below to resend the verification link.</p>
+            )}
+            {error && (
+              <div className="error-message" style={{ marginTop: '0.5rem' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                {error}
+              </div>
+            )}
+            <button
+              className="submit-button"
+              onClick={handleResendVerification}
+              disabled={isLoading || resendSuccess}
+              style={{ marginTop: '1rem' }}
+            >
+              {isLoading ? <span className="loading-spinner" /> : resendSuccess ? 'Email Sent!' : 'Resend Verification Email'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showEmailSent) {
     return (
@@ -74,6 +149,14 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
             <p>We sent a verification link to</p>
             <p className="email-address">{email}</p>
             <p className="email-hint">Click the link in your email to verify your account.</p>
+            <p className="email-hint" style={{ marginTop: '0.5rem' }}>You can start using the app right away.</p>
+            <button
+              className="submit-button"
+              onClick={onClose}
+              style={{ marginTop: '1rem' }}
+            >
+              Continue to Dashboard
+            </button>
           </div>
         </div>
       </div>
