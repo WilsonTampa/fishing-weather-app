@@ -65,7 +65,8 @@
       "Bash(git rev-list --all --objects)",
       "Bash(npm test)",
       "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && npx vite build:*)",
-      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && npx vitest run:*)"
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && npx vitest run:*)",
+      "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && npm info resend@4 version:*)"
     ]
   }
 }

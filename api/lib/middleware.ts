@@ -8,9 +8,13 @@ const ALLOWED_ORIGINS = [
   'https://www.mymarineforecast.com',
 ];
 
-// In development, also allow localhost
+// In non-production environments, also allow localhost and Vercel preview URLs
 if (process.env.VERCEL_ENV !== 'production') {
   ALLOWED_ORIGINS.push('http://localhost:3000', 'http://localhost:5173');
+  // Add the current Vercel preview URL if available
+  if (process.env.VERCEL_URL) {
+    ALLOWED_ORIGINS.push(`https://${process.env.VERCEL_URL}`);
+  }
 }
 
 /**
