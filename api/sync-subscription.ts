@@ -25,25 +25,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Get the user's subscription record to find their Stripe customer ID
-    const { data: subRow, error: subError } = await supabase
+    const { data: subRow } = await supabase
       .from('subscriptions')
       .select('stripe_customer_id, stripe_subscription_id')
       .eq('user_id', userId)
       .single();
 
-    if (subError || !subRow) {
-      return res.status(404).json({ error: 'No subscription record found' });
-    }
-
-    // If we already have a subscription ID, check it directly
-    if (subRow.stripe_subscription_id) {
+    // Strategy 1: If we already have a subscription ID, check it directly
+    if (subRow?.stripe_subscription_id) {
       const subscription = await stripe.subscriptions.retrieve(subRow.stripe_subscription_id);
       const result = await syncSubscriptionToSupabase(userId, subscription);
       return res.status(200).json(result);
     }
 
-    // Otherwise, look up subscriptions by customer ID
-    if (subRow.stripe_customer_id) {
+    // Strategy 2: Look up subscriptions by customer ID
+    if (subRow?.stripe_customer_id) {
       const subscriptions = await stripe.subscriptions.list({
         customer: subRow.stripe_customer_id,
         limit: 1,
@@ -54,6 +50,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const subscription = subscriptions.data[0];
         const result = await syncSubscriptionToSupabase(userId, subscription);
         return res.status(200).json(result);
+      }
+    }
+
+    // Strategy 3: Look up the Stripe customer by the user's email (fallback for
+    // cases where the customer ID wasn't saved to Supabase)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', userId)
+      .single();
+
+    if (profile?.email) {
+      const customers = await stripe.customers.list({
+        email: profile.email,
+        limit: 1,
+      });
+
+      if (customers.data.length > 0) {
+        const customer = customers.data[0];
+
+        // Backfill the customer ID into Supabase if we have a row
+        if (subRow) {
+          await supabase
+            .from('subscriptions')
+            .update({ stripe_customer_id: customer.id, updated_at: new Date().toISOString() })
+            .eq('user_id', userId);
+        }
+
+        const subscriptions = await stripe.subscriptions.list({
+          customer: customer.id,
+          limit: 1,
+          status: 'all',
+        });
+
+        if (subscriptions.data.length > 0) {
+          const subscription = subscriptions.data[0];
+          const result = await syncSubscriptionToSupabase(userId, subscription);
+          return res.status(200).json(result);
+        }
       }
     }
 
@@ -90,19 +125,23 @@ async function syncSubscriptionToSupabase(userId: string, subscription: Stripe.S
 
   const { error } = await supabase
     .from('subscriptions')
-    .update({
-      stripe_subscription_id: subscription.id,
-      status,
-      tier,
-      trial_ends_at: trialEndsAt,
-      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-      cancel_at_period_end: subscription.cancel_at_period_end,
-      updated_at: new Date().toISOString()
-    })
-    .eq('user_id', userId);
+    .upsert(
+      {
+        user_id: userId,
+        stripe_customer_id: subscription.customer as string,
+        stripe_subscription_id: subscription.id,
+        status,
+        tier,
+        trial_ends_at: trialEndsAt,
+        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+        cancel_at_period_end: subscription.cancel_at_period_end,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    );
 
   if (error) {
-    console.error('Error updating subscription during sync:', error);
+    console.error('Error upserting subscription during sync:', error);
   }
 
   return { status, tier, trial_ends_at: trialEndsAt };

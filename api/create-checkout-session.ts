@@ -58,14 +58,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       customerId = customer.id;
 
-      // Save customer ID to subscription record
-      const { error: updateError } = await supabase
+      // Save customer ID to subscription record (upsert in case the row doesn't exist yet)
+      const { error: upsertError } = await supabase
         .from('subscriptions')
-        .update({ stripe_customer_id: customerId })
-        .eq('user_id', userId);
+        .upsert(
+          { user_id: userId, stripe_customer_id: customerId, status: 'free', tier: 'free' },
+          { onConflict: 'user_id' }
+        );
 
-      if (updateError) {
-        console.error('Error updating subscription with customer ID:', updateError);
+      if (upsertError) {
+        console.error('Error saving subscription with customer ID:', upsertError);
       }
     }
 
