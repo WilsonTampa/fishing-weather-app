@@ -40,10 +40,22 @@ export default function ContactModal({ onClose }: ContactModalProps) {
         }),
       });
 
-      const data = await response.json();
+      // Handle non-JSON responses (e.g. Vercel server errors return plain text)
+      const contentType = response.headers.get('content-type');
+      if (!response.ok) {
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to send message. Please try again.');
+        }
+        throw new Error('Failed to send message. Please try again.');
+      }
 
-      if (!response.ok || data.error) {
-        throw new Error(data.error || 'Failed to send message. Please try again.');
+      const data = contentType && contentType.includes('application/json')
+        ? await response.json()
+        : {};
+
+      if (data.error) {
+        throw new Error(data.error);
       }
 
       setSuccess(true);

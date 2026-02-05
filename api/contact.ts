@@ -5,23 +5,23 @@ import { sendEmail } from './lib/email';
 const CONTACT_EMAIL = 'stevewilsontampa@gmail.com';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
-  if (handleCors(req, res)) return;
-
-  // Only allow POST
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  // Rate limiting: 5 contact form submissions per IP per 15 minutes
-  const ip = getClientIp(req);
-  if (!checkRateLimit(`contact:${ip}`, 5, 15 * 60 * 1000)) {
-    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
-  }
-
   try {
-    const { subject, message, userEmail } = req.body;
+    // CORS
+    if (handleCors(req, res)) return;
+
+    // Only allow POST
+    if (req.method !== 'POST') {
+      res.setHeader('Allow', 'POST');
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    // Rate limiting: 5 contact form submissions per IP per 15 minutes
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`contact:${ip}`, 5, 15 * 60 * 1000)) {
+      return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    }
+
+    const { subject, message, userEmail } = req.body || {};
 
     // Input validation
     if (!subject || typeof subject !== 'string' || subject.trim().length === 0) {
