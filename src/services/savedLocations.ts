@@ -29,6 +29,29 @@ export async function createSavedLocation(
 ): Promise<SavedLocation | null> {
   if (!supabase) return null;
 
+  // Application-level tier check (database trigger also enforces this)
+  const { data: sub } = await (supabase
+    .from('subscriptions') as any)
+    .select('tier, trial_ends_at')
+    .eq('user_id', userId)
+    .single() as { data: { tier: string; trial_ends_at: string | null } | null };
+
+  const tier = sub?.tier ?? 'free';
+  const trialExpired = tier === 'trial' && sub?.trial_ends_at && new Date(sub.trial_ends_at) < new Date();
+  const effectiveTier = trialExpired ? 'free' : tier;
+
+  if (effectiveTier === 'free') {
+    // Count existing locations for this user
+    const { count } = await supabase
+      .from('saved_locations')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (count !== null && count >= 1) {
+      throw new Error('Free tier users can save a maximum of 1 location. Upgrade to save more.');
+    }
+  }
+
   // If setting as default, clear existing defaults first
   if (isDefault) {
     await (supabase
@@ -52,6 +75,10 @@ export async function createSavedLocation(
     .single();
 
   if (error) {
+    // Provide a user-friendly message if the DB trigger catches a limit violation
+    if (error.code === 'P0001' || error.message?.includes('maximum of 1 location')) {
+      throw new Error('Free tier users can save a maximum of 1 location. Upgrade to save more.');
+    }
     console.error('Error saving location:', error);
     throw error;
   }

@@ -62,7 +62,8 @@
       "Bash(npx vercel:*)",
       "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && grep -h \"process.env\\\\.\" api/*.ts:*)",
       "Bash(kill:*)",
-      "Bash(git rev-list --all --objects)"
+      "Bash(git rev-list --all --objects)",
+      "Bash(npm test)"
     ]
   }
 }

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useRef, ReactNode } fro
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { authenticatedFetch } from '../lib/api';
+import { setSentryUser } from '../lib/sentry';
 import type { Profile, Subscription, SubscriptionTier } from '../types/database';
 
 interface AuthContextType {
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setSentryUser(session?.user?.id ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
       }
@@ -94,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           manualUserRef.current = false;
           setSession(session);
           setUser(session.user);
+          setSentryUser(session.user.id);
           setTimeout(() => {
             fetchUserData(session.user.id).finally(() => {
               setIsLoading(false);
@@ -108,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
           setProfile(null);
           setSubscription(null);
+          setSentryUser(null);
           setIsLoading(false);
         }
       }

@@ -9,12 +9,15 @@
     "prebuild": "npm run fetch-stations",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@sentry/react": "^10.38.0",
     "@stripe/stripe-js": "^8.6.4",
     "@supabase/supabase-js": "^2.93.1",
     "leaflet": "^1.9.4",
@@ -30,6 +33,8 @@
     "suncalc": "^1.9.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/leaflet": "^1.9.8",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
@@ -41,7 +46,9 @@
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "jsdom": "^28.0.0",
     "typescript": "^5.2.2",
-    "vite": "^5.1.0"
+    "vite": "^5.1.0",
+    "vitest": "^4.0.18"
   }
 }

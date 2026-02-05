@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { validatePassword, getPasswordStrength } from '../utils/passwordValidation';
 import './AuthModal.css';
 
 interface AuthModalProps {
@@ -53,6 +54,14 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
         }
         onClose();
       } else {
+        // Validate password strength before signup
+        const validation = validatePassword(password);
+        if (!validation.isValid) {
+          setError(`Password must have: ${validation.errors.join(', ').toLowerCase()}`);
+          setIsLoading(false);
+          return;
+        }
+
         const { error } = await signUpWithEmail(email, password);
         if (error) throw error;
         setShowEmailSent(true);
@@ -246,9 +255,18 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                minLength={6}
+                minLength={mode === 'signup' ? 8 : 1}
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               />
+              {mode === 'signup' && password.length > 0 && (
+                <div style={{ marginTop: '0.375rem', fontSize: '0.75rem', color:
+                  getPasswordStrength(password) === 'strong' ? '#10B981'
+                  : getPasswordStrength(password) === 'fair' ? '#F59E0B'
+                  : '#EF4444'
+                }}>
+                  Password strength: {getPasswordStrength(password)}
+                </div>
+              )}
             </div>
 
             {error && (

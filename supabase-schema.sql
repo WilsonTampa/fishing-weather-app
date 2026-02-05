@@ -68,9 +68,56 @@ CREATE POLICY "Users can view own subscription" ON public.subscriptions
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Saved locations policies
+-- Allow users to read and delete their own locations
 DROP POLICY IF EXISTS "Users can manage own locations" ON public.saved_locations;
 CREATE POLICY "Users can manage own locations" ON public.saved_locations
   FOR ALL USING (auth.uid() = user_id);
+
+-- ============================================
+-- FUNCTION: Enforce saved location limits by tier
+-- Free users: max 1 location. Trial/Paid: unlimited.
+-- Called by a trigger BEFORE INSERT on saved_locations.
+-- ============================================
+CREATE OR REPLACE FUNCTION public.enforce_saved_location_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+  user_tier TEXT;
+  user_trial_ends TIMESTAMPTZ;
+  location_count INT;
+BEGIN
+  -- Get the user's subscription tier
+  SELECT tier, trial_ends_at INTO user_tier, user_trial_ends
+  FROM public.subscriptions
+  WHERE user_id = NEW.user_id;
+
+  -- If trial tier, check if trial has actually expired
+  IF user_tier = 'trial' AND user_trial_ends IS NOT NULL AND user_trial_ends < NOW() THEN
+    user_tier := 'free';
+  END IF;
+
+  -- Trial and paid users have no limit
+  IF user_tier IN ('trial', 'paid') THEN
+    RETURN NEW;
+  END IF;
+
+  -- Free tier: check current count
+  SELECT COUNT(*) INTO location_count
+  FROM public.saved_locations
+  WHERE user_id = NEW.user_id;
+
+  IF location_count >= 1 THEN
+    RAISE EXCEPTION 'Free tier users can save a maximum of 1 location. Upgrade to save more.'
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS check_saved_location_limit ON public.saved_locations;
+CREATE TRIGGER check_saved_location_limit
+  BEFORE INSERT ON public.saved_locations
+  FOR EACH ROW EXECUTE FUNCTION public.enforce_saved_location_limit();
 
 -- ============================================
 -- TRIGGER: Auto-create profile & subscription on signup

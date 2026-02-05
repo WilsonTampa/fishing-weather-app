@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createSavedLocation } from '../services/savedLocations';
 import { supabase } from '../lib/supabase';
+import { validatePassword, getPasswordStrength } from '../utils/passwordValidation';
 import './FreemiumSignupModal.css';
 
 interface FreemiumSignupModalProps {
@@ -42,6 +43,14 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
     setIsLoading(true);
 
     try {
+      // Validate password strength before signup
+      const validation = validatePassword(password);
+      if (!validation.isValid) {
+        setError(`Password must have: ${validation.errors.join(', ').toLowerCase()}`);
+        setIsLoading(false);
+        return;
+      }
+
       const { error, user: newUser } = await signUpWithEmail(email, password);
       if (error) throw error;
       setView('success');
@@ -247,9 +256,18 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  minLength={6}
+                  minLength={isSignup ? 8 : 1}
                   autoComplete={isSignup ? 'new-password' : 'current-password'}
                 />
+                {isSignup && password.length > 0 && (
+                  <div style={{ marginTop: '0.375rem', fontSize: '0.75rem', color:
+                    getPasswordStrength(password) === 'strong' ? '#10B981'
+                    : getPasswordStrength(password) === 'fair' ? '#F59E0B'
+                    : '#EF4444'
+                  }}>
+                    Password strength: {getPasswordStrength(password)}
+                  </div>
+                )}
               </div>
 
               {error && (
