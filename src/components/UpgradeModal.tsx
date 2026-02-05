@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { authenticatedFetch } from '../lib/api';
 import './AuthModal.css'; // Reuse auth modal styles
 
 interface UpgradeModalProps {
@@ -79,9 +80,8 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
       // Include 7-day trial if user hasn't used one before
       const trialDays = hasUsedTrial ? undefined : 7;
 
-      const response = await fetch('/api/create-checkout-session', {
+      const response = await authenticatedFetch('/api/create-checkout-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           priceId,

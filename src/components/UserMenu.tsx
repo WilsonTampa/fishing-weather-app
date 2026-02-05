@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { authenticatedFetch } from '../lib/api';
 
 interface UserMenuProps {
   onOpenAuth: () => void;
@@ -67,9 +68,8 @@ export default function UserMenu({ onOpenAuth, onOpenUpgrade }: UserMenuProps) {
   const handleManageSubscription = async () => {
     setIsOpen(false);
     try {
-      const response = await fetch('/api/create-portal-session', {
+      const response = await authenticatedFetch('/api/create-portal-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           returnUrl: window.location.href

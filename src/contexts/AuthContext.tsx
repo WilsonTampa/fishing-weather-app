@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { authenticatedFetch } from '../lib/api';
 import type { Profile, Subscription, SubscriptionTier } from '../types/database';
 
 interface AuthContextType {
@@ -318,9 +319,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       attempts++;
 
       try {
-        const response = await fetch('/api/sync-subscription', {
+        const response = await authenticatedFetch('/api/sync-subscription', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.id }),
         });
 
