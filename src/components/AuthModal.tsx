@@ -52,7 +52,7 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
         }
         onClose();
       } else {
-        const { error, user: newUser } = await signUpWithEmail(email, password);
+        const { error } = await signUpWithEmail(email, password);
         if (error) throw error;
         setShowEmailSent(true);
       }
