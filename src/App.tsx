@@ -7,6 +7,8 @@ import SaveLocationModal from './components/SaveLocationModal';
 import SaveLocationPrompt from './components/SaveLocationPrompt';
 import LearnPage from './components/LearnPage';
 import ArticlePage from './components/ArticlePage';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 import WindMap from './components/WindMap';
 import FreemiumSignupModal from './components/FreemiumSignupModal';
 import { Location } from './types';
@@ -263,6 +265,8 @@ function App() {
         <Route path="/wind-map" element={<WindMap location={activeLocation} onLocationChange={handleLocationChange} />} />
         <Route path="/learn" element={<LearnPage />} />
         <Route path="/learn/:slug" element={<ArticlePage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
       </Routes>
     </Router>
   );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createSavedLocation } from '../services/savedLocations';
 import { supabase } from '../lib/supabase';
@@ -269,6 +270,15 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
                   isSignup ? 'Create Free Account' : 'Sign In'
                 )}
               </button>
+
+              {isSignup && (
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textAlign: 'center', marginTop: '0.75rem', lineHeight: '1.5' }}>
+                  By creating an account, you agree to our{' '}
+                  <Link to="/terms" onClick={onClose} style={{ color: 'var(--color-accent)' }}>Terms of Service</Link>
+                  {' '}and{' '}
+                  <Link to="/privacy" onClick={onClose} style={{ color: 'var(--color-accent)' }}>Privacy Policy</Link>.
+                </p>
+              )}
             </form>
 
             <div className="freemium-auth-switch">
