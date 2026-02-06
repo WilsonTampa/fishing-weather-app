@@ -21,6 +21,7 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapViewProps {
   onLocationSelect: (location: Location, promptSave?: boolean) => void;
+  onCancel?: () => void;
 }
 
 function LocationMarker({ onLocationClick }: { onLocationClick: (location: Location) => void }) {
@@ -57,7 +58,7 @@ function LocationMarker({ onLocationClick }: { onLocationClick: (location: Locat
   );
 }
 
-function MapView({ onLocationSelect }: MapViewProps) {
+function MapView({ onLocationSelect, onCancel }: MapViewProps) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
   const [showStationSelector, setShowStationSelector] = useState(false);
@@ -132,7 +133,40 @@ function MapView({ onLocationSelect }: MapViewProps) {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <h1 style={{ fontSize: '1.5rem' }}>My Marine Forecast</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: 'transparent',
+                color: 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.375rem',
+                fontSize: '0.875rem',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'var(--color-text-secondary)';
+                e.currentTarget.style.color = 'var(--color-text)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'var(--color-border)';
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Back to Dashboard
+            </button>
+          )}
+          <h1 style={{ fontSize: '1.5rem' }}>My Marine Forecast</h1>
+        </div>
         <button
           onClick={handleGetCurrentLocation}
           style={{

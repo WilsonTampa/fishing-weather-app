@@ -142,6 +142,7 @@ function App() {
   const [temporaryLocation, setTemporaryLocation] = useState<Location | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
   // The active location is either saved (persisted) or temporary (guest, in-memory only)
   const activeLocation = savedLocation || temporaryLocation;
@@ -177,6 +178,7 @@ function App() {
   }, []);
 
   const handleLocationSelect = (location: Location, promptSave: boolean = false) => {
+    setShowMap(false);
     if (promptSave) {
       // Logged-in trial/paid user: save to localStorage and prompt to save to DB
       localStorage.setItem('savedLocation', JSON.stringify(location));
@@ -201,9 +203,14 @@ function App() {
   };
 
   const handleLocationChange = () => {
-    // Allow user to change location by returning to map
-    setSavedLocation(null);
-    setTemporaryLocation(null);
+    // Show the map so user can pick a new location
+    // Keep the current location so they can cancel and go back
+    setShowMap(true);
+  };
+
+  const handleMapCancel = () => {
+    // User cancelled location change — go back to their current dashboard
+    setShowMap(false);
   };
 
   const handleLocationUpdate = () => {
@@ -238,17 +245,17 @@ function App() {
         <Route
           path="/"
           element={
-            activeLocation ? (
+            activeLocation && !showMap ? (
               <Navigate to="/forecast" replace />
             ) : (
-              <MapView onLocationSelect={handleLocationSelect} />
+              <MapView onLocationSelect={handleLocationSelect} onCancel={activeLocation ? handleMapCancel : undefined} />
             )
           }
         />
         <Route
           path="/forecast"
           element={
-            activeLocation ? (
+            activeLocation && !showMap ? (
               <ForecastViewWithLayout
                 location={activeLocation}
                 onLocationChange={handleLocationChange}
