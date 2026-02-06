@@ -69,7 +69,8 @@
       "Bash(cd /Users/stevewilson/Documents/Git\\\\ Repos/freemium_build && npm info resend@4 version:*)",
       "Bash(grep:*)",
       "WebFetch(domain:signoz.io)",
-      "WebFetch(domain:stripe.com)"
+      "WebFetch(domain:stripe.com)",
+      "Bash(npx vite build)"
     ]
   }
 }

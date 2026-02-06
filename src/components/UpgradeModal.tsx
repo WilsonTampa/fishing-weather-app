@@ -43,9 +43,9 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
             </p>
             <div className="trial-benefits" style={{ marginBottom: '1.5rem' }}>
               <ul>
-                <li>{checkIcon} View forecast up to 7 days in advance</li>
-                <li>{checkIcon} Customize your forecast dashboard</li>
-                <li>{checkIcon} Save unlimited locations</li>
+                <li>{checkIcon} View marine forecasts 7 days in advance</li>
+                <li>{checkIcon} Customize your own weather dashboard</li>
+                <li>{checkIcon} Save unlimited favorite locations</li>
               </ul>
             </div>
             <button
@@ -131,11 +131,11 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
 
           {/* Features list */}
           <div className="trial-benefits" style={{ marginBottom: '1.5rem' }}>
-            <h3>Upgrade to Pro to unlock:</h3>
+            <h3>Upgrade to Pro:</h3>
             <ul>
-              <li>{checkIcon} View forecast up to 7 days in advance</li>
-              <li>{checkIcon} Customize your forecast dashboard</li>
-              <li>{checkIcon} Save unlimited locations</li>
+              <li>{checkIcon} View marine forecasts 7 days in advance</li>
+              <li>{checkIcon} Customize your own weather dashboard</li>
+              <li>{checkIcon} Save unlimited favorite locations</li>
             </ul>
           </div>
 
