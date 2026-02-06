@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { handleCors, checkRateLimit, getClientIp } from './lib/middleware';
-import { sendEmail } from './lib/email';
+import { handleCors, checkRateLimit, getClientIp } from './lib/middleware.js';
+import { sendEmail } from './lib/email.js';
 
 const CONTACT_EMAIL = 'stevewilsontampa@gmail.com';
 

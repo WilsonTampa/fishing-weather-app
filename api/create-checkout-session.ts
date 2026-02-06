@@ -10,16 +10,7 @@ import {
   isValidTrialDays,
   checkRateLimit,
   getClientIp,
-} from './lib/middleware';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover'
-});
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+} from './lib/middleware.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS
@@ -31,6 +22,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Validate env vars
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.VITE_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const missing = [];
+    if (!process.env.STRIPE_SECRET_KEY) missing.push('STRIPE_SECRET_KEY');
+    if (!process.env.VITE_SUPABASE_URL) missing.push('VITE_SUPABASE_URL');
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+    console.error('Missing env vars:', missing.join(', '));
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+
   // Rate limiting: 10 checkout requests per IP per 15 minutes
   const ip = getClientIp(req);
   if (!checkRateLimit(`checkout:${ip}`, 10, 15 * 60 * 1000)) {
@@ -40,6 +41,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Authenticate the user
   const authenticatedUserId = await verifyAuth(req, res);
   if (!authenticatedUserId) return; // verifyAuth already sent the error response
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-12-15.clover'
+  });
+  const supabase = createClient(
+    process.env.VITE_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
 
   try {
     const { userId, priceId, trialDays, successUrl, cancelUrl } = req.body;

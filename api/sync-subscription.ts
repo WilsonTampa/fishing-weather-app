@@ -7,7 +7,7 @@ import {
   isValidUUID,
   checkRateLimit,
   getClientIp,
-} from './lib/middleware';
+} from './lib/middleware.js';
 
 // Validate required env vars at startup
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
