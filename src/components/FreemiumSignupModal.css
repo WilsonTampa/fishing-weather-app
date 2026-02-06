@@ -207,6 +207,22 @@
   box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
 }
 
+/* Forgot password link */
+.forgot-password-link {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  padding: 0;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
 /* Back link */
 .freemium-back-link {
   display: flex;

@@ -26,8 +26,10 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
 
   const [resendSuccess, setResendSuccess] = useState(false);
   const [showResendVerification, setShowResendVerification] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
-  const { signUpWithEmail, signInWithEmail, resendVerificationEmail } = useAuth();
+  const { signUpWithEmail, signInWithEmail, resendVerificationEmail, resetPassword } = useAuth();
 
   const saveLocationToDatabase = async (userId: string) => {
     try {
@@ -63,6 +65,22 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
       // the user sees the success screen. Instead, call it from "Continue to Dashboard".
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An error occurred';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+    try {
+      const { error } = await resetPassword(email);
+      if (error) throw error;
+      setResetEmailSent(true);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to send reset email';
       setError(message);
     } finally {
       setIsLoading(false);
@@ -121,6 +139,81 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );
+
+  // Forgot password view
+  if (showForgotPassword) {
+    return (
+      <div className="freemium-modal-overlay">
+        <div className="freemium-modal" onClick={e => e.stopPropagation()}>
+          <div className="freemium-modal-header">
+            <h2>{resetEmailSent ? 'Check Your Email' : 'Reset Password'}</h2>
+            <button className="close-button" onClick={onClose} aria-label="Close">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="freemium-modal-body">
+            {resetEmailSent ? (
+              <div className="freemium-success">
+                <div className="freemium-success-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5">
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p>We sent a password reset link to</p>
+                <p className="email-address">{email}</p>
+                <p>Click the link in your email to set a new password.</p>
+              </div>
+            ) : (
+              <>
+                <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 1.25rem', fontSize: '0.9375rem' }}>
+                  Enter your email address and we'll send you a link to reset your password.
+                </p>
+                <form className="freemium-signup-form" onSubmit={handleForgotPassword}>
+                  <div className="form-group">
+                    <label htmlFor="freemium-reset-email">Email</label>
+                    <input
+                      type="email"
+                      id="freemium-reset-email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      required
+                      autoComplete="email"
+                      autoFocus
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="error-message">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      {error}
+                    </div>
+                  )}
+
+                  <button type="submit" className="freemium-cta-primary" disabled={isLoading}>
+                    {isLoading ? <span className="loading-spinner" /> : 'Send Reset Link'}
+                  </button>
+                </form>
+              </>
+            )}
+            <button
+              className="freemium-cta-primary"
+              onClick={() => { setShowForgotPassword(false); setResetEmailSent(false); setError(null); }}
+              style={{ marginTop: '0.75rem', backgroundColor: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+            >
+              Back to Sign In
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Resend verification view (shown when login fails due to unverified email)
   if (showResendVerification) {
@@ -267,6 +360,15 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
                   }}>
                     Password strength: {getPasswordStrength(password)}
                   </div>
+                )}
+                {!isSignup && (
+                  <button
+                    type="button"
+                    className="forgot-password-link"
+                    onClick={() => { setShowForgotPassword(true); setError(null); }}
+                  >
+                    Forgot password?
+                  </button>
                 )}
               </div>
 

@@ -19,8 +19,10 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
   const [showEmailSent, setShowEmailSent] = useState(false);
   const [showResendVerification, setShowResendVerification] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
-  const { signInWithEmail, signUpWithEmail, resendVerificationEmail } = useAuth();
+  const { signInWithEmail, signUpWithEmail, resendVerificationEmail, resetPassword } = useAuth();
 
   // Google Sign-In temporarily disabled - needs OAuth setup in Supabase
   // const { signInWithGoogle } = useAuth();
@@ -74,6 +76,22 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+    try {
+      const { error } = await resetPassword(email);
+      if (error) throw error;
+      setResetEmailSent(true);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to send reset email';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleResendVerification = async () => {
     setIsLoading(true);
     setResendSuccess(false);
@@ -88,6 +106,87 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
       setIsLoading(false);
     }
   };
+
+  if (showForgotPassword) {
+    return (
+      <div className="auth-modal-overlay" onClick={onClose}>
+        <div className="auth-modal" onClick={e => e.stopPropagation()}>
+          <div className="auth-modal-header">
+            <h2>{resetEmailSent ? 'Check Your Email' : 'Reset Password'}</h2>
+            <button className="close-button" onClick={onClose} aria-label="Close">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="auth-modal-body">
+            {resetEmailSent ? (
+              <div className="email-sent">
+                <div className="email-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5">
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p>We sent a password reset link to</p>
+                <p className="email-address">{email}</p>
+                <p className="email-hint">Click the link in your email to set a new password.</p>
+                <button
+                  className="submit-button"
+                  onClick={() => { setShowForgotPassword(false); setResetEmailSent(false); setError(null); }}
+                  style={{ marginTop: '1rem' }}
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            ) : (
+              <>
+                <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 1.25rem', fontSize: '0.9375rem' }}>
+                  Enter your email address and we'll send you a link to reset your password.
+                </p>
+                <form onSubmit={handleForgotPassword}>
+                  <div className="form-group">
+                    <label htmlFor="email">Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      required
+                      autoComplete="email"
+                      autoFocus
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="error-message">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      {error}
+                    </div>
+                  )}
+
+                  <button type="submit" className="submit-button" disabled={isLoading}>
+                    {isLoading ? <span className="loading-spinner" /> : 'Send Reset Link'}
+                  </button>
+                </form>
+                <div className="auth-switch">
+                  <p>
+                    <button type="button" onClick={() => { setShowForgotPassword(false); setError(null); }}>
+                      Back to sign in
+                    </button>
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showResendVerification) {
     return (
@@ -266,6 +365,15 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
                 }}>
                   Password strength: {getPasswordStrength(password)}
                 </div>
+              )}
+              {mode === 'login' && (
+                <button
+                  type="button"
+                  className="forgot-password-link"
+                  onClick={() => { setShowForgotPassword(true); setError(null); }}
+                >
+                  Forgot password?
+                </button>
               )}
             </div>
 
