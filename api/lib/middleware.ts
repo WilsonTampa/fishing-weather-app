@@ -148,11 +148,11 @@ function cleanupRateLimitMap() {
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
   lastCleanup = now;
 
-  for (const [key, entry] of rateLimitMap) {
+  rateLimitMap.forEach((entry, key) => {
     if (now > entry.resetAt) {
       rateLimitMap.delete(key);
     }
-  }
+  });
 }
 
 /**

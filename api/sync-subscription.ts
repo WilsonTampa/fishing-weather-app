@@ -43,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const authenticatedUserId = await verifyAuth(req, res);
   if (!authenticatedUserId) return;
 
-  const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' });
+  const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2025-12-15.clover' });
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
@@ -150,7 +150,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 async function syncSubscriptionToSupabase(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   subscription: Stripe.Subscription
 ) {

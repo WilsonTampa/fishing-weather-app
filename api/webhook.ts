@@ -11,10 +11,11 @@ import {
 } from './lib/email-templates';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16'
+  apiVersion: '2025-12-15.clover'
 });
 
-const supabase = createClient(
+// Cast to `any` to avoid strict type inference issues with ungenerated Supabase types
+const supabase: any = createClient(
   process.env.VITE_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
@@ -238,9 +239,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
-        if (!invoice.subscription) break;
+        const invoiceSubscription = (invoice as any).subscription;
+        if (!invoiceSubscription) break;
 
-        const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+        const subscription = await stripe.subscriptions.retrieve(invoiceSubscription as string);
         const userId = subscription.metadata.supabase_user_id;
 
         if (!userId) {

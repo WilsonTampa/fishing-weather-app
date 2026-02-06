@@ -1,5 +1,4 @@
 import { Resend } from 'resend';
-import { createClient } from '@supabase/supabase-js';
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -44,7 +43,7 @@ export async function sendEmail(options: {
  * Returns null if not found or on error.
  */
 export async function getUserEmail(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string
 ): Promise<string | null> {
   try {
@@ -59,7 +58,7 @@ export async function getUserEmail(
       return null;
     }
 
-    return data.email;
+    return data.email as string;
   } catch (err) {
     console.error('[email] Error fetching user email:', err);
     return null;
