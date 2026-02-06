@@ -155,13 +155,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ? new Date(subscription.current_period_end)
     : null;
 
-  // Feature permissions
-  const canAccessFutureDays = tier === 'trial' || tier === 'paid';
-  const canSaveLocations = !!user; // Any logged-in user can save at least 1 location
-  const canSaveMoreLocations = tier === 'trial' || tier === 'paid'
-    ? true // Unlimited for trial/paid
-    : savedLocationCount < 1; // Free users: only 1 location
-  const canCustomizeDashboard = tier === 'trial' || tier === 'paid';
+  // TODO: REVERT BEFORE LAUNCH — temporarily unlocking all paid features for pre-launch testing
+  const canAccessFutureDays = true; // was: tier === 'trial' || tier === 'paid';
+  const canSaveLocations = true; // was: !!user;
+  const canSaveMoreLocations = true; // was: tier === 'trial' || tier === 'paid' ? true : savedLocationCount < 1;
+  const canCustomizeDashboard = true; // was: tier === 'trial' || tier === 'paid';
 
   // Calculate days remaining in trial
   const daysRemaining = subscription?.trial_ends_at && tier === 'trial'
