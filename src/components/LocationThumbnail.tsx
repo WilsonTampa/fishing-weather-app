@@ -51,7 +51,7 @@ function LocationThumbnail({ latitude, longitude, onClick }: LocationThumbnailPr
         attributionControl={false}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}"
         />
         <Marker position={[latitude, longitude]} icon={thumbnailIcon} />
       </MapContainer>
