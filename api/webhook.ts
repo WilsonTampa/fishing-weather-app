@@ -1,24 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-import { sendEmail, getUserEmail } from './lib/email';
+import { sendEmail, getUserEmail } from './lib/email.js';
 import {
   welcomeTrialEmail,
   trialEndingSoonEmail,
   subscriptionActivatedEmail,
   paymentFailedEmail,
   subscriptionCanceledEmail,
-} from './lib/email-templates';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover'
-});
-
-// Cast to `any` to avoid strict type inference issues with ungenerated Supabase types
-const supabase: any = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+} from './lib/email-templates.js';
 
 // Disable body parsing, we need raw body for webhook signature verification
 export const config = {
@@ -43,6 +33,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Validate env vars
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.VITE_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error('Missing required env vars for webhook');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-12-15.clover'
+  });
+
+  // Cast to `any` to avoid strict type inference issues with ungenerated Supabase types
+  const supabase: any = createClient(
+    process.env.VITE_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
   const sig = req.headers['stripe-signature'];
   if (!sig) {
     return res.status(400).json({ error: 'Missing stripe-signature header' });
@@ -55,7 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     event = stripe.webhooks.constructEvent(
       buf,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
