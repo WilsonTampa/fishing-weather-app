@@ -177,6 +177,29 @@
   opacity: 0.5;
 }
 
+/* Focused station section (from marker click) */
+.focused-station-section {
+  margin-bottom: 0.75rem;
+}
+
+.station-item.focused {
+  border-color: var(--color-accent);
+  background-color: rgba(88, 166, 255, 0.05);
+}
+
+.nearby-stations-section {
+  margin-top: 0.25rem;
+}
+
+.nearby-stations-heading {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.5rem 0.25rem;
+}
+
 /* Save location upsell prompt */
 .save-prompt-content {
   display: flex;

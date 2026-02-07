@@ -45,7 +45,7 @@ let TIDE_STATIONS_CACHE: TideStation[] | null = null;
  * Load all tide stations from static JSON file
  * Data is fetched during build time via scripts/fetch-stations.js
  */
-async function loadAllTideStations(): Promise<TideStation[]> {
+export async function loadAllTideStations(): Promise<TideStation[]> {
   // Return cached data if already loaded
   if (TIDE_STATIONS_CACHE !== null) {
     return TIDE_STATIONS_CACHE;

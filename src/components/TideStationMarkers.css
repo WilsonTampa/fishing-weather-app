@@ -1,0 +1,10 @@
+.tide-station-marker {
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.tide-station-marker:hover {
+  transform: scale(1.2);
+}

@@ -3,9 +3,11 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Location } from '../types';
 import TideStationSelector from './TideStationSelector';
+import TideStationMarkers from './TideStationMarkers';
 import MapOnboarding from './MapOnboarding';
 import { useAuth } from '../contexts/AuthContext';
 import 'leaflet/dist/leaflet.css';
+import './TideStationMarkers.css';
 
 // Fix for default marker icons in React-Leaflet
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -64,6 +66,7 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
   const [showStationSelector, setShowStationSelector] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [focusedStation, setFocusedStation] = useState<{ id: string; name: string; lat: number; lng: number } | undefined>(undefined);
   const { user, canSaveMoreLocations } = useAuth();
 
   // Show onboarding overlay on first visit only (not when returning via "Change Location")
@@ -83,6 +86,7 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
       dismissOnboarding();
     }
     setPendingLocation(location);
+    setFocusedStation(undefined);
     setShowStationSelector(true);
   };
 
@@ -104,9 +108,23 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
     }
   };
 
+  const handleStationMarkerClick = (station: { id: string; name: string; lat: number; lng: number }) => {
+    if (showOnboarding) {
+      dismissOnboarding();
+    }
+    setPendingLocation({
+      latitude: station.lat,
+      longitude: station.lng,
+      name: station.name
+    });
+    setFocusedStation(station);
+    setShowStationSelector(true);
+  };
+
   const handleStationSelectorClose = () => {
     setShowStationSelector(false);
     setPendingLocation(null);
+    setFocusedStation(undefined);
   };
 
   const handleGetCurrentLocation = () => {
@@ -218,6 +236,7 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <LocationMarker onLocationClick={handleLocationClick} />
+          <TideStationMarkers onStationClick={handleStationMarkerClick} />
         </MapContainer>
 
         {/* First-visit onboarding overlay */}
@@ -234,6 +253,7 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
         <TideStationSelector
           userLat={pendingLocation.latitude}
           userLng={pendingLocation.longitude}
+          focusedStation={focusedStation}
           onSelect={handleStationSelect}
           onClose={handleStationSelectorClose}
         />
