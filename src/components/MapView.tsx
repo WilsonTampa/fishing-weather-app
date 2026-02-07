@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Location } from '../types';
@@ -246,6 +247,33 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
             onDismiss={dismissOnboarding}
           />
         )}
+
+        {/* Footer links for Privacy & Terms */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '0.375rem',
+          padding: '0.5rem 1rem',
+          backgroundColor: 'rgba(13, 17, 23, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 400,
+          fontSize: '0.75rem',
+          color: 'var(--color-text-secondary)'
+        }}>
+          <Link to="/privacy" style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--color-text)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--color-text-secondary)'}
+          >Privacy Policy</Link>
+          <span>·</span>
+          <Link to="/terms" style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--color-text)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--color-text-secondary)'}
+          >Terms of Service</Link>
+        </div>
       </div>
 
       {/* Tide Station Selector Modal */}
