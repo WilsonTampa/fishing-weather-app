@@ -71,7 +71,8 @@
       "WebFetch(domain:signoz.io)",
       "WebFetch(domain:stripe.com)",
       "Bash(npx vite build)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(sort:*)"
     ]
   }
 }

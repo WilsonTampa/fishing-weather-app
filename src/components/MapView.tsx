@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Location } from '../types';
 import TideStationSelector from './TideStationSelector';
+import MapOnboarding from './MapOnboarding';
 import { useAuth } from '../contexts/AuthContext';
 import 'leaflet/dist/leaflet.css';
 
@@ -62,9 +63,25 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
   const [showStationSelector, setShowStationSelector] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const { user, canSaveMoreLocations } = useAuth();
 
+  // Show onboarding overlay on first visit only (not when returning via "Change Location")
+  useEffect(() => {
+    if (!onCancel && !localStorage.getItem('hasSeenMapOnboarding')) {
+      setShowOnboarding(true);
+    }
+  }, [onCancel]);
+
+  const dismissOnboarding = () => {
+    setShowOnboarding(false);
+    localStorage.setItem('hasSeenMapOnboarding', 'true');
+  };
+
   const handleLocationClick = (location: Location) => {
+    if (showOnboarding) {
+      dismissOnboarding();
+    }
     setPendingLocation(location);
     setShowStationSelector(true);
   };
@@ -93,6 +110,9 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
   };
 
   const handleGetCurrentLocation = () => {
+    if (showOnboarding) {
+      dismissOnboarding();
+    }
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -185,18 +205,6 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
         </button>
       </header>
 
-      {/* Instructions */}
-      <div style={{
-        padding: '1rem 2rem',
-        backgroundColor: 'var(--color-background)',
-        borderBottom: '1px solid var(--color-border)',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: 'var(--color-text-secondary)' }}>
-          Click anywhere on the map to get marine conditions, tide predictions, and offshore weather forecasts
-        </p>
-      </div>
-
       {/* Map */}
       <div style={{ flex: 1, position: 'relative' }}>
         <MapContainer
@@ -211,6 +219,14 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
           />
           <LocationMarker onLocationClick={handleLocationClick} />
         </MapContainer>
+
+        {/* First-visit onboarding overlay */}
+        {showOnboarding && (
+          <MapOnboarding
+            onUseMyLocation={handleGetCurrentLocation}
+            onDismiss={dismissOnboarding}
+          />
+        )}
       </div>
 
       {/* Tide Station Selector Modal */}
