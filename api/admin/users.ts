@@ -7,7 +7,7 @@ import {
 } from '../lib/middleware.js';
 
 // Admin email whitelist — only these users can access this endpoint
-const ADMIN_EMAILS = ['steve@mymarineforecast.com'];
+const ADMIN_EMAILS = ['stevewilsontampa@gmail.com'];
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
