@@ -12,6 +12,7 @@ import TermsOfService from './components/TermsOfService';
 import WindMap from './components/WindMap';
 import FreemiumSignupModal from './components/FreemiumSignupModal';
 import ResetPassword from './components/ResetPassword';
+import AdminDashboard from './components/AdminDashboard';
 import { Location } from './types';
 import './styles/global.css';
 
@@ -273,6 +274,7 @@ function App() {
         <Route path="/wind-map" element={<WindMap location={activeLocation} onLocationChange={handleLocationChange} />} />
         <Route path="/learn" element={<LearnPage />} />
         <Route path="/learn/:slug" element={<ArticlePage />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
