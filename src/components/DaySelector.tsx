@@ -49,9 +49,10 @@ function DaySelector({ selectedDay, onSelectDay, onLockedDayClick }: DaySelector
     return day.toDateString() === today.toDateString();
   };
 
-  // Day is locked if: auth is configured AND user can't access future days AND it's not today
+  // Day is locked if: auth is configured AND user can't access future days AND it's beyond tomorrow
+  // Free users get today + tomorrow (48 hours), paid/trial get full 7-day forecast
   const isLocked = (index: number) => {
-    return isConfigured && !canAccessFutureDays && index > 0;
+    return isConfigured && !canAccessFutureDays && index > 1;
   };
 
   const formatDay = (day: Date) => {
@@ -67,8 +68,8 @@ function DaySelector({ selectedDay, onSelectDay, onLockedDayClick }: DaySelector
   };
 
   const handleDayClick = (day: Date, index: number) => {
-    // Today is always free
-    if (index === 0) {
+    // Today and tomorrow are always free
+    if (index <= 1) {
       onSelectDay(day);
       return;
     }

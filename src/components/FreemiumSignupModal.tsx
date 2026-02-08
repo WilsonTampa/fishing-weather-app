@@ -474,7 +474,7 @@ export default function FreemiumSignupModal({ locationName, latitude, longitude,
             <div className="freemium-tier freemium-tier-free">
               <div className="freemium-tier-label">Always Free:</div>
               <ul>
-                <li>{checkIcon} View Today's marine forecast</li>
+                <li>{checkIcon} Marine forecast for next 48 hours</li>
                 <li>{checkIcon} Save your favorite location</li>
               </ul>
             </div>

@@ -301,7 +301,7 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  Today's marine forecast
+                  Marine forecast for next 48 hours
                 </li>
                 <li>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">

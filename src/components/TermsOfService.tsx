@@ -73,7 +73,7 @@ function TermsOfService() {
         <h3>Free Plan</h3>
         <p>All registered users receive a free plan that includes:</p>
         <ul>
-          <li>Today's marine forecast</li>
+          <li>Marine forecast for next 48 hours</li>
           <li>One saved location</li>
         </ul>
 
