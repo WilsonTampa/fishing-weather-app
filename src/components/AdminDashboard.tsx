@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authenticatedFetch } from '../lib/api';
 import './AdminDashboard.css';
@@ -63,7 +63,6 @@ function formatRelative(dateStr: string | null): string {
 
 function AdminDashboard() {
   const { user, isLoading: authLoading } = useAuth();
-  const navigate = useNavigate();
   const [data, setData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,13 +75,6 @@ function AdminDashboard() {
       document.title = 'My Marine Forecast - Tide, Wind & Weather for Boating and Fishing';
     };
   }, []);
-
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/', { replace: true });
-    }
-  }, [authLoading, user, navigate]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -109,11 +101,14 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user) {
       fetchData();
+    } else if (!authLoading && !user) {
+      setLoading(false);
+      setError('You must be logged in to access the admin dashboard.');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [authLoading, user]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
