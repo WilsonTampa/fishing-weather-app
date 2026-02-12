@@ -38,6 +38,15 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
             </button>
           </div>
           <div className="auth-modal-body">
+            {featureDescription && (
+              <div className="upgrade-prompt">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0110 0v4" />
+                </svg>
+                <span>{featureDescription}</span>
+              </div>
+            )}
             <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.25rem', textAlign: 'center' }}>
               Create a free account first, then start your 7-day free trial to access all Pro features:
             </p>

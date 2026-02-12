@@ -74,7 +74,13 @@
       "Bash(cat:*)",
       "Bash(sort:*)",
       "Bash(npx --yes sharp-cli:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(git checkout:*)",
+      "WebFetch(domain:docs.google.com)",
+      "WebFetch(domain:api.open-meteo.com)",
+      "Bash(done)",
+      "Bash(npx vitest run)",
+      "Bash(git merge multiple_models --no-ff -m \"$\\(cat <<''EOF''\nMerge branch ''multiple_models'' — multi-model forecast comparison\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

@@ -151,8 +151,7 @@ function ForecastView({
   const openUpgradeModal = onOpenUpgradeModal ?? (() => setInternalShowUpgrade(true));
 
   const handleCompareModels = () => {
-    // DEV: bypass tier gate for testing
-    if (tier === 'free' && !import.meta.env.DEV) {
+    if (tier === 'free') {
       setUpgradeFeatureDescription('Compare GFS, ECMWF, HRRR & NAM side by side to see where models agree');
       openUpgradeModal();
     } else {
