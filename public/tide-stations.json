@@ -1,6 +1,6 @@
 {
   "count": 3379,
-  "fetchedAt": "2026-02-10T12:38:11.940Z",
+  "fetchedAt": "2026-02-12T23:50:47.568Z",
   "stations": [
     {
       "id": "TPT2731",
@@ -13277,8 +13277,8 @@
     {
       "id": "8725439",
       "name": "Tropical Homesites Landing, Pine Island",
-      "lat": 26.546972274780273,
-      "lng": -82.0808334350586,
+      "lat": 26.5483,
+      "lng": -82.08,
       "state": "FL",
       "type": "S"
     },
