@@ -43,6 +43,7 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
             </p>
             <div className="trial-benefits" style={{ marginBottom: '1.5rem' }}>
               <ul>
+                <li>{checkIcon} Compare GFS, ECMWF, HRRR &amp; NAM forecast models</li>
                 <li>{checkIcon} View marine forecasts 7 days in advance</li>
                 <li>{checkIcon} Customize your own weather dashboard</li>
                 <li>{checkIcon} Save unlimited favorite locations</li>
@@ -102,8 +103,8 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
     }
   };
 
-  const monthlyPrice = 4.99;
-  const annualPrice = 45;
+  const monthlyPrice = 7.99;
+  const annualPrice = 72;
   const monthlySavings = Math.round((1 - (annualPrice / 12) / monthlyPrice) * 100);
 
   return (
@@ -133,6 +134,7 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
           <div className="trial-benefits" style={{ marginBottom: '1.5rem' }}>
             <h3>Upgrade to Pro:</h3>
             <ul>
+              <li>{checkIcon} Compare GFS, ECMWF, HRRR &amp; NAM forecast models</li>
               <li>{checkIcon} View marine forecasts 7 days in advance</li>
               <li>{checkIcon} Customize your own weather dashboard</li>
               <li>{checkIcon} Save unlimited favorite locations</li>
@@ -277,6 +279,26 @@ export default function UpgradeModal({ onClose, onOpenAuth, featureDescription }
           }}>
             Secure payment powered by Stripe. Cancel anytime.
           </p>
+
+          {/* DEV ONLY: Bypass button for testing without Stripe */}
+          {import.meta.env.DEV && (
+            <button
+              onClick={onClose}
+              style={{
+                width: '100%',
+                marginTop: '0.75rem',
+                padding: '0.5rem',
+                backgroundColor: 'transparent',
+                border: '1px dashed #f0883e',
+                borderRadius: '8px',
+                color: '#f0883e',
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+              }}
+            >
+              [DEV] Skip &mdash; Close &amp; Continue
+            </button>
+          )}
         </div>
       </div>
     </div>

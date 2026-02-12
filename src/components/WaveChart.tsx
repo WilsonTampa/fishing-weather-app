@@ -1,12 +1,16 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { WaveData } from '../types';
+import type { MultiModelData } from '../types/multiModel';
+import ConfidenceBadge from './ConfidenceBadge';
 
 interface WaveChartProps {
   data: WaveData[];
   selectedDay: Date;
+  multiModelData?: MultiModelData | null;
+  onCompareModels?: () => void;
 }
 
-function WaveChart({ data, selectedDay }: WaveChartProps) {
+function WaveChart({ data, selectedDay, multiModelData, onCompareModels }: WaveChartProps) {
   // Filter data for selected day
   const startOfDay = new Date(selectedDay);
   startOfDay.setHours(0, 0, 0, 0);
@@ -165,13 +169,15 @@ function WaveChart({ data, selectedDay }: WaveChartProps) {
         flexWrap: 'wrap',
         gap: '0.5rem',
       }}>
-        <h2 style={{
-          fontSize: '1.25rem',
-          margin: 0,
-          color: 'var(--color-wave)'
-        }}>
-          WAVE CONDITIONS
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <h2 style={{
+            fontSize: '1.25rem',
+            margin: 0,
+            color: 'var(--color-wave)'
+          }}>
+            WAVE CONDITIONS
+          </h2>
+        </div>
         {currentWave && (
           <div style={{
             display: 'flex',
@@ -212,8 +218,8 @@ function WaveChart({ data, selectedDay }: WaveChartProps) {
               return `${displayHour}${ampm}`;
             }}
             type="number"
-            domain={[0, 24]}
-            ticks={[0, 6, 12, 18, 24]}
+            domain={[0, 23]}
+            ticks={[0, 6, 12, 18]}
           />
           <YAxis
             stroke="var(--color-text-secondary)"
@@ -288,6 +294,18 @@ function WaveChart({ data, selectedDay }: WaveChartProps) {
           <span style={{ color: 'var(--color-text-secondary)' }}>Wave Direction</span>
         </div>
       </div>
+
+      {/* Model Confidence */}
+      {multiModelData && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+          <ConfidenceBadge
+            confidenceScores={multiModelData.confidence}
+            selectedDay={selectedDay}
+            relevantParams={['waveHeight']}
+            onCompareModels={onCompareModels}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -336,8 +336,8 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
               return `${displayHour}${ampm}`;
             }}
             type="number"
-            domain={[0, 24]}
-            ticks={[0, 6, 12, 18, 24]}
+            domain={[0, 23]}
+            ticks={[0, 6, 12, 18]}
             allowDataOverflow={false}
           />
           <YAxis
