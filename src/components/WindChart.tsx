@@ -1,12 +1,16 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { WindData } from '../types';
+import type { MultiModelData } from '../types/multiModel';
+import ConfidenceBadge from './ConfidenceBadge';
 
 interface WindChartProps {
   data: WindData[];
   selectedDay: Date;
+  multiModelData?: MultiModelData | null;
+  onCompareModels?: () => void;
 }
 
-function WindChart({ data, selectedDay }: WindChartProps) {
+function WindChart({ data, selectedDay, multiModelData, onCompareModels }: WindChartProps) {
   // Filter data for selected day
   const startOfDay = new Date(selectedDay);
   startOfDay.setHours(0, 0, 0, 0);
@@ -165,13 +169,15 @@ function WindChart({ data, selectedDay }: WindChartProps) {
         flexWrap: 'wrap',
         gap: '0.5rem',
       }}>
-        <h2 style={{
-          fontSize: '1.25rem',
-          margin: 0,
-          color: 'var(--color-wind)'
-        }}>
-          MARINE WIND CONDITIONS
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <h2 style={{
+            fontSize: '1.25rem',
+            margin: 0,
+            color: 'var(--color-wind)'
+          }}>
+            MARINE WIND CONDITIONS
+          </h2>
+        </div>
         {currentWind && (
           <div style={{
             display: 'flex',
@@ -214,8 +220,8 @@ function WindChart({ data, selectedDay }: WindChartProps) {
               return `${displayHour}${ampm}`;
             }}
             type="number"
-            domain={[0, 24]}
-            ticks={[0, 6, 12, 18, 24]}
+            domain={[0, 23]}
+            ticks={[0, 6, 12, 18]}
           />
           <YAxis
             stroke="var(--color-text-secondary)"
@@ -290,6 +296,18 @@ function WindChart({ data, selectedDay }: WindChartProps) {
           <span style={{ color: 'var(--color-text-secondary)' }}>Wind Direction</span>
         </div>
       </div>
+
+      {/* Model Confidence */}
+      {multiModelData && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+          <ConfidenceBadge
+            confidenceScores={multiModelData.confidence}
+            selectedDay={selectedDay}
+            relevantParams={['windSpeed', 'windGusts', 'windDirection']}
+            onCompareModels={onCompareModels}
+          />
+        </div>
+      )}
     </div>
   );
 }

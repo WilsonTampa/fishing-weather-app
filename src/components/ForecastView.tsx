@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { DndContext, DragOverlay, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Location } from '../types';
+import type { MultiModelData } from '../types/multiModel';
 import { getLocationForecast } from '../services/noaaApi';
 import WindChart from './WindChart';
 import WaveChart from './WaveChart';
@@ -12,6 +13,8 @@ import WeatherConditionsChart from './WeatherConditionsChart';
 import SunMoonTimes from './SunMoonTimes';
 import FeedingPeriods from './FeedingPeriods';
 import BarometricPressure from './BarometricPressure';
+import MultiModelDebug from './MultiModelDebug';
+import ModelComparisonModal from './ModelComparisonModal';
 import AlertBanner from './AlertBanner';
 import DashboardCard from './DashboardCard';
 import DaySelector from './DaySelector';
@@ -55,6 +58,7 @@ interface ForecastData {
   waterTemperature?: number | null;
   waves?: any[];
   alerts?: any[];
+  multiModel?: MultiModelData | null;
 }
 
 function ForecastView({
@@ -83,9 +87,10 @@ function ForecastView({
   const [upgradeFeatureDescription, setUpgradeFeatureDescription] = useState('Access extended 7-day forecasts');
   const [showDashboardUpsell, setShowDashboardUpsell] = useState(false);
   const [activeDragId, setActiveDragId] = useState<CardId | null>(null);
+  const [showModelComparison, setShowModelComparison] = useState(false);
 
   // Dashboard customization
-  const { canCustomizeDashboard } = useAuth();
+  const { canCustomizeDashboard, tier } = useAuth();
   const {
     layout,
     isEditMode,
@@ -145,6 +150,16 @@ function ForecastView({
   const openAuthModal = onOpenAuthModal ?? (() => setInternalShowAuth(true));
   const openUpgradeModal = onOpenUpgradeModal ?? (() => setInternalShowUpgrade(true));
 
+  const handleCompareModels = () => {
+    // DEV: bypass tier gate for testing
+    if (tier === 'free' && !import.meta.env.DEV) {
+      setUpgradeFeatureDescription('Compare GFS, ECMWF, HRRR & NAM side by side to see where models agree');
+      openUpgradeModal();
+    } else {
+      setShowModelComparison(true);
+    }
+  };
+
   useEffect(() => {
     setSelectedDay(new Date());
     setSelectedStationId(location.tideStationId);
@@ -156,7 +171,7 @@ function ForecastView({
       setError(null);
 
       try {
-        const data = await getLocationForecast(location, selectedStationId);
+        const data = await getLocationForecast(location, selectedStationId, { includeMultiModel: true });
         setForecastData(data);
       } catch (err) {
         console.error('Error fetching forecast data:', err);
@@ -441,8 +456,8 @@ function ForecastView({
 
             // Build card renderer map
             const cardRenderers: Record<CardId, React.ReactNode> = {
-              wind: <WindChart data={forecastData.wind} selectedDay={selectedDay} />,
-              waves: <WaveChart data={forecastData.waves || []} selectedDay={selectedDay} />,
+              wind: <WindChart data={forecastData.wind} selectedDay={selectedDay} multiModelData={forecastData.multiModel} onCompareModels={handleCompareModels} />,
+              waves: <WaveChart data={forecastData.waves || []} selectedDay={selectedDay} multiModelData={forecastData.multiModel} onCompareModels={handleCompareModels} />,
               tide: (
                 <TideChart
                   data={forecastData.tides}
@@ -520,6 +535,11 @@ function ForecastView({
             );
           })()}
 
+          {/* TEMPORARY: Multi-Model Debug Panel — Remove before production */}
+          {forecastData.multiModel && (
+            <MultiModelDebug data={forecastData.multiModel} selectedDay={selectedDay} />
+          )}
+
           {/* Marine Forecast Info */}
           <div style={{
             backgroundColor: 'var(--color-surface)',
@@ -572,6 +592,15 @@ function ForecastView({
             openAuthModal();
           }}
           featureDescription={upgradeFeatureDescription}
+        />
+      )}
+
+      {/* Model Comparison Modal */}
+      {showModelComparison && forecastData?.multiModel && (
+        <ModelComparisonModal
+          multiModelData={forecastData.multiModel}
+          selectedDay={selectedDay}
+          onClose={() => setShowModelComparison(false)}
         />
       )}
 

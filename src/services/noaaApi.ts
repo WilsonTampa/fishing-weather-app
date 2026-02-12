@@ -1,4 +1,6 @@
 import { WindData, TemperatureData, TideData, WeatherData, WaveData, MarineAlert, Location } from '../types';
+import { fetchMultiModelData } from './multiModelApi';
+import type { MultiModelData } from '../types/multiModel';
 
 // NOAA CO-OPS API base URL for tide data
 const NOAA_COOPS_BASE = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
@@ -411,7 +413,11 @@ export async function fetchMarineAlerts(
 /**
  * Get complete forecast data for a location
  */
-export async function getLocationForecast(location: Location, tideStationId?: string) {
+export async function getLocationForecast(
+  location: Location,
+  tideStationId?: string,
+  options?: { includeMultiModel?: boolean }
+) {
   try {
     // Use provided tide station ID or find nearest
     let tideStation: TideStation | null | undefined;
@@ -474,7 +480,16 @@ export async function getLocationForecast(location: Location, tideStationId?: st
       waterTempPromise = Promise.resolve(null);
     }
 
-    const [weather, tides, waterTemp, waves, alerts] = await Promise.all([weatherPromise, tidePromise, waterTempPromise, wavePromise, alertsPromise]);
+    // Conditionally fetch multi-model data in parallel with everything else
+    const multiModelPromise: Promise<MultiModelData | null> =
+      options?.includeMultiModel
+        ? fetchMultiModelData(location.latitude, location.longitude).catch(err => {
+            console.error('Multi-model fetch failed, continuing without:', err);
+            return null;
+          })
+        : Promise.resolve(null);
+
+    const [weather, tides, waterTemp, waves, alerts, multiModel] = await Promise.all([weatherPromise, tidePromise, waterTempPromise, wavePromise, alertsPromise, multiModelPromise]);
 
     return {
       wind: weather.wind,
@@ -485,7 +500,8 @@ export async function getLocationForecast(location: Location, tideStationId?: st
       tideStation: tideStation || undefined,
       waterTemperature: waterTemp,
       waves,
-      alerts
+      alerts,
+      multiModel,
     };
   } catch (error) {
     console.error('Error getting location forecast:', error);

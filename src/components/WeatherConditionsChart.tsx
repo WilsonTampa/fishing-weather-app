@@ -124,8 +124,8 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
               return `${displayHour}${ampm}`;
             }}
             type="number"
-            domain={[0, 24]}
-            ticks={[0, 6, 12, 18, 24]}
+            domain={[0, 23]}
+            ticks={[0, 6, 12, 18]}
           />
           <YAxis
             stroke="var(--color-text-secondary)"
