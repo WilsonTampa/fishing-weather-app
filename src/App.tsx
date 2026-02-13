@@ -14,6 +14,8 @@ import FreemiumSignupModal from './components/FreemiumSignupModal';
 import ResetPassword from './components/ResetPassword';
 import AdminDashboard from './components/AdminDashboard';
 import { Location } from './types';
+import { useAuth } from './contexts/AuthContext';
+import { fetchSavedLocations } from './services/savedLocations';
 import './styles/global.css';
 
 function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, showSavePromptOnLoad, onSavePromptHandled, isTemporaryLocation, onLocationSaved }: {
@@ -139,6 +141,7 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, 
 }
 
 function App() {
+  const { user } = useAuth();
   const [savedLocation, setSavedLocation] = useState<Location | null>(null);
   const [temporaryLocation, setTemporaryLocation] = useState<Location | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -178,13 +181,27 @@ function App() {
     loadSavedLocation();
   }, []);
 
-  const handleLocationSelect = (location: Location, promptSave: boolean = false) => {
+  const handleLocationSelect = async (location: Location, promptSave: boolean = false) => {
     setShowMap(false);
     if (promptSave) {
       // Logged-in trial/paid user: save to localStorage and prompt to save to DB
       localStorage.setItem('savedLocation', JSON.stringify(location));
       setSavedLocation(location);
-      setShowSavePrompt(true);
+
+      // Don't prompt to save if this location is already in the user's saved locations
+      let alreadySaved = false;
+      if (user && location.tideStationId) {
+        try {
+          const existing = await fetchSavedLocations(user.id);
+          alreadySaved = existing.some(loc => loc.tide_station_id === location.tideStationId);
+        } catch {
+          // If check fails, default to showing the prompt
+        }
+      }
+
+      if (!alreadySaved) {
+        setShowSavePrompt(true);
+      }
     } else {
       // Guest or free user selecting from map: use temporary location
       // Don't persist to localStorage — they need to sign up to save
