@@ -160,14 +160,7 @@ function ForecastView({
   const openUpgradeModal = onOpenUpgradeModal ?? (() => setInternalShowUpgrade(true));
 
   const handleCompareModels = () => {
-    if (tier === 'free') {
-      setInlinePrompt({
-        feature: 'Multi-model forecast comparison',
-        variant: user ? 'upgrade' : 'signup',
-      });
-    } else {
-      setShowModelComparison(true);
-    }
+    setShowModelComparison(true);
   };
 
   useEffect(() => {
@@ -646,6 +639,12 @@ function ForecastView({
           multiModelData={forecastData.multiModel}
           selectedDay={selectedDay}
           onClose={() => setShowModelComparison(false)}
+          previewMode={tier === 'free'}
+          onUpgrade={() => {
+            setUpgradeFeatureDescription('Multi-model forecast comparison');
+            openUpgradeModal();
+          }}
+          onSignup={() => openAuthModal()}
         />
       )}
 

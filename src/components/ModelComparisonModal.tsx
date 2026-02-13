@@ -1,4 +1,5 @@
-import { useMemo, Fragment } from 'react';
+import { useMemo, useEffect, useRef, useCallback, Fragment } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type {
   MultiModelData,
@@ -39,6 +40,9 @@ interface ModelComparisonModalProps {
   multiModelData: MultiModelData;
   selectedDay: Date;
   onClose: () => void;
+  previewMode?: boolean;
+  onUpgrade?: () => void;
+  onSignup?: () => void;
 }
 
 // ── Types for table rendering ──
@@ -57,7 +61,35 @@ export default function ModelComparisonModal({
   multiModelData,
   selectedDay,
   onClose,
+  previewMode,
+  onUpgrade,
+  onSignup,
 }: ModelComparisonModalProps) {
+  const { user } = useAuth();
+
+  // Preview mode: trigger upgrade/signup after 5s or on first interaction
+  const previewTriggered = useRef(false);
+  const triggerPreviewUpgrade = useCallback(() => {
+    if (!previewMode || previewTriggered.current) return;
+    previewTriggered.current = true;
+    if (user) {
+      onUpgrade?.();
+    } else {
+      onSignup?.();
+    }
+  }, [previewMode, user, onUpgrade, onSignup]);
+
+  useEffect(() => {
+    if (!previewMode) return;
+    const timer = setTimeout(triggerPreviewUpgrade, 5000);
+    return () => clearTimeout(timer);
+  }, [previewMode, triggerPreviewUpgrade]);
+
+  const handlePreviewInteraction = useCallback(() => {
+    if (previewMode && !previewTriggered.current) {
+      triggerPreviewUpgrade();
+    }
+  }, [previewMode, triggerPreviewUpgrade]);
   // Build a local YYYY-MM-DD string to match timestamps against the selected day
   const selectedDayStr = useMemo(() => {
     const y = selectedDay.getFullYear();
@@ -713,6 +745,7 @@ export default function ModelComparisonModal({
           <h2 className="model-comparison-header__title">
             Model Comparison
             <span className="model-comparison-header__date">&mdash; {dayLabel}</span>
+            {previewMode && <span className="model-comparison-preview-badge">Preview</span>}
           </h2>
           <button className="model-comparison-header__close" onClick={onClose}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -724,7 +757,12 @@ export default function ModelComparisonModal({
         </div>
 
         {/* Body */}
-        <div className="model-comparison-body">
+        <div
+          className="model-comparison-body"
+          onScroll={handlePreviewInteraction}
+          onClick={handlePreviewInteraction}
+          onMouseMove={handlePreviewInteraction}
+        >
           {/* Wind Speed Comparison Chart */}
           {windChartData.length > 0 && weatherModelIds.length > 0 && (
             <div className="model-comparison-section">
