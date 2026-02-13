@@ -95,6 +95,7 @@ function ForecastView({
   const [showDashboardUpsell, setShowDashboardUpsell] = useState(false);
   const [activeDragId, setActiveDragId] = useState<CardId | null>(null);
   const [showModelComparison, setShowModelComparison] = useState(false);
+  const [previewTriggeredModal, setPreviewTriggeredModal] = useState(false);
   const [inlinePrompt, setInlinePrompt] = useState<{ feature: string; variant: 'signup' | 'upgrade' } | null>(null);
 
   // Dashboard customization
@@ -154,8 +155,22 @@ function ForecastView({
 
   const closeStationSelector = onCloseStationSelector ?? (() => setInternalShowStation(false));
   const authModalMode = authModalModeProp ?? internalAuthMode;
-  const closeAuthModal = onCloseAuthModal ?? (() => setInternalShowAuth(false));
-  const closeUpgradeModal = onCloseUpgradeModal ?? (() => setInternalShowUpgrade(false));
+  const baseCloseAuth = onCloseAuthModal ?? (() => setInternalShowAuth(false));
+  const baseCloseUpgrade = onCloseUpgradeModal ?? (() => setInternalShowUpgrade(false));
+  const closeAuthModal = () => {
+    baseCloseAuth();
+    if (previewTriggeredModal) {
+      setShowModelComparison(false);
+      setPreviewTriggeredModal(false);
+    }
+  };
+  const closeUpgradeModal = () => {
+    baseCloseUpgrade();
+    if (previewTriggeredModal) {
+      setShowModelComparison(false);
+      setPreviewTriggeredModal(false);
+    }
+  };
   const openAuthModal = onOpenAuthModal ?? ((mode?: 'login' | 'signup') => { setInternalAuthMode(mode ?? 'signup'); setInternalShowAuth(true); });
   const openUpgradeModal = onOpenUpgradeModal ?? (() => setInternalShowUpgrade(true));
 
@@ -641,10 +656,14 @@ function ForecastView({
           onClose={() => setShowModelComparison(false)}
           previewMode={tier === 'free'}
           onUpgrade={() => {
+            setPreviewTriggeredModal(true);
             setUpgradeFeatureDescription('Multi-model forecast comparison');
             openUpgradeModal();
           }}
-          onSignup={() => openAuthModal()}
+          onSignup={() => {
+            setPreviewTriggeredModal(true);
+            openAuthModal();
+          }}
         />
       )}
 
