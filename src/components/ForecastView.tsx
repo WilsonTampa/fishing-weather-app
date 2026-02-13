@@ -15,6 +15,7 @@ import FeedingPeriods from './FeedingPeriods';
 import BarometricPressure from './BarometricPressure';
 import ModelComparisonModal from './ModelComparisonModal';
 import AlertBanner from './AlertBanner';
+import ForecastSynopsis from './ForecastSynopsis';
 import DashboardCard from './DashboardCard';
 import DaySelector from './DaySelector';
 import TideStationSelector from './TideStationSelector';
@@ -437,6 +438,16 @@ function ForecastView({
           {forecastData.alerts && forecastData.alerts.length > 0 && (
             <AlertBanner alerts={forecastData.alerts} selectedDay={selectedDay} />
           )}
+
+          {/* Weather Synopsis Banner */}
+          <ForecastSynopsis
+            wind={forecastData.wind}
+            waves={forecastData.waves}
+            weather={forecastData.weather}
+            multiModel={forecastData.multiModel ?? null}
+            selectedDay={selectedDay}
+            onCompareModels={handleCompareModels}
+          />
 
           {/* Charts - Sortable Grid */}
           {(() => {

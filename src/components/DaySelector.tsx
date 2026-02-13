@@ -59,7 +59,7 @@ function DaySelector({ selectedDay, onSelectDay, onLockedDayClick }: DaySelector
     if (isToday(day)) return 'Today';
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    if (day.toDateString() === tomorrow.toDateString()) return 'Tmrw';
+    if (day.toDateString() === tomorrow.toDateString()) return day.toLocaleDateString('en-US', { weekday: 'short' });
     return day.toLocaleDateString('en-US', { weekday: 'short' });
   };
 
