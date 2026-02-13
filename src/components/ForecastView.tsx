@@ -13,7 +13,6 @@ import WeatherConditionsChart from './WeatherConditionsChart';
 import SunMoonTimes from './SunMoonTimes';
 import FeedingPeriods from './FeedingPeriods';
 import BarometricPressure from './BarometricPressure';
-import MultiModelDebug from './MultiModelDebug';
 import ModelComparisonModal from './ModelComparisonModal';
 import AlertBanner from './AlertBanner';
 import DashboardCard from './DashboardCard';
@@ -533,11 +532,6 @@ function ForecastView({
               </DndContext>
             );
           })()}
-
-          {/* TEMPORARY: Multi-Model Debug Panel — Remove before production */}
-          {forecastData.multiModel && (
-            <MultiModelDebug data={forecastData.multiModel} selectedDay={selectedDay} />
-          )}
 
           {/* Marine Forecast Info */}
           <div style={{
