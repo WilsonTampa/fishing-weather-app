@@ -28,6 +28,17 @@ interface MapViewProps {
   onCancel?: () => void;
 }
 
+// Dismiss onboarding on any map interaction (click, scroll, zoom, drag)
+function MapInteractionListener({ onInteraction }: { onInteraction: () => void }) {
+  useMapEvents({
+    click: onInteraction,
+    dragstart: onInteraction,
+    zoomstart: onInteraction,
+    mousedown: onInteraction,
+  });
+  return null;
+}
+
 function LocationMarker({ onLocationClick }: { onLocationClick: (location: Location) => void }) {
   const [position, setPosition] = useState<[number, number] | null>(null);
 
@@ -76,6 +87,7 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
       setShowOnboarding(true);
     }
   }, [onCancel]);
+
 
   const dismissOnboarding = () => {
     setShowOnboarding(false);
@@ -129,9 +141,6 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
   };
 
   const handleGetCurrentLocation = () => {
-    if (showOnboarding) {
-      dismissOnboarding();
-    }
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -238,12 +247,12 @@ function MapView({ onLocationSelect, onCancel }: MapViewProps) {
           />
           <LocationMarker onLocationClick={handleLocationClick} />
           <TideStationMarkers onStationClick={handleStationMarkerClick} />
+          {showOnboarding && <MapInteractionListener onInteraction={dismissOnboarding} />}
         </MapContainer>
 
         {/* First-visit onboarding overlay */}
         {showOnboarding && (
           <MapOnboarding
-            onUseMyLocation={handleGetCurrentLocation}
             onDismiss={dismissOnboarding}
           />
         )}

@@ -1,14 +1,13 @@
 import './MapOnboarding.css';
 
 interface MapOnboardingProps {
-  onUseMyLocation: () => void;
   onDismiss: () => void;
 }
 
-function MapOnboarding({ onUseMyLocation, onDismiss }: MapOnboardingProps) {
+function MapOnboarding({ onDismiss }: MapOnboardingProps) {
   return (
-    <div className="map-onboarding-backdrop">
-      <div className="map-onboarding-card">
+    <div className="map-onboarding-backdrop" onClick={onDismiss}>
+      <div className="map-onboarding-card" onClick={e => e.stopPropagation()}>
         <button className="map-onboarding-close" onClick={onDismiss} aria-label="Close">
           ✕
         </button>
@@ -20,21 +19,8 @@ function MapOnboarding({ onUseMyLocation, onDismiss }: MapOnboardingProps) {
           </svg>
         </div>
 
-        <h2>Choose Your Fishing Spot</h2>
-        <p>Tap anywhere on the map near where you fish or boat</p>
-
-        <div className="map-onboarding-divider">or</div>
-
-        <button
-          className="map-onboarding-location-btn"
-          onClick={onUseMyLocation}
-        >
-          📍 Use My Location
-        </button>
-
-        <p className="map-onboarding-hint">
-          We'll find the nearest tide station and show your forecast
-        </p>
+        <h2>Choose Your Location</h2>
+        <p>Choose a tide station to display the marine forecast for that location</p>
       </div>
     </div>
   );

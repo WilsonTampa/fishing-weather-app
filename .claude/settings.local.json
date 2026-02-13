@@ -82,7 +82,8 @@
       "Bash(npx vitest run)",
       "Bash(git merge multiple_models --no-ff -m \"$\\(cat <<''EOF''\nMerge branch ''multiple_models'' — multi-model forecast comparison\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(node scripts/prerender-articles.js:*)",
-      "WebFetch(domain:tides4fishing.com)"
+      "WebFetch(domain:tides4fishing.com)",
+      "Bash(git merge:*)"
     ]
   }
 }
