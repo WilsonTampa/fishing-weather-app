@@ -157,8 +157,8 @@ export default function ConfidenceBadge({
     : worstScore.modelsAvailable.map(id => MODEL_LABELS[id]).join(', ');
   // Show range if model availability varies across the day
   const modelCountLabel = minModelCount === maxModelCount
-    ? `${modelCount} model${modelCount !== 1 ? 's' : ''}`
-    : `${minModelCount}–${maxModelCount} models`;
+    ? `${modelCount} Weather Model${modelCount !== 1 ? 's' : ''}`
+    : `${minModelCount}–${maxModelCount} Weather Models`;
 
   return (
     <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -175,39 +175,43 @@ export default function ConfidenceBadge({
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '6px',
-          padding: '4px 12px',
-          borderRadius: '16px',
-          border: '1px solid rgba(88, 166, 255, 0.4)',
-          backgroundColor: 'rgba(88, 166, 255, 0.08)',
+          gap: '8px',
+          padding: '8px 16px',
+          borderRadius: '8px',
+          border: '1px solid rgba(88, 166, 255, 0.5)',
+          backgroundColor: 'rgba(88, 166, 255, 0.15)',
           color: '#e6edf3',
-          fontSize: '0.75rem',
-          fontWeight: 500,
+          fontSize: '0.8rem',
+          fontWeight: 600,
           cursor: 'pointer',
           whiteSpace: 'nowrap',
           lineHeight: '1.4',
           transition: 'all 150ms',
+          boxShadow: '0 0 12px rgba(88, 166, 255, 0.1)',
         }}
         onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(88, 166, 255, 0.18)';
-          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(88, 166, 255, 0.6)';
+          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(88, 166, 255, 0.28)';
+          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(88, 166, 255, 0.8)';
+          (e.currentTarget as HTMLElement).style.boxShadow = '0 0 16px rgba(88, 166, 255, 0.2)';
         }}
         onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(88, 166, 255, 0.08)';
-          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(88, 166, 255, 0.4)';
+          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(88, 166, 255, 0.15)';
+          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(88, 166, 255, 0.5)';
+          (e.currentTarget as HTMLElement).style.boxShadow = '0 0 12px rgba(88, 166, 255, 0.1)';
         }}
         title={`${modelCountLabel}: ${modelNames}`}
       >
         {/* Confidence dot */}
         <span style={{
-          width: '8px',
-          height: '8px',
+          width: '10px',
+          height: '10px',
           borderRadius: '50%',
           backgroundColor: LEVEL_COLORS[worstScore.level],
           flexShrink: 0,
+          boxShadow: `0 0 6px ${LEVEL_COLORS[worstScore.level]}`,
         }} />
         <span>Compare {modelCountLabel}</span>
-        <span style={{ color: '#58a6ff', fontSize: '0.85rem' }}>&rsaquo;</span>
+        <span style={{ color: '#58a6ff', fontSize: '1rem', fontWeight: 700 }}>&rsaquo;</span>
       </button>
 
       {/* Popover (only used when no onCompareModels handler) */}
