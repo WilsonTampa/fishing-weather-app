@@ -24,6 +24,7 @@ interface AuthContextType {
   savedLocationCount: number;
   setSavedLocationCount: (count: number) => void;
   signInWithGoogle: () => Promise<void>;
+  signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUpWithEmail: (email: string, password: string) => Promise<{ error: Error | null; user?: User | null }>;
   resendVerificationEmail: (email: string) => Promise<{ error: Error | null }>;
@@ -179,6 +180,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
     if (error) throw error;
+  };
+
+  const signInWithMagicLink = async (email: string) => {
+    if (!supabase) return { error: new Error('Auth not configured') };
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/forecast`
+      }
+    });
+    return { error: error as Error | null };
   };
 
   const signInWithEmail = async (email: string, password: string) => {
@@ -407,6 +420,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       savedLocationCount,
       setSavedLocationCount,
       signInWithGoogle,
+      signInWithMagicLink,
       signInWithEmail,
       signUpWithEmail,
       resendVerificationEmail,

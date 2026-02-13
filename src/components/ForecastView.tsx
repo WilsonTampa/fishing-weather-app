@@ -22,6 +22,8 @@ import TideStationSelector from './TideStationSelector';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
 import UpgradeModal from './UpgradeModal';
+import InlineUpgradePrompt from './InlineUpgradePrompt';
+import SaveLocationBanner from './SaveLocationBanner';
 import { useMobileMenu, useDashboardEditContext } from './AppLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { useDashboardLayout } from '../hooks/useDashboardLayout';
@@ -35,10 +37,12 @@ interface ForecastViewProps {
   showStationSelector?: boolean;
   onCloseStationSelector?: () => void;
   showAuthModal?: boolean;
+  authModalMode?: 'login' | 'signup';
   onCloseAuthModal?: () => void;
   showUpgradeModal?: boolean;
   onCloseUpgradeModal?: () => void;
-  onOpenAuthModal?: () => void;
+  isTemporaryLocation?: boolean;
+  onOpenAuthModal?: (mode?: 'login' | 'signup') => void;
   onOpenUpgradeModal?: () => void;
 }
 
@@ -65,9 +69,11 @@ function ForecastView({
   location,
   onLocationChange,
   onLocationUpdate,
+  isTemporaryLocation,
   showStationSelector: showStationSelectorProp,
   onCloseStationSelector,
   showAuthModal: showAuthModalProp,
+  authModalMode: authModalModeProp,
   onCloseAuthModal,
   showUpgradeModal: showUpgradeModalProp,
   onCloseUpgradeModal,
@@ -83,14 +89,16 @@ function ForecastView({
   // Use props if provided (from AppLayout), otherwise fall back to internal state
   const [internalShowStation, setInternalShowStation] = useState(false);
   const [internalShowAuth, setInternalShowAuth] = useState(false);
+  const [internalAuthMode, setInternalAuthMode] = useState<'login' | 'signup'>('login');
   const [internalShowUpgrade, setInternalShowUpgrade] = useState(false);
   const [upgradeFeatureDescription, setUpgradeFeatureDescription] = useState('Access extended 7-day forecasts');
   const [showDashboardUpsell, setShowDashboardUpsell] = useState(false);
   const [activeDragId, setActiveDragId] = useState<CardId | null>(null);
   const [showModelComparison, setShowModelComparison] = useState(false);
+  const [inlinePrompt, setInlinePrompt] = useState<{ feature: string; variant: 'signup' | 'upgrade' } | null>(null);
 
   // Dashboard customization
-  const { canCustomizeDashboard, tier } = useAuth();
+  const { user, canCustomizeDashboard, tier } = useAuth();
   const {
     layout,
     isEditMode,
@@ -145,15 +153,18 @@ function ForecastView({
   const showUpgradeModal = showUpgradeModalProp ?? internalShowUpgrade;
 
   const closeStationSelector = onCloseStationSelector ?? (() => setInternalShowStation(false));
+  const authModalMode = authModalModeProp ?? internalAuthMode;
   const closeAuthModal = onCloseAuthModal ?? (() => setInternalShowAuth(false));
   const closeUpgradeModal = onCloseUpgradeModal ?? (() => setInternalShowUpgrade(false));
-  const openAuthModal = onOpenAuthModal ?? (() => setInternalShowAuth(true));
+  const openAuthModal = onOpenAuthModal ?? ((mode?: 'login' | 'signup') => { setInternalAuthMode(mode ?? 'signup'); setInternalShowAuth(true); });
   const openUpgradeModal = onOpenUpgradeModal ?? (() => setInternalShowUpgrade(true));
 
   const handleCompareModels = () => {
     if (tier === 'free') {
-      setUpgradeFeatureDescription('Compare GFS, ECMWF, HRRR & NAM side by side to see where models agree');
-      openUpgradeModal();
+      setInlinePrompt({
+        feature: 'Multi-model forecast comparison',
+        variant: user ? 'upgrade' : 'signup',
+      });
     } else {
       setShowModelComparison(true);
     }
@@ -233,8 +244,10 @@ function ForecastView({
                 if (canCustomizeDashboard) {
                   enterEditMode();
                 } else {
-                  setUpgradeFeatureDescription('Customize your dashboard layout');
-                  openUpgradeModal();
+                  setInlinePrompt({
+                    feature: 'Custom dashboard layout',
+                    variant: user ? 'upgrade' : 'signup',
+                  });
                 }
               }}
               title="Customize Dashboard"
@@ -274,7 +287,7 @@ function ForecastView({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
           <UserMenu
-            onOpenAuth={openAuthModal}
+            onOpenAuth={() => openAuthModal('login')}
             onOpenUpgrade={openUpgradeModal}
           />
         </div>
@@ -410,12 +423,32 @@ function ForecastView({
                 selectedDay={selectedDay}
                 onSelectDay={setSelectedDay}
                 onLockedDayClick={() => {
-                  setUpgradeFeatureDescription('Access extended 7-day forecasts');
-                  openUpgradeModal();
+                  setInlinePrompt({
+                    feature: 'Extended 7-day forecasts',
+                    variant: user ? 'upgrade' : 'signup',
+                  });
                 }}
               />
             </div>
           </div>
+
+          {/* Inline upgrade prompt — shown at gate points */}
+          {inlinePrompt && (
+            <InlineUpgradePrompt
+              featureDescription={inlinePrompt.feature}
+              variant={inlinePrompt.variant}
+              onSignup={() => {
+                setInlinePrompt(null);
+                openAuthModal();
+              }}
+              onUpgrade={() => {
+                setInlinePrompt(null);
+                setUpgradeFeatureDescription(inlinePrompt.feature);
+                openUpgradeModal();
+              }}
+              onDismiss={() => setInlinePrompt(null)}
+            />
+          )}
 
           {/* Edit mode header bar */}
           {isEditMode && (
@@ -448,6 +481,14 @@ function ForecastView({
             selectedDay={selectedDay}
             onCompareModels={handleCompareModels}
           />
+
+          {/* Save Location Banner — shown to anonymous guests */}
+          {isTemporaryLocation && !user && (
+            <SaveLocationBanner
+              locationName={location.name || 'this location'}
+              onSignup={openAuthModal}
+            />
+          )}
 
           {/* Charts - Sortable Grid */}
           {(() => {
@@ -583,7 +624,7 @@ function ForecastView({
       {showAuthModal && (
         <AuthModal
           onClose={closeAuthModal}
-          initialMode="signup"
+          initialMode={authModalMode}
         />
       )}
 

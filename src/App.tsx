@@ -10,7 +10,6 @@ import ArticlePage from './components/ArticlePage';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import WindMap from './components/WindMap';
-import FreemiumSignupModal from './components/FreemiumSignupModal';
 import ResetPassword from './components/ResetPassword';
 import AdminDashboard from './components/AdminDashboard';
 import { Location } from './types';
@@ -18,21 +17,20 @@ import { useAuth } from './contexts/AuthContext';
 import { fetchSavedLocations } from './services/savedLocations';
 import './styles/global.css';
 
-function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, showSavePromptOnLoad, onSavePromptHandled, isTemporaryLocation, onLocationSaved }: {
+function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, showSavePromptOnLoad, onSavePromptHandled, isTemporaryLocation }: {
   location: Location;
   onLocationChange: () => void;
   onLocationUpdate?: () => void;
   showSavePromptOnLoad?: boolean;
   onSavePromptHandled?: () => void;
   isTemporaryLocation?: boolean;
-  onLocationSaved?: () => void;
 }) {
   const [showStationSelector, setShowStationSelector] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showSaveLocationModal, setShowSaveLocationModal] = useState(false);
   const [showSavePrompt, setShowSavePrompt] = useState(false);
-  const [showFreemiumSignup, setShowFreemiumSignup] = useState(false);
   const [savedLocationsRefreshKey, setSavedLocationsRefreshKey] = useState(0);
 
   // Show save prompt when navigating from map (for paid/trial users)
@@ -44,18 +42,6 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, 
       }
     }
   }, [showSavePromptOnLoad, onSavePromptHandled]);
-
-  // Show freemium signup modal every time a guest arrives with a temporary location.
-  // Triggers on first visit AND every subsequent location change while still a guest.
-  useEffect(() => {
-    if (isTemporaryLocation) {
-      // Short delay so user can see the dashboard first
-      const timer = setTimeout(() => {
-        setShowFreemiumSignup(true);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [isTemporaryLocation, location]);
 
   const handleSelectSavedLocation = (lat: number, lng: number, tideStationId: string | null, name: string) => {
     const newLocation: Location = {
@@ -74,7 +60,7 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, 
     <AppLayout
       onLocationChange={onLocationChange}
       onOpenStationSelector={() => setShowStationSelector(true)}
-      onOpenAuth={() => setShowAuthModal(true)}
+      onOpenAuth={() => { setAuthModalMode('signup'); setShowAuthModal(true); }}
       onOpenUpgrade={() => setShowUpgradeModal(true)}
       onSaveLocation={() => setShowSaveLocationModal(true)}
       onSelectSavedLocation={handleSelectSavedLocation}
@@ -84,13 +70,15 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, 
         location={location}
         onLocationChange={onLocationChange}
         onLocationUpdate={onLocationUpdate}
+        isTemporaryLocation={isTemporaryLocation}
         showStationSelector={showStationSelector}
         onCloseStationSelector={() => setShowStationSelector(false)}
         showAuthModal={showAuthModal}
+        authModalMode={authModalMode}
         onCloseAuthModal={() => setShowAuthModal(false)}
         showUpgradeModal={showUpgradeModal}
         onCloseUpgradeModal={() => setShowUpgradeModal(false)}
-        onOpenAuthModal={() => setShowAuthModal(true)}
+        onOpenAuthModal={(mode?: 'login' | 'signup') => { setAuthModalMode(mode ?? 'signup'); setShowAuthModal(true); }}
         onOpenUpgradeModal={() => setShowUpgradeModal(true)}
       />
 
@@ -102,7 +90,7 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, 
           tideStationId={location.tideStationId ?? null}
           onClose={() => setShowSaveLocationModal(false)}
           onSaved={() => setSavedLocationsRefreshKey(prev => prev + 1)}
-          onOpenAuth={() => { setShowSaveLocationModal(false); setShowAuthModal(true); }}
+          onOpenAuth={() => { setShowSaveLocationModal(false); setAuthModalMode('signup'); setShowAuthModal(true); }}
           onOpenUpgrade={() => { setShowSaveLocationModal(false); setShowUpgradeModal(true); }}
         />
       )}
@@ -119,23 +107,6 @@ function ForecastViewWithLayout({ location, onLocationChange, onLocationUpdate, 
         />
       )}
 
-      {/* Freemium Signup Modal (shown to guests after they see the dashboard) */}
-      {showFreemiumSignup && isTemporaryLocation && location.name && (
-        <FreemiumSignupModal
-          locationName={location.name}
-          latitude={location.latitude}
-          longitude={location.longitude}
-          tideStationId={location.tideStationId}
-          onClose={() => setShowFreemiumSignup(false)}
-          onSignupComplete={() => {
-            setShowFreemiumSignup(false);
-            if (onLocationSaved) {
-              onLocationSaved();
-            }
-            setSavedLocationsRefreshKey(prev => prev + 1);
-          }}
-        />
-      )}
     </AppLayout>
   );
 }
@@ -170,6 +141,13 @@ function App() {
           }
 
           setSavedLocation(location);
+        } else {
+          // No saved location — check for a guest location
+          const guest = localStorage.getItem('guestLocation');
+          if (guest) {
+            const guestLocation: Location = JSON.parse(guest);
+            setTemporaryLocation(guestLocation);
+          }
         }
       } catch (error) {
         console.error('Error loading saved location:', error);
@@ -204,21 +182,29 @@ function App() {
       }
     } else {
       // Guest or free user selecting from map: use temporary location
-      // Don't persist to localStorage — they need to sign up to save
-      // The FreemiumSignupModal will auto-show via the isTemporaryLocation effect
+      // Persist to localStorage so they don't lose it on refresh
+      localStorage.setItem('guestLocation', JSON.stringify(location));
       setTemporaryLocation(location);
     }
   };
 
-  const handleLocationSaved = () => {
-    // Called after a guest signs up and their temporary location is saved
-    // Promote temporary location to saved location
-    if (temporaryLocation) {
-      localStorage.setItem('savedLocation', JSON.stringify(temporaryLocation));
-      setSavedLocation(temporaryLocation);
-      setTemporaryLocation(null);
+  // When a guest signs in (e.g. via Google OAuth redirect), promote their guest location
+  useEffect(() => {
+    if (user && !savedLocation) {
+      const guest = localStorage.getItem('guestLocation');
+      if (guest) {
+        try {
+          const guestLocation: Location = JSON.parse(guest);
+          localStorage.setItem('savedLocation', JSON.stringify(guestLocation));
+          localStorage.removeItem('guestLocation');
+          setSavedLocation(guestLocation);
+          setTemporaryLocation(null);
+        } catch {
+          localStorage.removeItem('guestLocation');
+        }
+      }
     }
-  };
+  }, [user, savedLocation]);
 
   const handleLocationChange = () => {
     // Show the map so user can pick a new location
@@ -281,7 +267,6 @@ function App() {
                 showSavePromptOnLoad={showSavePrompt}
                 onSavePromptHandled={() => setShowSavePrompt(false)}
                 isTemporaryLocation={!savedLocation && !!temporaryLocation}
-                onLocationSaved={handleLocationSaved}
               />
             ) : (
               <Navigate to="/" replace />

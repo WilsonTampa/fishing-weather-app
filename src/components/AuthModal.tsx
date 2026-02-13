@@ -293,26 +293,6 @@ export default function AuthModal({ onClose, initialMode = 'login', upgradePromp
             </div>
           )}
 
-          {mode === 'signup' && (
-            <div className="trial-benefits">
-              <h3>Free Account Includes:</h3>
-              <ul>
-                <li>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  Marine forecast for next 48 hours
-                </li>
-                <li>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  Save your favorite location
-                </li>
-              </ul>
-            </div>
-          )}
-
           <button className="google-button" onClick={handleGoogleSignIn} type="button">
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
