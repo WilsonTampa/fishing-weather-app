@@ -205,6 +205,26 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
     );
   }
 
+  // Determine current tide phase (incoming = rising toward next high, outgoing = falling toward next low)
+  const getTidePhase = (): { label: string; incoming: boolean } | null => {
+    if (!isToday || dayData.length === 0) return null;
+
+    // Find the next tide event after now
+    const nowMs = now.getTime();
+    const allTides = [...data].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    const nextTideEvent = allTides.find(t => new Date(t.timestamp).getTime() > nowMs);
+
+    if (!nextTideEvent) return null;
+
+    // If next event is High, tide is incoming (rising). If Low, tide is outgoing (falling).
+    if (nextTideEvent.type === 'H') {
+      return { label: 'Incoming', incoming: true };
+    }
+    return { label: 'Outgoing', incoming: false };
+  };
+
+  const tidePhase = getTidePhase();
+
   return (
     <div style={{
       backgroundColor: 'var(--color-surface)',
@@ -215,12 +235,10 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         marginBottom: '1rem',
         borderBottom: '1px solid var(--color-border)',
         paddingBottom: '0.75rem',
-        flexWrap: 'wrap',
-        gap: '0.5rem',
       }}>
         <h2 style={{
           fontSize: '1.25rem',
@@ -229,70 +247,35 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
         }}>
           TIDE PREDICTIONS
         </h2>
-        {dayData.length > 0 && (
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-            {/* Low Tides */}
-            {dayData.some(t => t.type === 'L') && (
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
-                  Low tide
-                </div>
-                {dayData.filter(t => t.type === 'L').map((tide, index) => {
-                  const tideTime = new Date(tide.timestamp);
-                  return (
-                    <div key={index} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--color-text)' }}>
-                        {tideTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                      </span>
-                      <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-                        {tide.height.toFixed(2)} ft
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            {/* High Tides */}
-            {dayData.some(t => t.type === 'H') && (
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
-                  High tide
-                </div>
-                {dayData.filter(t => t.type === 'H').map((tide, index) => {
-                  const tideTime = new Date(tide.timestamp);
-                  return (
-                    <div key={index} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--color-text)' }}>
-                        {tideTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                      </span>
-                      <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-                        {tide.height.toFixed(2)} ft
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            {/* Tidal Range */}
-            {tidalRange !== null && (
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
-                  Tidal range
-                </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--color-text)' }}>
-                    {tidalRange.toFixed(2)} ft
-                  </span>
-                </div>
-                <div style={{
-                  fontSize: '0.75rem',
-                  color: rangeLabel === 'Strong' ? '#4ADE80' : rangeLabel === 'Moderate' ? '#FCD34D' : 'var(--color-text-secondary)',
-                  fontWeight: 600
-                }}>
-                  {rangeLabel}
-                </div>
-              </div>
-            )}
+        {tidePhase && (
+          <div style={{ textAlign: 'right' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '1.25rem',
+              fontWeight: 'bold',
+              color: tidePhase.incoming ? '#4ADE80' : '#F87171',
+            }}>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ transform: tidePhase.incoming ? undefined : 'rotate(180deg)' }}
+              >
+                <line x1="12" y1="19" x2="12" y2="5" />
+                <polyline points="5 12 12 5 19 12" />
+              </svg>
+              {tidePhase.label}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+              Current Tide
+            </div>
           </div>
         )}
       </div>
@@ -380,6 +363,81 @@ function TideChart({ data, selectedDay, stationName, waterTemperature }: TideCha
           })}
         </AreaChart>
       </ResponsiveContainer>
+
+      {/* Tide Details — below chart */}
+      {dayData.length > 0 && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'flex-start',
+          marginTop: '0.75rem',
+          paddingTop: '0.75rem',
+          borderTop: '1px solid var(--color-border)',
+          flexWrap: 'wrap',
+          gap: '0.5rem',
+        }}>
+          {/* Low Tides */}
+          {dayData.some(t => t.type === 'L') && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
+                Low Tide
+              </div>
+              {dayData.filter(t => t.type === 'L').map((tide, index) => {
+                const tideTime = new Date(tide.timestamp);
+                return (
+                  <div key={index} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.4rem' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                      {tideTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                      {tide.height.toFixed(2)} ft
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {/* High Tides */}
+          {dayData.some(t => t.type === 'H') && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
+                High Tide
+              </div>
+              {dayData.filter(t => t.type === 'H').map((tide, index) => {
+                const tideTime = new Date(tide.timestamp);
+                return (
+                  <div key={index} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.4rem' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                      {tideTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                      {tide.height.toFixed(2)} ft
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {/* Tidal Range */}
+          {tidalRange !== null && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
+                Tidal Range
+              </div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                {tidalRange.toFixed(2)} ft
+              </div>
+              <div style={{
+                fontSize: '0.75rem',
+                color: rangeLabel === 'Strong' ? '#4ADE80' : rangeLabel === 'Moderate' ? '#FCD34D' : 'var(--color-text-secondary)',
+                fontWeight: 600
+              }}>
+                {rangeLabel}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

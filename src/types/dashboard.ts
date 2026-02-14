@@ -6,7 +6,9 @@ export type CardId =
   | 'weather'
   | 'sunmoon'
   | 'feeding'
-  | 'barometric';
+  | 'barometric'
+  // Legacy ID — kept for migration of saved layouts
+  | 'sunmoonfeeding';
 
 export interface CardConfig {
   id: CardId;
@@ -26,7 +28,7 @@ export const DEFAULT_LAYOUT: DashboardLayout = {
     { id: 'waves', title: 'Wave Conditions', collapsed: false },
     { id: 'weather', title: 'Weather Conditions', collapsed: false },
     { id: 'barometric', title: 'Barometric Pressure', collapsed: false },
-    { id: 'feeding', title: 'Feeding Periods', collapsed: false },
-    { id: 'sunmoon', title: 'Sun & Moon Times', collapsed: false },
+    { id: 'sunmoon', title: 'Sun & Moon', collapsed: false },
+    { id: 'feeding', title: 'Major & Minor Feeding Times', collapsed: false },
   ],
 };

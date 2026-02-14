@@ -6,6 +6,45 @@ interface WeatherConditionsChartProps {
   selectedDay: Date;
 }
 
+function getPrecipSynopsis(dayData: WeatherData[]): string | null {
+  if (dayData.length === 0) return null;
+
+  const avgPrecip = dayData.reduce((s, w) => s + w.precipitationProbability, 0) / dayData.length;
+  const maxPrecip = Math.max(...dayData.map(w => w.precipitationProbability));
+
+  if (maxPrecip < 10) return 'No precipitation expected.';
+  if (avgPrecip >= 70) return 'Rain likely throughout the day.';
+
+  if (avgPrecip >= 40) {
+    const amWeather = dayData.filter(w => new Date(w.timestamp).getHours() < 12);
+    const pmWeather = dayData.filter(w => new Date(w.timestamp).getHours() >= 12);
+    const amAvg = amWeather.length > 0
+      ? amWeather.reduce((s, w) => s + w.precipitationProbability, 0) / amWeather.length
+      : 0;
+    const pmAvg = pmWeather.length > 0
+      ? pmWeather.reduce((s, w) => s + w.precipitationProbability, 0) / pmWeather.length
+      : 0;
+
+    if (pmAvg > amAvg + 15) return 'Chance of showers this afternoon.';
+    if (amAvg > pmAvg + 15) return 'Chance of showers this morning.';
+    return 'Chance of showers throughout the day.';
+  }
+
+  if (avgPrecip >= 20 || maxPrecip >= 40) {
+    // Find the peak window
+    const amWeather = dayData.filter(w => new Date(w.timestamp).getHours() < 12);
+    const pmWeather = dayData.filter(w => new Date(w.timestamp).getHours() >= 12);
+    const amMax = amWeather.length > 0 ? Math.max(...amWeather.map(w => w.precipitationProbability)) : 0;
+    const pmMax = pmWeather.length > 0 ? Math.max(...pmWeather.map(w => w.precipitationProbability)) : 0;
+
+    if (pmMax > amMax + 15) return 'Slight chance of rain this afternoon.';
+    if (amMax > pmMax + 15) return 'Slight chance of rain this morning.';
+    return 'Slight chance of rain.';
+  }
+
+  return 'Mostly dry conditions expected.';
+}
+
 function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartProps) {
   // Filter data for selected day
   const startOfDay = new Date(selectedDay);
@@ -152,6 +191,22 @@ function WeatherConditionsChart({ data, selectedDay }: WeatherConditionsChartPro
           />
         </BarChart>
       </ResponsiveContainer>
+
+      {/* Precipitation Synopsis */}
+      {(() => {
+        const synopsis = getPrecipSynopsis(dayData);
+        return synopsis ? (
+          <div style={{
+            marginTop: '0.75rem',
+            padding: '0.5rem 0.75rem',
+            fontSize: '0.85rem',
+            color: 'var(--color-text-secondary)',
+            borderTop: '1px solid var(--color-border)',
+          }}>
+            {synopsis}
+          </div>
+        ) : null;
+      })()}
     </div>
   );
 }

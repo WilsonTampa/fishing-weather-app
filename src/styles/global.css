@@ -199,11 +199,11 @@ button:disabled {
 .mb-md { margin-bottom: var(--spacing-md); }
 .mb-lg { margin-bottom: var(--spacing-lg); }
 
-/* Desktop layout - 2x2 grid with uniform card heights */
+/* Desktop layout - 2-column grid, cards sized to their content */
 @media (min-width: 1200px) {
   .charts-grid {
     grid-template-columns: 1fr 1fr !important;
-    grid-auto-rows: 1fr !important;
+    grid-auto-rows: auto !important;
   }
 }
 

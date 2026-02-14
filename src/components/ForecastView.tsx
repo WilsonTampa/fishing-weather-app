@@ -510,9 +510,20 @@ function ForecastView({
               sunmoon: true,
               feeding: true,
               barometric: true,
+              // Legacy combined card — hidden (migrated to separate sunmoon + feeding)
+              sunmoonfeeding: false,
             };
 
             // Build card renderer map
+            const sunMoonNode = (
+              <SunMoonTimes
+                data={solunarData}
+                weatherData={forecastData.weather}
+                selectedDay={selectedDay}
+              />
+            );
+            const feedingNode = <FeedingPeriods data={solunarData} />;
+
             const cardRenderers: Record<CardId, React.ReactNode> = {
               wind: <WindChart data={forecastData.wind} selectedDay={selectedDay} multiModelData={forecastData.multiModel} onCompareModels={handleCompareModels} />,
               waves: <WaveChart data={forecastData.waves || []} selectedDay={selectedDay} multiModelData={forecastData.multiModel} onCompareModels={handleCompareModels} />,
@@ -532,15 +543,11 @@ function ForecastView({
                 />
               ),
               weather: <WeatherConditionsChart data={forecastData.weather} selectedDay={selectedDay} />,
-              sunmoon: (
-                <SunMoonTimes
-                  data={solunarData}
-                  weatherData={forecastData.weather}
-                  selectedDay={selectedDay}
-                />
-              ),
-              feeding: <FeedingPeriods data={solunarData} />,
+              sunmoon: sunMoonNode,
+              feeding: feedingNode,
               barometric: <BarometricPressure pressureData={forecastData.pressure} selectedDay={selectedDay} />,
+              // Legacy — kept so TypeScript is happy; hidden via cardAvailability
+              sunmoonfeeding: sunMoonNode,
             };
 
             const visibleCards = layout.cards.filter(c => cardAvailability[c.id]);
