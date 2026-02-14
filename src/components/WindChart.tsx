@@ -299,7 +299,7 @@ function WindChart({ data, selectedDay, multiModelData, onCompareModels }: WindC
 
       {/* Model Confidence */}
       {multiModelData && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.75rem', marginBottom: '0.25rem' }}>
           <ConfidenceBadge
             confidenceScores={multiModelData.confidence}
             selectedDay={selectedDay}

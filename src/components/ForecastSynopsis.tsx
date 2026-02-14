@@ -332,23 +332,36 @@ export default function ForecastSynopsis({
 
       {/* CTA */}
       {confidence && (
-        <>
-          {' '}
-          <span
+        <div style={{ marginTop: '0.5rem' }}>
+          <button
             onClick={onCompareModels}
             style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: 'rgba(88, 166, 255, 0.18)',
               color: '#58a6ff',
-              cursor: 'pointer',
+              fontSize: '0.8rem',
               fontWeight: 600,
+              cursor: 'pointer',
               whiteSpace: 'nowrap',
+              transition: 'all 150ms',
             }}
-            role="button"
-            tabIndex={0}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onCompareModels(); }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#58a6ff';
+              e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = 'rgba(88, 166, 255, 0.18)';
+              e.currentTarget.style.color = '#58a6ff';
+            }}
           >
             Compare all {confidence.modelCount} Weather Models &rsaquo;
-          </span>
-        </>
+          </button>
+        </div>
       )}
     </div>
   );

@@ -59,10 +59,10 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
         <div>
           <div
             style={{
-              backgroundColor: 'var(--color-solunar-major)',
-              color: 'white',
+              backgroundColor: 'transparent',
+              color: 'var(--color-solunar-major)',
+              borderBottom: '2px solid var(--color-solunar-major)',
               padding: '0.5rem',
-              borderRadius: 'var(--radius-md)',
               fontWeight: 600,
               fontSize: '0.875rem',
               textAlign: 'center',
@@ -103,10 +103,10 @@ function FeedingPeriods({ data }: FeedingPeriodsProps) {
         <div>
           <div
             style={{
-              backgroundColor: 'var(--color-solunar-minor)',
-              color: '#1a1a1a',
+              backgroundColor: 'transparent',
+              color: 'var(--color-solunar-minor)',
+              borderBottom: '2px solid var(--color-solunar-minor)',
               padding: '0.5rem',
-              borderRadius: 'var(--radius-md)',
               fontWeight: 600,
               fontSize: '0.875rem',
               textAlign: 'center',

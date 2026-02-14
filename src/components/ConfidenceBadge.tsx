@@ -176,28 +176,30 @@ export default function ConfidenceBadge({
           display: 'inline-flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '8px 16px',
+          padding: '9px 18px',
           borderRadius: '8px',
-          border: '1px solid rgba(88, 166, 255, 0.5)',
-          backgroundColor: 'rgba(88, 166, 255, 0.15)',
+          border: '1px solid rgba(88, 166, 255, 0.6)',
+          backgroundColor: 'rgba(88, 166, 255, 0.22)',
           color: '#e6edf3',
-          fontSize: '0.8rem',
+          fontSize: '0.85rem',
           fontWeight: 600,
           cursor: 'pointer',
           whiteSpace: 'nowrap',
           lineHeight: '1.4',
           transition: 'all 150ms',
-          boxShadow: '0 0 12px rgba(88, 166, 255, 0.1)',
+          boxShadow: '0 0 16px rgba(88, 166, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         }}
         onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(88, 166, 255, 0.28)';
-          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(88, 166, 255, 0.8)';
-          (e.currentTarget as HTMLElement).style.boxShadow = '0 0 16px rgba(88, 166, 255, 0.2)';
+          e.currentTarget.style.backgroundColor = '#58a6ff';
+          e.currentTarget.style.borderColor = '#58a6ff';
+          e.currentTarget.style.color = '#ffffff';
+          e.currentTarget.style.boxShadow = '0 0 20px rgba(88, 166, 255, 0.35)';
         }}
         onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(88, 166, 255, 0.15)';
-          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(88, 166, 255, 0.5)';
-          (e.currentTarget as HTMLElement).style.boxShadow = '0 0 12px rgba(88, 166, 255, 0.1)';
+          e.currentTarget.style.backgroundColor = 'rgba(88, 166, 255, 0.22)';
+          e.currentTarget.style.borderColor = 'rgba(88, 166, 255, 0.6)';
+          e.currentTarget.style.color = '#e6edf3';
+          e.currentTarget.style.boxShadow = '0 0 16px rgba(88, 166, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)';
         }}
         title={`${modelCountLabel}: ${modelNames}`}
       >
